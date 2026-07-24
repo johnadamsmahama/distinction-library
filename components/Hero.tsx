@@ -24,7 +24,7 @@ export default function Hero() {
           Study with clarity. Graduate with <em className="italic text-gold">distinction</em>.
         </h1>
 
-        <p className="font-body text-[15px] leading-[1.65] text-white/50 mb-[34px]">
+        <p className="font-body text-[15px] leading-[1.65] text-white/70 mb-[34px]">
           The exclusive academic platform for UPSA students. Past questions, curated study
           materials, and AI-powered learning — all in one place.
         </p>
@@ -44,7 +44,7 @@ export default function Hero() {
           </a>
         </div>
 
-        <div className="flex gap-[22px] justify-center flex-wrap font-condensed font-medium text-[11.5px] text-white/38">
+        <div className="flex gap-[22px] justify-center flex-wrap font-condensed font-medium text-[11.5px] text-white/70">
           <span>✓ Verified UPSA access only</span>
           <span>✓ Private &amp; secure</span>
           <span>✓ Always free</span>

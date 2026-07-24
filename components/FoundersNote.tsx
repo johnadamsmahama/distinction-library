@@ -11,7 +11,7 @@ export default function FoundersNote() {
                 JM
               </div>
               <div className="font-condensed font-bold text-sm text-white">J.A. Mahama</div>
-              <div className="font-condensed font-medium text-[10.5px] text-white/35 mt-0.5">
+              <div className="font-condensed font-medium text-[10.5px] text-white/70 mt-0.5">
                 Founder, Distinction Programme
               </div>
             </div>
@@ -22,7 +22,7 @@ export default function FoundersNote() {
                 &ldquo;I built this because I kept watching students fail — not from lack of ability,
                 but from lack of access.&rdquo;
               </p>
-              <div className="space-y-[18px] font-body text-[14.5px] leading-[1.75] text-white/62">
+              <div className="space-y-[18px] font-body text-[14.5px] leading-[1.75] text-white/85">
                 <p>
                   Every semester, I saw the same pattern. Students scrambling for past papers days
                   before exams. Notes passed around on WhatsApp in poor quality. Capable minds
@@ -35,7 +35,7 @@ export default function FoundersNote() {
                 </p>
                 <p>Distinction is not accidental. But it shouldn&apos;t require luck either.</p>
               </div>
-              <div className="font-display italic text-[15px] text-white/40 border-t border-gold/20 pt-[18px] mt-6">
+              <div className="font-display italic text-[15px] text-white/70 border-t border-gold/20 pt-[18px] mt-6">
                 — J.A. Mahama
               </div>
             </div>

@@ -19,7 +19,7 @@ export default function Stats() {
               <path d={s.path} />
             </svg>
             <div className="font-display font-bold text-[30px] text-gold mb-2">{s.num}</div>
-            <div className="font-condensed font-semibold text-[10px] uppercase tracking-[1.2px] text-white/38">
+            <div className="font-condensed font-semibold text-[10px] uppercase tracking-[1.2px] text-white/70">
               {s.label}
             </div>
           </div>
