@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -16,6 +17,7 @@ export default function DashboardNav({
   isAdmin?: boolean;
 }) {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -25,8 +27,8 @@ export default function DashboardNav({
   };
 
   return (
-    <nav className="sticky top-0 z-50 h-[60px] bg-navy-deep border-b border-gold/10">
-      <div className="max-w-content mx-auto h-full px-7 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-navy-deep border-b border-gold/10">
+      <div className="max-w-content mx-auto h-[60px] px-7 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-[9px]">
           <div className="w-[30px] h-[30px] bg-gold rounded-[7px] flex items-center justify-center font-display font-black text-[15px] text-navy">
             D
@@ -84,12 +86,56 @@ export default function DashboardNav({
 
           <button
             onClick={handleLogout}
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/50 hover:text-white transition-colors"
+            className="hidden md:block font-condensed font-bold text-xs uppercase tracking-wide text-white/50 hover:text-white transition-colors"
+          >
+            Log out
+          </button>
+
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+            aria-label="Open menu"
+          >
+            <svg viewBox="0 0 24 24" className="w-[20px] h-[20px] stroke-white fill-none" strokeWidth={1.8}>
+              {menuOpen ? (
+                <path d="M6 6l12 12M6 18L18 6" />
+              ) : (
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {menuOpen && (
+        <div className="md:hidden bg-navy-deep border-t border-gold/10 px-7 py-4 flex flex-col gap-4">
+          <Link href="/leaderboard" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors">
+            Leaderboard
+          </Link>
+          <Link href="/blog" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors">
+            Blog
+          </Link>
+          <Link href="/support" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors">
+            Support
+          </Link>
+          {isStaff && (
+            <Link href="/moderate" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-gold hover:text-gold-light transition-colors">
+              Moderate
+            </Link>
+          )}
+          {isAdmin && (
+            <Link href="/admin" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-gold hover:text-gold-light transition-colors">
+              Admin
+            </Link>
+          )}
+          <button
+            onClick={handleLogout}
+            className="text-left font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors"
           >
             Log out
           </button>
         </div>
-      </div>
+      )}
     </nav>
   );
 }
