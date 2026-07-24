@@ -79,6 +79,39 @@ export default function UploadForm({
       return;
     }
 
+    // Duplicate check before uploading the file
+    if (tab === 'paper') {
+      const { data: existing } = await supabase
+        .from('past_papers')
+        .select('id')
+        .eq('course_id', courseId)
+        .eq('year', Number(year))
+        .eq('exam_type', examType)
+        .in('status', ['pending', 'approved'])
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        setLoading(false);
+        setError('This past paper (same course, year, and exam type) has already been submitted.');
+        return;
+      }
+    } else {
+      const { data: existing } = await supabase
+        .from('study_materials')
+        .select('id')
+        .eq('course_id', courseId)
+        .eq('week_number', Number(week))
+        .ilike('title', title.trim())
+        .in('status', ['pending', 'approved'])
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        setLoading(false);
+        setError('A study material with this title already exists for this course and week.');
+        return;
+      }
+    }
+
     const ext = file.name.split('.').pop();
     const path = `${user.id}/${courseId}/${Date.now()}.${ext}`;
 
