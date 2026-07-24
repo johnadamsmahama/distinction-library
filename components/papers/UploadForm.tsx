@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 type Tab = 'paper' | 'material';
 
@@ -79,7 +80,6 @@ export default function UploadForm({
       return;
     }
 
-    // Duplicate check before uploading the file
     if (tab === 'paper') {
       const { data: existing } = await supabase
         .from('past_papers')
@@ -185,22 +185,26 @@ export default function UploadForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className={labelClass}>Course</label>
-          <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className={inputClass} required>
-            <option value="">Select a course…</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
-            ))}
-          </select>
+          <CustomSelect
+            value={courseId}
+            onChange={setCourseId}
+            placeholder="Select a course…"
+            options={courses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+          />
         </div>
 
         {tab === 'paper' ? (
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Exam type</label>
-              <select value={examType} onChange={(e) => setExamType(e.target.value as any)} className={inputClass}>
-                <option value="mid_semester">Mid-Semester</option>
-                <option value="end_of_semester">End of Semester</option>
-              </select>
+              <CustomSelect
+                value={examType}
+                onChange={(v) => setExamType(v as any)}
+                options={[
+                  { value: 'mid_semester', label: 'Mid-Semester' },
+                  { value: 'end_of_semester', label: 'End of Semester' },
+                ]}
+              />
             </div>
             <div>
               <label className={labelClass}>Year</label>
@@ -229,19 +233,23 @@ export default function UploadForm({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Type</label>
-                <select value={contentType} onChange={(e) => setContentType(e.target.value as any)} className={inputClass}>
-                  <option value="lecture_slides">Lecture Slides</option>
-                  <option value="study_notes">Study Notes</option>
-                  <option value="study_guide">Study Guide</option>
-                </select>
+                <CustomSelect
+                  value={contentType}
+                  onChange={(v) => setContentType(v as any)}
+                  options={[
+                    { value: 'lecture_slides', label: 'Lecture Slides' },
+                    { value: 'study_notes', label: 'Study Notes' },
+                    { value: 'study_guide', label: 'Study Guide' },
+                  ]}
+                />
               </div>
               <div>
                 <label className={labelClass}>Week</label>
-                <select value={week} onChange={(e) => setWeek(e.target.value)} className={inputClass}>
-                  {LEVELS_WEEKS.map((w) => (
-                    <option key={w} value={w}>Week {w}</option>
-                  ))}
-                </select>
+                <CustomSelect
+                  value={week}
+                  onChange={setWeek}
+                  options={LEVELS_WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))}
+                />
               </div>
             </div>
           </>
