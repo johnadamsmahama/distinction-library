@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
+import CustomSelect from '@/components/ui/CustomSelect';
 
 type Tab = 'papers' | 'materials';
 
@@ -130,9 +131,6 @@ export default function RepositoryBrowser({
     };
   }, [tab, courseId, level, department, year, examType, week, contentType]);
 
-  // Free-text search runs client-side over the already-filtered batch —
-  // fine at current catalogue size; swap for a server-side ilike/full-text
-  // query once the library grows past a few hundred items per course.
   const term = search.trim().toLowerCase();
   const visiblePapers = papers.filter(
     (p) =>
@@ -181,56 +179,84 @@ export default function RepositoryBrowser({
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
-        <select value={department} onChange={(e) => setDepartment(e.target.value)} className={selectClass}>
-          <option value="">All departments</option>
-          {departments.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
+        <CustomSelect
+          value={department}
+          onChange={setDepartment}
+          placeholder="All departments"
+          className="w-full sm:w-56"
+          options={[
+            { value: '', label: 'All departments' },
+            ...departments.map((d) => ({ value: d, label: d })),
+          ]}
+        />
 
-        <select value={level} onChange={(e) => setLevel(e.target.value)} className={selectClass}>
-          <option value="">All levels</option>
-          {LEVELS.map((l) => (
-            <option key={l} value={l}>Level {l}</option>
-          ))}
-        </select>
+        <CustomSelect
+          value={level}
+          onChange={setLevel}
+          placeholder="All levels"
+          className="w-full sm:w-40"
+          options={[
+            { value: '', label: 'All levels' },
+            ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` })),
+          ]}
+        />
 
-        <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className={selectClass}>
-          <option value="">All courses</option>
-          {filteredCourses.map((c) => (
-            <option key={c.id} value={c.id}>{c.code} — {c.name}</option>
-          ))}
-        </select>
+        <CustomSelect
+          value={courseId}
+          onChange={setCourseId}
+          placeholder="All courses"
+          className="w-full sm:w-64"
+          options={[
+            { value: '', label: 'All courses' },
+            ...filteredCourses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` })),
+          ]}
+        />
 
         {tab === 'papers' ? (
           <>
-            <select value={examType} onChange={(e) => setExamType(e.target.value)} className={selectClass}>
-              <option value="">All exam types</option>
-              <option value="mid_semester">Mid-Semester</option>
-              <option value="end_of_semester">End of Semester</option>
-            </select>
+            <CustomSelect
+              value={examType}
+              onChange={setExamType}
+              placeholder="All exam types"
+              className="w-full sm:w-48"
+              options={[
+                { value: '', label: 'All exam types' },
+                { value: 'mid_semester', label: 'Mid-Semester' },
+                { value: 'end_of_semester', label: 'End of Semester' },
+              ]}
+            />
             <input
               type="number"
               placeholder="Year"
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className={`${selectClass} w-28`}
+              className="px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors w-28"
             />
           </>
         ) : (
           <>
-            <select value={contentType} onChange={(e) => setContentType(e.target.value)} className={selectClass}>
-              <option value="">All material types</option>
-              <option value="lecture_slides">Lecture Slides</option>
-              <option value="study_notes">Study Notes</option>
-              <option value="study_guide">Study Guide</option>
-            </select>
-            <select value={week} onChange={(e) => setWeek(e.target.value)} className={selectClass}>
-              <option value="">All weeks</option>
-              {WEEKS.map((w) => (
-                <option key={w} value={w}>Week {w}</option>
-              ))}
-            </select>
+            <CustomSelect
+              value={contentType}
+              onChange={setContentType}
+              placeholder="All material types"
+              className="w-full sm:w-52"
+              options={[
+                { value: '', label: 'All material types' },
+                { value: 'lecture_slides', label: 'Lecture Slides' },
+                { value: 'study_notes', label: 'Study Notes' },
+                { value: 'study_guide', label: 'Study Guide' },
+              ]}
+            />
+            <CustomSelect
+              value={week}
+              onChange={setWeek}
+              placeholder="All weeks"
+              className="w-full sm:w-40"
+              options={[
+                { value: '', label: 'All weeks' },
+                ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` })),
+              ]}
+            />
           </>
         )}
       </div>
@@ -264,9 +290,6 @@ export default function RepositoryBrowser({
     </div>
   );
 }
-
-const selectClass =
-  'px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors';
 
 function ResultsList({
   items,

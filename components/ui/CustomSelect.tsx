@@ -1,0 +1,73 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+
+export type SelectOption = { value: string; label: string };
+
+export default function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = 'Select…',
+  className = '',
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <div ref={ref} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
+      >
+        <span className={selected ? '' : 'text-g600'}>{selected ? selected.label : placeholder}</span>
+        <svg
+          viewBox="0 0 24 24"
+          className={`w-4 h-4 stroke-g600 fill-none flex-shrink-0 ml-2 transition-transform ${open ? 'rotate-180' : ''}`}
+          strokeWidth={2}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-lg shadow-lg">
+          {options.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => {
+                onChange(o.value);
+                setOpen(false);
+              }}
+              className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-off-white ${
+                o.value === value ? 'bg-gold/10 text-navy font-bold' : 'text-g800'
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
