@@ -28,7 +28,7 @@ export default function ProfileCard({
       <div className="flex items-start justify-between mb-5">
         <div>
           <div className="font-display font-bold text-lg">{fullName ?? 'Student'}</div>
-          <div className="font-condensed text-[12px] text-white/50 mt-0.5">
+          <div className="font-condensed text-[12px] text-white/70 mt-0.5">
             {department ?? 'Department not set'}
             {level ? ` · Level ${level}` : ''}
           </div>
@@ -45,7 +45,7 @@ export default function ProfileCard({
       <div className="grid grid-cols-2 gap-4 mb-5">
         <div>
           <div className="font-display font-bold text-2xl text-gold">{uploadCount}</div>
-          <div className="font-condensed text-[10px] uppercase tracking-wide text-white/40">
+          <div className="font-condensed text-[10px] uppercase tracking-wide text-white/70">
             Papers uploaded
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function ProfileCard({
           <div className="font-display font-bold text-2xl text-gold">
             {leaderboardRank ? `#${leaderboardRank}` : '—'}
           </div>
-          <div className="font-condensed text-[10px] uppercase tracking-wide text-white/40">
+          <div className="font-condensed text-[10px] uppercase tracking-wide text-white/70">
             Leaderboard rank
           </div>
         </div>
@@ -61,10 +61,10 @@ export default function ProfileCard({
 
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="font-condensed text-[10px] uppercase tracking-wide text-white/40">
+          <span className="font-condensed text-[10px] uppercase tracking-wide text-white/70">
             Upload standing
           </span>
-          <span className="font-condensed text-[10px] text-white/40">{strikesCount}/3 strikes</span>
+          <span className="font-condensed text-[10px] text-white/70">{strikesCount}/3 strikes</span>
         </div>
         <div className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
