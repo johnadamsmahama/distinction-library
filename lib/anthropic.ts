@@ -12,4 +12,4 @@ export function getAnthropicClient() {
 
 // The model used across both AI features. Centralised so it's a one-line
 // change if you want to upgrade/downgrade later.
-export const CLAUDE_MODEL = 'claude-sonnet-4-5';
+export const CLAUDE_MODEL = 'claude-sonnet-5';
