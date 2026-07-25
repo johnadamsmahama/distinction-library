@@ -5,6 +5,7 @@ import ProfileCard from '@/components/dashboard/ProfileCard';
 import BookmarkedCourses from '@/components/dashboard/BookmarkedCourses';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import { VaultSummary, QuickActions } from '@/components/dashboard/VaultAndActions';
+import ProgrammeWidget from '@/components/dashboard/ProgrammeWidget';
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
             contributorBadge={data.profile?.contributor_badge ?? null}
             leaderboardRank={data.leaderboardRank}
           />
+          <ProgrammeWidget />
           <VaultSummary summary={data.vaultSummary} />
           <QuickActions />
         </div>
