@@ -6,7 +6,7 @@ import Reveal from './Reveal';
 const FAQS = [
   {
     q: 'Who can join?',
-    a: 'Exclusive to verified UPSA students with a valid @st.upsa.edu.gh email.',
+    a: 'Exclusive to verified UPSA students with a valid @upsamail.edu.gh email.',
   },
   {
     q: 'Is it free?',
