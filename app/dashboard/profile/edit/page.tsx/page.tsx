@@ -1,41 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-export default function EditProfilePage() {
+export default function EditProfilePage({
+  initialFullName,
+}: {
+  initialFullName: string | null;
+}) {
   const router = useRouter();
   const supabase = createClient();
-  const [fullName, setFullName] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState(initialFullName ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
-      const name = profile?.full_name ?? (user.user_metadata?.full_name as string) ?? '';
-      setFullName(name);
-      setLoading(false);
-    };
-
-    loadProfile();
-  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -70,10 +48,6 @@ export default function EditProfilePage() {
     router.push('/dashboard');
     router.refresh();
   };
-
-  if (loading) {
-    return <div className="max-w-md mx-auto py-10 text-g600">Loading...</div>;
-  }
 
   return (
     <div className="max-w-md mx-auto py-10">

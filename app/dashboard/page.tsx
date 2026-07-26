@@ -1,54 +1,47 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { getDashboardData } from '@/lib/dashboard-data';
+import ProfileCard from '@/components/dashboard/ProfileCard';
+import BookmarkedCourses from '@/components/dashboard/BookmarkedCourses';
+import RecentActivity from '@/components/dashboard/RecentActivity';
+import { VaultSummary, QuickActions } from '@/components/dashboard/VaultAndActions';
+import InstallPrompt from '@/components/InstallPrompt';
 
-import { useEffect, useState } from 'react';
+export default async function DashboardPage() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [visible, setVisible] = useState(false);
+  if (!user) redirect('/login');
 
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setVisible(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-
-    window.addEventListener('appinstalled', () => {
-      setVisible(false);
-      setDeferredPrompt(null);
-    });
-
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  if (!visible) return null;
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-    setVisible(false);
-  };
+  const data = await getDashboardData(supabase, user.id);
+  const fullName = data.profile?.full_name ?? (user.user_metadata?.full_name as string) ?? null;
 
   return (
-    <div className="bg-navy rounded-2xl p-4 mb-6 flex items-center justify-between gap-3">
-      <div>
-        <div className="font-condensed font-bold text-sm text-white">
-          Install Distinction Library
-        </div>
-        <p className="font-body text-xs text-white/70 mt-0.5">
-          Add it to your home screen for quick, app-like access.
-        </p>
+    <div>
+      <h1 className="font-display font-bold text-2xl text-navy mb-1">
+        Welcome back{fullName ? `, ${fullName.split(' ')[0]}` : ''}.
+      </h1>
+      <p className="font-body text-sm text-g600 mb-8">Here&apos;s where you left off.</p>
+
+      <div className="max-w-2xl mx-auto space-y-6">
+        <InstallPrompt />
+        <ProfileCard
+          fullName={fullName}
+          department={data.profile?.department ?? null}
+          level={data.profile?.level ?? null}
+          uploadCount={data.profile?.upload_count ?? 0}
+          strikesCount={data.profile?.strikes_count ?? 0}
+          uploadSuspended={data.profile?.upload_suspended ?? false}
+          contributorBadge={data.profile?.contributor_badge ?? null}
+          leaderboardRank={data.leaderboardRank}
+        />
+        <BookmarkedCourses courses={data.bookmarks} />
+        <RecentActivity papers={data.recentPapers as any} materials={data.recentMaterials as any} />
+        <QuickActions />
+        <VaultSummary summary={data.vaultSummary} />
       </div>
-      <button
-        onClick={handleInstall}
-        className="flex-shrink-0 bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2.5 rounded-lg hover:bg-gold-light transition-colors"
-      >
-        Install
-      </button>
     </div>
   );
 }
