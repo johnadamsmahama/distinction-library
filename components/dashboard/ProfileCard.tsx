@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 const BADGE_COLORS: Record<string, string> = {
   gold: 'bg-gold text-navy',
   silver: 'bg-gray-300 text-g800',
@@ -27,7 +29,15 @@ export default function ProfileCard({
     <div className="bg-navy rounded-2xl p-6 text-white">
       <div className="flex items-start justify-between mb-5">
         <div>
-          <div className="font-display font-bold text-lg">{fullName ?? 'Student'}</div>
+          <div className="flex items-center gap-2">
+            <div className="font-display font-bold text-lg">{fullName ?? 'Student'}</div>
+            <Link
+              href="/dashboard/profile/edit"
+              className="font-condensed text-[10px] uppercase tracking-wide text-gold hover:text-gold-light transition-colors"
+            >
+              Edit
+            </Link>
+          </div>
           <div className="font-condensed text-[12px] text-white/70 mt-0.5">
             {department ?? 'Department not set'}
             {level ? ` · Level ${level}` : ''}
