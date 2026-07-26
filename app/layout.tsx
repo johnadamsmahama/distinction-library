@@ -3,9 +3,9 @@ import './globals.css';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
-  title: 'Distinction Library — A J.A. Mahama Initiative',
+  title: 'Distinction Library — J.A. Mahama Initiative',
   description:
-    'The exclusive academic platform for UPSA students. Past questions, curated study materials, and AI-powered learning — all in one place.',
+    'The all-in-one academic platform, built exclusively for UPSA students. Past questions, curated study materials, and AI-powered learning — all in one place.',
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.png',
