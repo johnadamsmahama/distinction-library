@@ -51,7 +51,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     try {
       const pdfDoc = await PDFDocument.load(bytes);
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      const stamp = 'Distinction Library — A J.A. Mahama Initiative';
+      const stamp = 'Distinction Library — J.A. Mahama Initiative';
       const courseCode = (paper.courses as any)?.code ?? '';
 
       for (const page of pdfDoc.getPages()) {
