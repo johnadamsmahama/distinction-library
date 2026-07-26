@@ -16,7 +16,7 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-full px-4 py-[7px] mb-7">
           <span className="w-[6px] h-[6px] rounded-full bg-gold animate-pulse" />
           <span className="font-condensed font-bold text-[10.5px] tracking-[1.5px] uppercase text-gold">
-            A J.A. Mahama Initiative · UPSA
+            J.A. Mahama Initiative · UPSA
           </span>
         </div>
 
@@ -25,8 +25,8 @@ export default function Hero() {
         </h1>
 
         <p className="font-body text-[15px] leading-[1.65] text-white/70 mb-[34px]">
-          The exclusive academic platform for UPSA students. Past questions, curated study
-          materials, and AI-powered learning — all in one place.
+          The all-in-one academic platform, built exclusively for UPSA students. Past questions,
+          curated study materials, and AI-powered learning — all in one place.
         </p>
 
         <div className="flex gap-[14px] justify-center flex-wrap mb-9">
