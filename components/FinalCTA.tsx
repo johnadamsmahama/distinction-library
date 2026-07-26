@@ -17,8 +17,7 @@ export default function FinalCTA() {
           Ready to achieve <em className="italic text-gold">distinction</em>?
         </h2>
         <p className="font-body text-[15px] text-white/55 leading-[1.6] mb-8">
-          Join thousands of UPSA students already using Distinction Library to study smarter, not
-          harder.
+          Sign up for Distinction Library — Built by students, for students.
         </p>
         <div className="flex gap-[14px] justify-center flex-wrap">
           <a
