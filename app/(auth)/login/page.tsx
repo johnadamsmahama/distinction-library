@@ -57,7 +57,7 @@ function LoginForm() {
     <AuthShell
       eyebrow="Welcome back"
       title="Log in"
-      subtitle="A J.A. Mahama Initiative — UPSA students only."
+      subtitle="J.A. Mahama Initiative — UPSA students only."
       footer={
         <>
           New here?{' '}
