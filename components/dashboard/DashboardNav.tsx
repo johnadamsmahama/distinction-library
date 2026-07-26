@@ -49,6 +49,9 @@ export default function DashboardNav({
             <Link href="/support" className="font-condensed font-bold text-xs uppercase tracking-wide text-white/50 hover:text-white transition-colors">
               Support
             </Link>
+            <Link href="/dashboard/settings" className="font-condensed font-bold text-xs uppercase tracking-wide text-white/50 hover:text-white transition-colors">
+              Settings
+            </Link>
           </div>
           {isStaff && (
             <Link
@@ -117,6 +120,9 @@ export default function DashboardNav({
           </Link>
           <Link href="/support" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors">
             Support
+          </Link>
+          <Link href="/dashboard/settings" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors">
+            Settings
           </Link>
           {isStaff && (
             <Link href="/moderate" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-gold hover:text-gold-light transition-colors">
