@@ -3,6 +3,7 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development', // avoids SW caching hassles while developing
+  buildExcludes: [/app-build-manifest\.json$/],
   fallbacks: {
     document: '/offline',
   },
