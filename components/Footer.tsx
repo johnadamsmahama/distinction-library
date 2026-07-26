@@ -43,7 +43,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-5 text-center">
           <div className="font-condensed text-[11.5px] text-white/60">
-            A J.A. Mahama Initiative · Distinction Programme · UPSA · 2026
+            J.A. Mahama Initiative · Distinction Programme · UPSA · 2026
           </div>
           <div className="font-condensed text-[11.5px] text-white/60 mt-1.5">
             © 2026 Distinction Library. All rights reserved.
