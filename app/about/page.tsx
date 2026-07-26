@@ -5,7 +5,7 @@ export default function AboutPage() {
     <div className="bg-white">
       <section className="bg-navy-deep px-7 py-20 text-center">
         <div className="max-w-hero mx-auto">
-          <div className="eyebrow mb-4">A J.A. Mahama Initiative</div>
+          <div className="eyebrow mb-4">J.A. Mahama Initiative</div>
           <h1 className="font-display font-black text-[clamp(32px,5vw,48px)] text-white leading-tight">
             Built for UPSA students, by a UPSA student.
           </h1>
