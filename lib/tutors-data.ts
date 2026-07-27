@@ -32,10 +32,12 @@ export async function getFeaturedTutors(
   supabase: SupabaseClient,
   limit = 3
 ): Promise<FeaturedTutor[]> {
+  // Uses the public-safe view (peer_tutors_public), not the peer_tutors table
+  // directly — it's readable by logged-out visitors and physically excludes
+  // whatsapp_number/email, so the landing page can never receive contact info.
   const { data } = await supabase
-    .from('peer_tutors')
+    .from('peer_tutors_public')
     .select('id, full_name, photo_url, department, level')
-    .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(limit);
 
