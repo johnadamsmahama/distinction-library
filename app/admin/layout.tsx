@@ -8,6 +8,7 @@ const TABS = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/users', label: 'Users & Roles' },
   { href: '/admin/courses', label: 'Courses' },
+  { href: '/admin/tutors', label: 'Peer Tutors' },
   { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/support', label: 'Support Tickets' },
 ];
