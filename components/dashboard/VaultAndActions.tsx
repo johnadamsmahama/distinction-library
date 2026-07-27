@@ -43,6 +43,7 @@ const ACTIONS = [
   { href: '/vault/quiz-generator', label: 'Generate a Quiz', desc: 'Turn notes into practice questions', path: 'M9 12l2 2 4-4' },
   { href: '/vault/companion', label: 'Ask the AI Companion', desc: 'Explain a topic or summarise notes', path: 'M8 12h8M8 16h5' },
   { href: '/papers/upload', label: 'Upload a Past Paper', desc: 'Contribute to the community library', path: 'M12 4v12m0 0l-4-4m4 4l4-4M5 20h14' },
+  { href: '/tutors', label: 'Find a Peer Tutor', desc: 'Get one-on-one help from a fellow student', path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75' },
 ];
 
 export function QuickActions() {
