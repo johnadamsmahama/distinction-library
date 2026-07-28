@@ -19,7 +19,7 @@ export default function FoundersNote() {
             <div>
               <div className="eyebrow mb-4">A Note From The Founder</div>
               <p className="font-display font-bold italic text-[22px] text-gold leading-[1.45] border-l-[3px] border-gold pl-[22px] mb-7">
-                &ldquo;I built this because I watched students struggle — not from lack of ability,
+                &ldquo;I built this because I watched students struggle, not from lack of ability,
                 but from lack of access.&rdquo;
               </p>
               <div className="space-y-[18px] font-body text-[14.5px] leading-[1.75] text-white/85">
@@ -30,8 +30,8 @@ export default function FoundersNote() {
                 </p>
                 <p>
                   Distinction Library is my answer to that. A single, organised, always-free space
-                  where every UPSA student — regardless of who they know or what department
-                  they&apos;re in — has the same access to the tools that make the difference.
+                  where every UPSA student, regardless of who they know or what department
+                  they&apos;re in, has the same access to the tools that make the difference.
                 </p>
                 <p>Distinction is not accidental. But it shouldn&apos;t require luck either.</p>
               </div>
