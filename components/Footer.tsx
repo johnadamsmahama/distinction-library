@@ -10,7 +10,7 @@ export default function Footer() {
               <span className="text-white">Distinction</span> <span className="text-gold">Library</span>
             </div>
             <p className="font-body text-xs text-white/70 max-w-[260px] mx-auto sm:mx-0">
-              A single, organised, always-free academic resource platform for UPSA students.
+              A single, organised, academic resource platform for UPSA students.
             </p>
           </div>
 
