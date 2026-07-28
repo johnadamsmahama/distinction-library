@@ -13,7 +13,7 @@ export default function StudentIdInput({
 }) {
   return (
     <div>
-      <label htmlFor="studentId" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2">
+      <label htmlFor="studentId" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5">
         UPSA Student ID
       </label>
       <div
@@ -29,10 +29,10 @@ export default function StudentIdInput({
           placeholder="10347621"
           value={value}
           onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
-          className="flex-1 px-4 py-3 font-body text-[15px] text-g800 outline-none min-w-0"
+          className="flex-1 px-4 py-2.5 font-body text-[15px] text-g800 outline-none min-w-0"
           autoComplete="username"
         />
-        <span className="px-3 py-3 font-condensed text-[13px] text-g600 bg-g100 whitespace-nowrap">
+        <span className="px-3 py-2.5 font-condensed text-[13px] text-g600 bg-g100 whitespace-nowrap">
           @{UPSA_DOMAIN}
         </span>
       </div>
