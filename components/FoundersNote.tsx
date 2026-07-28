@@ -35,7 +35,7 @@ export default function FoundersNote() {
                 </p>
                 <p>Distinction is not accidental. But it shouldn&apos;t require luck either.</p>
               </div>
-              <div className="font-display italic text-[15px] text-white/70 border-t border-gold/20 pt-[18px] mt-6">
+              <div className="font-display text-[15px] text-white/70 border-t border-gold/20 pt-[18px] mt-6">
                 — J.A. Mahama
               </div>
             </div>
