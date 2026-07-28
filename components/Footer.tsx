@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-content mx-auto">
         <div className="flex flex-wrap justify-between gap-10 mb-8">
           <div className="text-center sm:text-left">
-            <div className="font-condensed font-bold text-[15px] mb-3">
+            <div className="font-condensed font-bold text-[15px] mb-3 max-w-[260px] mx-auto sm:mx-0">
               <span className="text-white">Distinction</span> <span className="text-gold">Library</span>
             </div>
             <p className="font-body text-xs text-white/70 max-w-[260px] mx-auto sm:mx-0">
