@@ -16,7 +16,7 @@ export default async function PeerTutors() {
         <Reveal className="text-center max-w-[520px] mx-auto mb-11">
           <div className="eyebrow">Distinction Programme</div>
           <h2 className="font-display font-bold text-[clamp(26px,4vw,36px)] text-navy mt-[10px]">
-            Learn from students who&apos;ve been there.
+            Stuck on a topic? Ask a Peer Tutor.
           </h2>
           <p className="font-body text-[14.5px] leading-[1.65] text-g600 mt-3">
             Peer tutors are fellow UPSA students who volunteer to help with assignments, group
