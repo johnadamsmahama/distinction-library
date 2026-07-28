@@ -104,11 +104,11 @@ export default function SignupPage() {
       title="Create your account"
       subtitle="Access is exclusive to verified UPSA students."
     >
-      <form onSubmit={handleSubmit} className="space-y-3.5">
+      <form onSubmit={handleSubmit} className="space-y-2.5">
         <StudentIdInput value={studentId} onChange={setStudentId} error={idErr} />
 
         <div>
-          <label htmlFor="fullName" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5">
+          <label htmlFor="fullName" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1">
             Full name
           </label>
           <input
@@ -117,13 +117,13 @@ export default function SignupPage() {
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
             placeholder="e.g. Ama Serwaa"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5">
+          <label htmlFor="password" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1">
             Password
           </label>
           <input
@@ -133,14 +133,14 @@ export default function SignupPage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
             placeholder="At least 8 characters"
             autoComplete="new-password"
           />
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5">
+          <label htmlFor="confirmPassword" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1">
             Confirm password
           </label>
           <input
@@ -149,7 +149,7 @@ export default function SignupPage() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
             autoComplete="new-password"
           />
         </div>
@@ -159,12 +159,12 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-2.5 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-2 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Creating account…' : 'Create account'}
         </button>
 
-        <div className="text-center bg-gold/10 border border-gold/30 rounded-lg py-2.5 px-4">
+        <div className="text-center bg-gold/10 border border-gold/30 rounded-lg py-2 px-4">
           <span className="font-body text-sm text-g800">
             Already have an account?{' '}
             <Link
