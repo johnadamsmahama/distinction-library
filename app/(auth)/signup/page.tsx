@@ -103,14 +103,6 @@ export default function SignupPage() {
       eyebrow="Get started"
       title="Create your account"
       subtitle="Access is exclusive to verified UPSA students."
-      footer={
-        <>
-          Already have an account?{' '}
-          <Link href="/login" className="text-gold hover:underline">
-            Log in
-          </Link>
-        </>
-      }
     >
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <StudentIdInput value={studentId} onChange={setStudentId} error={idErr} />
@@ -171,6 +163,18 @@ export default function SignupPage() {
         >
           {loading ? 'Creating account…' : 'Create account'}
         </button>
+
+        <div className="text-center bg-gold/10 border border-gold/30 rounded-lg py-2.5 px-4">
+          <span className="font-body text-sm text-g800">
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              className="font-condensed font-bold text-navy underline underline-offset-4 decoration-gold"
+            >
+              Log in
+            </Link>
+          </span>
+        </div>
       </form>
     </AuthShell>
   );
