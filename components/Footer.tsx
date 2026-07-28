@@ -4,14 +4,16 @@ export default function Footer() {
   return (
     <footer className="bg-navy-mid border-t border-gold/10 py-10 px-7">
       <div className="max-w-content mx-auto">
-        <div className="flex flex-wrap justify-between gap-10 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-8">
           <div className="text-center sm:text-left">
-            <div className="font-condensed font-bold text-[15px] mb-3 max-w-[260px] mx-auto sm:mx-0">
-              <span className="text-white">Distinction</span> <span className="text-gold">Library</span>
+            <div className="max-w-[260px] mx-auto sm:mx-0">
+              <div className="font-condensed font-bold text-[15px] mb-3">
+                <span className="text-white">Distinction</span> <span className="text-gold">Library</span>
+              </div>
+              <p className="font-body text-xs text-white/70">
+                A single, organised, academic resource platform for UPSA students.
+              </p>
             </div>
-            <p className="font-body text-xs text-white/70 max-w-[260px] mx-auto sm:mx-0">
-              A single, organised, academic resource platform for UPSA students.
-            </p>
           </div>
 
           <div>
