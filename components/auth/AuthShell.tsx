@@ -32,13 +32,13 @@ export default function AuthShell({
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white rounded-2xl p-6 shadow-2xl">
           <div className="eyebrow mb-2">{eyebrow}</div>
           <h1 className="font-display font-bold text-2xl text-navy mb-2">{title}</h1>
           {subtitle && (
-            <p className="font-body text-sm text-g600 mb-6 leading-relaxed">{subtitle}</p>
+            <p className="font-body text-sm text-g600 mb-4 leading-relaxed">{subtitle}</p>
           )}
-          {!subtitle && <div className="mb-6" />}
+          {!subtitle && <div className="mb-4" />}
           {children}
         </div>
 
