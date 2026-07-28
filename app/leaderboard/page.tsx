@@ -19,7 +19,7 @@ export default async function LeaderboardPage() {
     <div>
       <h1 className="font-display font-bold text-2xl text-navy mb-1">Leaderboard</h1>
       <p className="font-body text-sm text-g600 mb-6">
-        Top contributors by approved past papers. Gold, Silver, and Bronze badges reset each
+        Top contributors by approved past papers and study materials. Gold, Silver, and Bronze badges reset each
         semester.
       </p>
       <Leaderboard rows={(rows as any) ?? []} currentUserId={user.id} />
