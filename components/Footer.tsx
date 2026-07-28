@@ -5,8 +5,8 @@ export default function Footer() {
     <footer className="bg-navy-mid border-t border-gold/10 py-10 px-7">
       <div className="max-w-content mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-8">
-          <div className="text-center sm:text-left">
-            <div className="max-w-[260px] mx-auto sm:mx-0">
+          <div className="text-left">
+            <div className="max-w-[260px]">
               <div className="font-condensed font-bold text-[15px] mb-3">
                 <span className="text-white">Distinction</span> <span className="text-gold">Library</span>
               </div>
