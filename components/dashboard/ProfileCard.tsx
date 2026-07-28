@@ -48,7 +48,7 @@ export default function ProfileCard({
             <div>
               <div className="font-display font-bold text-2xl text-gold">{uploadCount}</div>
               <div className="font-condensed text-[10px] uppercase tracking-wide text-white/70">
-                Papers uploaded
+                contributions
               </div>
             </div>
             <div>
