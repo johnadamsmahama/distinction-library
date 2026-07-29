@@ -10,6 +10,9 @@ type PendingPaper = {
   file_url: string;
   created_at: string;
   uploaded_by: string;
+  detected_type: string | null;
+  type_mismatch: boolean;
+  classification_notes: string | null;
   courses: { code: string; name: string };
   profiles: { id: string; student_id: string; full_name: string | null };
 };
@@ -22,8 +25,18 @@ type PendingMaterial = {
   file_url: string;
   created_at: string;
   uploaded_by: string | null;
+  detected_type: string | null;
+  type_mismatch: boolean;
+  classification_notes: string | null;
   courses: { code: string; name: string };
   profiles: { id: string; student_id: string; full_name: string | null } | null;
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  past_paper: 'Past Paper',
+  lecture_slides: 'Lecture Slides',
+  study_guide: 'Study Guide',
+  other: 'Other',
 };
 
 export default function ModerationQueue({
@@ -40,6 +53,7 @@ export default function ModerationQueue({
   const [materials, setMaterials] = useState(initialMaterials);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [reason, setReason] = useState('');
   const [issueStrike, setIssueStrike] = useState(false);
 
@@ -172,8 +186,20 @@ export default function ModerationQueue({
                     <div className="font-body text-xs text-g600 mt-0.5">
                       Submitted by {p.profiles?.full_name ?? p.profiles?.student_id ?? 'unknown'}
                     </div>
+                    <ClassificationBadge
+                      detectedType={p.detected_type}
+                      mismatch={p.type_mismatch}
+                      notes={p.classification_notes}
+                      uploadedAs="Past Paper"
+                    />
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => setPreviewId(previewId === p.id ? null : p.id)}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                    >
+                      {previewId === p.id ? 'Hide' : 'Preview'}
+                    </button>
                     <button
                       disabled={busyId === p.id}
                       onClick={() => approvePaper(p)}
@@ -189,6 +215,7 @@ export default function ModerationQueue({
                     </button>
                   </div>
                 </div>
+                {previewId === p.id && <FilePreview fileUrl={p.file_url} />}
                 {rejectingId === p.id && (
                   <RejectPanel
                     reason={reason}
@@ -218,8 +245,20 @@ export default function ModerationQueue({
                     {m.week_number ? `Week ${m.week_number} · ` : ''}
                     Submitted by {m.profiles?.full_name ?? m.profiles?.student_id ?? 'unknown'}
                   </div>
+                  <ClassificationBadge
+                    detectedType={m.detected_type}
+                    mismatch={m.type_mismatch}
+                    notes={m.classification_notes}
+                    uploadedAs="Study Material"
+                  />
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => setPreviewId(previewId === m.id ? null : m.id)}
+                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                  >
+                    {previewId === m.id ? 'Hide' : 'Preview'}
+                  </button>
                   <button
                     disabled={busyId === m.id}
                     onClick={() => approveMaterial(m)}
@@ -235,6 +274,7 @@ export default function ModerationQueue({
                   </button>
                 </div>
               </div>
+              {previewId === m.id && <FilePreview fileUrl={m.file_url} />}
               {rejectingId === m.id && (
                 <RejectPanel
                   reason={reason}
@@ -249,6 +289,70 @@ export default function ModerationQueue({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ClassificationBadge({
+  detectedType,
+  mismatch,
+  notes,
+  uploadedAs,
+}: {
+  detectedType: string | null;
+  mismatch: boolean;
+  notes: string | null;
+  uploadedAs: string;
+}) {
+  if (!detectedType) {
+    return (
+      <div className="font-body text-[11px] text-g600 mt-1.5 italic">
+        AI review pending…
+      </div>
+    );
+  }
+
+  const label = TYPE_LABELS[detectedType] ?? detectedType;
+
+  if (mismatch) {
+    return (
+      <div className="mt-1.5 inline-flex items-start gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">
+        <span className="font-condensed font-bold text-[11px] uppercase text-red-600">
+          ⚠ Possible mismatch
+        </span>
+        <span className="font-body text-[11px] text-red-700">
+          AI thinks this looks like <strong>{label}</strong>, but it was uploaded as {uploadedAs}.
+          {notes ? ` ${notes}` : ''}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1.5 inline-flex items-center gap-1.5 bg-g50 border border-g100 rounded-lg px-2.5 py-1">
+      <span className="font-condensed font-bold text-[10px] uppercase text-g600">
+        AI detected: {label}
+      </span>
+    </div>
+  );
+}
+
+function FilePreview({ fileUrl }: { fileUrl: string }) {
+  return (
+    <div className="mt-3 pt-3 border-t border-g100">
+      <iframe
+        src={fileUrl}
+        className="w-full h-[420px] rounded-lg border border-g100"
+        title="Document preview"
+      />
+      <a
+        href={fileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-condensed font-bold text-xs uppercase text-gold hover:underline mt-2 inline-block"
+      >
+        Open in new tab →
+      </a>
     </div>
   );
 }
