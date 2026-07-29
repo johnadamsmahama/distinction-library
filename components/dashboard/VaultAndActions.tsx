@@ -106,6 +106,21 @@ const ACTIONS = [
     sheen: true,
     grain: true,
   },
+  {
+    href: '/predictor',
+    label: 'Check Exam Predictions',
+    desc: 'See AI-ranked likely topics for your course',
+    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
+    background: 'radial-gradient(140% 140% at 85% 0%, #C9A02C, #0D2B5E 65%)',
+    aurora:
+      'radial-gradient(40% 45% at 85% 10%, rgba(240,210,120,.5), transparent 70%), radial-gradient(45% 50% at 15% 60%, rgba(30,70,160,.5), transparent 70%), radial-gradient(50% 55% at 60% 95%, rgba(10,30,70,.5), transparent 70%)',
+    textClass: 'text-white',
+    subClass: 'text-white/80',
+    iconBgClass: 'bg-white/[.14]',
+    iconColorClass: 'text-gold-light',
+    arrowColorClass: 'text-gold-light',
+    grain: true,
+  },
 ];
 
 export function QuickActions() {
