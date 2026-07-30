@@ -28,6 +28,7 @@ export default async function DashboardPage() {
 
       <div className="max-w-2xl mx-auto space-y-6">
         <InstallPrompt />
+        <CommunityAndToolsSection />
         <ProfileCard
           fullName={fullName}
           department={data.profile?.department ?? null}
@@ -35,14 +36,6 @@ export default async function DashboardPage() {
           uploadCount={data.profile?.upload_count ?? 0}
           strikesCount={data.profile?.strikes_count ?? 0}
           uploadSuspended={data.profile?.upload_suspended ?? false}
-          contributorBadge={data.profile?.contributor_badge ?? null}
-          leaderboardRank={data.leaderboardRank}
-        />
-        <CommunityAndToolsSection
-          fullName={fullName}
-          department={data.profile?.department ?? null}
-          level={data.profile?.level ?? null}
-          uploadCount={data.profile?.upload_count ?? 0}
           contributorBadge={data.profile?.contributor_badge ?? null}
           leaderboardRank={data.leaderboardRank}
         />
