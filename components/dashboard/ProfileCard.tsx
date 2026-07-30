@@ -28,9 +28,9 @@ export default function ProfileCard({
   return (
     <Link
       href="/dashboard/leaderboard"
-      className="block bg-gradient-to-br from-navy to-navy-deep rounded-[18px] p-5 text-white"
+      className="flex flex-col justify-center min-h-[150px] bg-gradient-to-br from-navy to-navy-deep rounded-[18px] p-5 text-white"
     >
-      <div className="flex items-start justify-between mb-[18px]">
+      <div className="flex items-start justify-between mb-3">
         <div>
           <div className="font-display font-bold text-lg">
             {fullName ?? 'Student'} <span className="text-gold">(You)</span>
@@ -47,25 +47,25 @@ export default function ProfileCard({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-[18px]">
+      <div className="grid grid-cols-2 gap-4 mb-3">
         <div>
-          <div className="font-display font-bold text-[26px] text-gold">{uploadCount}</div>
-          <div className="font-condensed font-semibold text-[10.5px] uppercase tracking-wide text-white/65 mt-px">
+          <div className="font-display font-bold text-[22px] text-gold leading-none">{uploadCount}</div>
+          <div className="font-condensed font-semibold text-[10.5px] uppercase tracking-wide text-white/65 mt-1">
             Papers uploaded
           </div>
         </div>
         <div>
-          <div className="font-display font-bold text-[26px] text-gold">
+          <div className="font-display font-bold text-[22px] text-gold leading-none">
             {leaderboardRank ? `#${leaderboardRank}` : '—'}
           </div>
-          <div className="font-condensed font-semibold text-[10.5px] uppercase tracking-wide text-white/65 mt-px">
+          <div className="font-condensed font-semibold text-[10.5px] uppercase tracking-wide text-white/65 mt-1">
             Leaderboard rank
           </div>
         </div>
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-[7px]">
+        <div className="flex items-center justify-between mb-[6px]">
           <span className="font-condensed font-semibold text-[10.5px] uppercase tracking-wide text-white/65">
             Upload standing
           </span>
