@@ -18,16 +18,9 @@ function WhatsAppIcon() {
   );
 }
 
-// Sits above ProfileCard on the dashboard (Buy Data, then Classroom/WhatsApp).
-// The WhatsApp link here replaces the one that used to live inside
-// ProfileCard's "Distinction Programme" panel — that panel has been removed
-// so there's only one WhatsApp entry point. The old separate "Leaderboard"
-// preview card has been removed since ProfileCard now covers rank/badge/
-// uploads and links to /dashboard/leaderboard itself.
 export default function CommunityAndToolsSection() {
   return (
     <div className="space-y-4">
-      {/* Buy Data — feasibility study in progress, placeholder only */}
       <div className="flex items-center justify-between gap-3.5 flex-wrap bg-gradient-to-br from-navy to-navy-deep rounded-[18px] px-5 py-[22px]">
         <div>
           <div className="font-display font-bold text-[19px] text-white">Buy Data</div>
@@ -40,9 +33,8 @@ export default function CommunityAndToolsSection() {
         </span>
       </div>
 
-      {/* Google Classroom (left) / WhatsApp (right) */}
-      <div className="grid grid-cols-2 bg-gradient-to-br from-navy to-navy-deep rounded-[18px] overflow-hidden">
-        <div className="flex flex-col items-start text-left px-[18px] py-[22px] border-r border-white/15">
+      <div className="grid grid-cols-2 min-h-[150px] bg-gradient-to-br from-navy to-navy-deep rounded-[18px] overflow-hidden">
+        <div className="flex flex-col justify-center items-start text-left px-[18px] py-[22px] border-r border-white/15">
           <a
             href={CLASSROOM_URL}
             target="_blank"
@@ -56,7 +48,7 @@ export default function CommunityAndToolsSection() {
             Join the Distinction Programme&apos;s Free Online Classes.
           </p>
         </div>
-        <div className="flex flex-col items-end text-right px-[18px] py-[22px]">
+        <div className="flex flex-col justify-center items-end text-right px-[18px] py-[22px]">
           <a
             href={WHATSAPP_URL}
             target="_blank"
