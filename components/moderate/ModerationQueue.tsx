@@ -20,6 +20,7 @@ type PendingPaper = {
 type PendingMaterial = {
   id: string;
   title: string;
+  suggested_title: string | null;
   content_type: string;
   week_number: number | null;
   file_url: string;
@@ -79,9 +80,19 @@ export default function ModerationQueue({
 
   const approveMaterial = async (material: PendingMaterial) => {
     setBusyId(material.id);
+
+    // Use the AI's typo-corrected title if one exists, otherwise the
+    // original — either way, save it in CAPS the moment it's approved.
+    const finalTitle = (material.suggested_title || material.title).toUpperCase();
+
     const { error } = await supabase
       .from('study_materials')
-      .update({ status: 'approved', reviewed_by: staffId, reviewed_at: new Date().toISOString() })
+      .update({
+        status: 'approved',
+        title: finalTitle,
+        reviewed_by: staffId,
+        reviewed_at: new Date().toISOString(),
+      })
       .eq('id', material.id);
     setBusyId(null);
 
@@ -93,7 +104,7 @@ export default function ModerationQueue({
     if (material.uploaded_by) {
       await notify(
         material.uploaded_by,
-        `Your study material "${material.title}" for ${material.courses.code} was approved.`,
+        `Your study material "${finalTitle}" for ${material.courses.code} was approved.`,
         'upload_approved'
       );
     }
@@ -178,7 +189,7 @@ export default function ModerationQueue({
           <div className="space-y-3">
             {papers.map((p) => (
               <div key={p.id} className="bg-white border border-g100 rounded-xl p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-condensed font-bold text-sm text-navy">
                       {p.courses.code} — {p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'} {p.year}
@@ -193,7 +204,7 @@ export default function ModerationQueue({
                       uploadedAs="Past Paper"
                     />
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-wrap gap-2 flex-shrink-0">
                     <button
                       onClick={() => setPreviewId(previewId === p.id ? null : p.id)}
                       className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
@@ -236,11 +247,17 @@ export default function ModerationQueue({
         <div className="space-y-3">
           {materials.map((m) => (
             <div key={m.id} className="bg-white border border-g100 rounded-xl p-4">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-condensed font-bold text-sm text-navy">
                     {m.courses.code} — {m.title}
                   </div>
+                  {m.suggested_title && m.suggested_title !== m.title && (
+                    <div className="font-body text-xs text-gold mt-0.5">
+                      AI suggests: &ldquo;{m.suggested_title}&rdquo; — this corrected version will be
+                      saved (in CAPS) if approved.
+                    </div>
+                  )}
                   <div className="font-body text-xs text-g600 mt-0.5">
                     {m.week_number ? `Week ${m.week_number} · ` : ''}
                     Submitted by {m.profiles?.full_name ?? m.profiles?.student_id ?? 'unknown'}
@@ -252,7 +269,7 @@ export default function ModerationQueue({
                     uploadedAs="Study Material"
                   />
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex flex-wrap gap-2 flex-shrink-0">
                   <button
                     onClick={() => setPreviewId(previewId === m.id ? null : m.id)}
                     className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
@@ -316,11 +333,11 @@ function ClassificationBadge({
 
   if (mismatch) {
     return (
-      <div className="mt-1.5 inline-flex items-start gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">
-        <span className="font-condensed font-bold text-[11px] uppercase text-red-600">
+      <div className="mt-1.5 flex flex-col gap-1 sm:inline-flex sm:flex-row sm:items-start sm:gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 max-w-full sm:max-w-md">
+        <span className="font-condensed font-bold text-[11px] uppercase text-red-600 shrink-0">
           ⚠ Possible mismatch
         </span>
-        <span className="font-body text-[11px] text-red-700">
+        <span className="font-body text-[11px] text-red-700 break-words">
           AI thinks this looks like <strong>{label}</strong>, but it was uploaded as {uploadedAs}.
           {notes ? ` ${notes}` : ''}
         </span>
@@ -342,7 +359,7 @@ function FilePreview({ fileUrl }: { fileUrl: string }) {
     <div className="mt-3 pt-3 border-t border-g100">
       <iframe
         src={fileUrl}
-        className="w-full h-[420px] rounded-lg border border-g100"
+        className="w-full h-[60vh] max-h-[420px] rounded-lg border border-g100"
         title="Document preview"
       />
       <a
