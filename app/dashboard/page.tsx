@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getDashboardData } from '@/lib/dashboard-data';
 import ProfileCard from '@/components/dashboard/ProfileCard';
+import CommunityAndToolsSection from '@/components/dashboard/CommunityAndToolsSection';
 import BookmarkedCourses from '@/components/dashboard/BookmarkedCourses';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import { VaultSummary, QuickActions } from '@/components/dashboard/VaultAndActions';
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
           contributorBadge={data.profile?.contributor_badge ?? null}
           leaderboardRank={data.leaderboardRank}
         />
+        <CommunityAndToolsSection />
         <BookmarkedCourses courses={data.bookmarks} />
         <RecentActivity papers={data.recentPapers as any} materials={data.recentMaterials as any} />
         <QuickActions />
