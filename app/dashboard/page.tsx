@@ -38,7 +38,14 @@ export default async function DashboardPage() {
           contributorBadge={data.profile?.contributor_badge ?? null}
           leaderboardRank={data.leaderboardRank}
         />
-        <CommunityAndToolsSection />
+        <CommunityAndToolsSection
+          fullName={fullName}
+          department={data.profile?.department ?? null}
+          level={data.profile?.level ?? null}
+          uploadCount={data.profile?.upload_count ?? 0}
+          contributorBadge={data.profile?.contributor_badge ?? null}
+          leaderboardRank={data.leaderboardRank}
+        />
         <BookmarkedCourses courses={data.bookmarks} />
         <RecentActivity papers={data.recentPapers as any} materials={data.recentMaterials as any} />
         <QuickActions />
