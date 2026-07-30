@@ -14,6 +14,8 @@ export type BookmarkedCourse = {
   study_material_count: number;
 };
 
+const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
+
 export default function BookmarkedCourses({ courses }: { courses: BookmarkedCourse[] }) {
   const [list, setList] = useState(courses);
   const supabase = createClient();
@@ -28,11 +30,22 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
   };
 
   return (
-    <div className="relative overflow-hidden flex flex-col min-h-[280px] bg-white border border-g100 rounded-2xl p-6 before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(theme(colors.navy)_0.6px,transparent_0.6px)] before:bg-[length:16px_16px] before:opacity-[0.04] before:pointer-events-none">
-      <div className="relative z-10 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-5">
+    <div className="relative overflow-hidden flex flex-col min-h-[280px] rounded-2xl border border-[#D8D3C6] bg-[#EDEAE2]">
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[.16]"
+        style={{ backgroundImage: GRAIN, mixBlendMode: 'multiply' }}
+      />
+      <svg
+        className="absolute -right-3.5 -bottom-[18px] w-[130px] h-[130px] opacity-10 pointer-events-none"
+        viewBox="0 0 24 24" fill="none" stroke="#A45A2A" strokeWidth="1"
+      >
+        <path d="M6 2h12v20l-6-4-6 4V2z" />
+      </svg>
+
+      <div className="relative z-10 flex flex-col flex-1 p-6">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-bold text-lg text-navy">Your courses</h2>
-          <Link href="/papers" className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline">
+          <Link href="/papers" className="font-condensed font-bold text-xs uppercase tracking-wide text-[#A45A2A] hover:underline">
             Browse all →
           </Link>
         </div>
@@ -55,7 +68,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
             {list.map((c) => (
               <div
                 key={c.course_id}
-                className="flex items-center justify-between border border-g100 rounded-xl px-4 py-3 hover:border-gold transition-colors"
+                className="flex items-center justify-between bg-white border border-[#D8D3C6] border-l-4 border-l-[#A45A2A] rounded-xl px-4 py-3"
               >
                 <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
                   <div className="font-condensed font-bold text-sm text-navy truncate">
