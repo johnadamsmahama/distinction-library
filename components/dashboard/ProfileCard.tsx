@@ -33,7 +33,7 @@ export default function ProfileCard({
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="font-display font-bold text-lg">
-            {fullName ?? 'Student'} <span className="text-gold">(You)</span>
+            {fullName ?? 'Student'}
           </div>
           <div className="font-condensed text-xs text-white/70 mt-0.5">
             {department ?? 'Department not set'}
