@@ -28,53 +28,55 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
   };
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-display font-bold text-lg text-navy">Your courses</h2>
-        <Link href="/papers" className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline">
-          Browse all →
-        </Link>
-      </div>
-
-      {list.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="font-body text-sm text-g600 mb-4">
-            You haven&apos;t bookmarked any courses yet. Bookmark the ones you&apos;re taking to
-            see their papers and materials here.
-          </p>
-          <Link
-            href="/papers"
-            className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg hover:bg-gold-light transition-colors"
-          >
-            Browse courses
+    <div className="relative overflow-hidden flex flex-col min-h-[280px] bg-white border border-g100 rounded-2xl p-6 before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(theme(colors.navy)_0.6px,transparent_0.6px)] before:bg-[length:16px_16px] before:opacity-[0.04] before:pointer-events-none">
+      <div className="relative z-10 flex flex-col flex-1">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display font-bold text-lg text-navy">Your courses</h2>
+          <Link href="/papers" className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline">
+            Browse all →
           </Link>
         </div>
-      ) : (
-        <div className="space-y-3">
-          {list.map((c) => (
-            <div
-              key={c.course_id}
-              className="flex items-center justify-between border border-g100 rounded-xl px-4 py-3 hover:border-gold transition-colors"
+
+        {list.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
+            <p className="font-body text-sm text-g600 mb-4">
+              You haven&apos;t bookmarked any courses yet. Bookmark the ones you&apos;re taking to
+              see their papers and materials here.
+            </p>
+            <Link
+              href="/papers"
+              className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg hover:bg-gold-light transition-colors"
             >
-              <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
-                <div className="font-condensed font-bold text-sm text-navy truncate">
-                  {c.code} · {c.name}
-                </div>
-                <div className="font-body text-xs text-g600 mt-0.5">
-                  {c.past_paper_count} past papers · {c.study_material_count} materials
-                </div>
-              </Link>
-              <button
-                onClick={() => removeBookmark(c.course_id)}
-                aria-label={`Remove bookmark for ${c.code}`}
-                className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+              Browse courses
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {list.map((c) => (
+              <div
+                key={c.course_id}
+                className="flex items-center justify-between border border-g100 rounded-xl px-4 py-3 hover:border-gold transition-colors"
               >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
+                  <div className="font-condensed font-bold text-sm text-navy truncate">
+                    {c.code} · {c.name}
+                  </div>
+                  <div className="font-body text-xs text-g600 mt-0.5">
+                    {c.past_paper_count} past papers · {c.study_material_count} materials
+                  </div>
+                </Link>
+                <button
+                  onClick={() => removeBookmark(c.course_id)}
+                  aria-label={`Remove bookmark for ${c.code}`}
+                  className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
