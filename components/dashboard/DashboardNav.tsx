@@ -5,11 +5,19 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
+// Primary nav per spec Section 2. Reconciled against the live app's old
+// hamburger (Section 2.1): Leaderboard now lives under Dashboard/Profile,
+// Tutors under Success Centre, Support under Settings — all still reachable,
+// just no longer top-level. See CHANGELOG_STEP3.md for the full mapping.
 const NAV_LINKS = [
-  { href: '/leaderboard', label: 'Leaderboard' },
-  { href: '/tutors', label: 'Tutors' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/papers', label: 'Library' },
+  { href: '/ai-tools', label: 'AI Tools' },
+  { href: '/predictor', label: 'Exam Predictor' },
+  { href: '/opportunity-hub', label: 'Opportunity Hub' },
+  { href: '/success-centre', label: 'Success Centre' },
   { href: '/blog', label: 'Blog' },
-  { href: '/support', label: 'Support' },
+  { href: '/dashboard/notifications', label: 'Notifications' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 
@@ -55,14 +63,14 @@ export default function DashboardNav({
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-[11px]">
+        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-[11px] overflow-x-auto max-w-[52vw]">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href || pathname?.startsWith(link.href + '/');
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-[15px] py-2 rounded-[8px] font-condensed font-semibold text-[13px] transition-colors ${
+                className={`px-[15px] py-2 rounded-[8px] font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
                   active ? 'bg-gold text-navy' : 'text-white/65 hover:text-white hover:bg-white/[.07]'
                 }`}
               >
@@ -106,14 +114,17 @@ export default function DashboardNav({
 
           <div className="hidden sm:block w-px h-[22px] bg-white/[.12]" />
 
-          <div className="hidden sm:flex items-center gap-[9px] px-[10px] py-[5px] rounded-[10px]">
+          <Link
+            href="/profile"
+            className="hidden sm:flex items-center gap-[9px] px-[10px] py-[5px] rounded-[10px] hover:bg-white/[.06] transition-colors"
+          >
             <div className="w-[30px] h-[30px] rounded-full bg-gold text-navy flex items-center justify-center font-condensed font-bold text-xs shadow-[0_0_0_2px_rgba(255,255,255,.15)]">
               {initials}
             </div>
             <span className="font-condensed font-semibold text-xs text-white">
               {fullName?.split(' ')[0] ?? 'Student'}
             </span>
-          </div>
+          </Link>
 
           <div className="hidden md:block w-px h-[22px] bg-white/[.12]" />
 
@@ -142,6 +153,13 @@ export default function DashboardNav({
 
       {menuOpen && (
         <div className="md:hidden bg-navy-deep border-t border-gold/10 px-7 py-4 flex flex-col gap-4">
+          <Link
+            href="/profile"
+            onClick={() => setMenuOpen(false)}
+            className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors"
+          >
+            Profile
+          </Link>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
