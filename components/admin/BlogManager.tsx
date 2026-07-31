@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+// Section 9.2 of the spec: "Categories: Study Tips, Platform Updates,
+// Opportunities Spotlight, Student Stories" — must match the DB check
+// constraint on blog_posts.category exactly.
+const CATEGORIES = ['Study Tips', 'Platform Updates', 'Opportunities Spotlight', 'Student Stories'] as const;
+
+type Category = (typeof CATEGORIES)[number];
+
 type Post = {
   id: string;
   title: string;
   body: string;
   cover_image_url: string | null;
+  category: Category | null;
   published: boolean;
   published_at: string | null;
 };
@@ -17,6 +25,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
   const [title, setTitle] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [body, setBody] = useState('');
+  const [category, setCategory] = useState<Category | ''>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +34,10 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
     setError(null);
     if (!title.trim() || !body.trim()) {
       setError('Title and body are required.');
+      return;
+    }
+    if (!category) {
+      setError('Choose a category.');
       return;
     }
 
@@ -36,6 +49,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
         title: title.trim(),
         body: body.trim(),
         cover_image_url: coverUrl.trim() || null,
+        category,
         author_id: authorId,
         published: false,
       })
@@ -51,6 +65,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
     setTitle('');
     setBody('');
     setCoverUrl('');
+    setCategory('');
   };
 
   const togglePublish = async (post: Post) => {
@@ -71,6 +86,20 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
     setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, published: nextPublished } : p)));
   };
 
+  const changeCategory = async (post: Post, nextCategory: Category) => {
+    const supabase = createClient();
+    const { error: updateErr } = await supabase
+      .from('blog_posts')
+      .update({ category: nextCategory })
+      .eq('id', post.id);
+
+    if (updateErr) {
+      alert(updateErr.message);
+      return;
+    }
+    setPosts((prev) => prev.map((p) => (p.id === post.id ? { ...p, category: nextCategory } : p)));
+  };
+
   const deletePost = async (id: string) => {
     if (!confirm('Delete this post permanently?')) return;
     const supabase = createClient();
@@ -85,6 +114,23 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
         <div>
           <label className={labelClass}>Title</label>
           <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className={labelClass}>Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as Category)}
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Choose a category…
+            </option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className={labelClass}>Cover image URL (optional)</label>
@@ -115,15 +161,36 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-condensed font-semibold text-sm text-g800 truncate">{p.title}</div>
-                  <span
-                    className={`inline-block mt-1 font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded ${
-                      p.published ? 'bg-green-100 text-green-700' : 'bg-off-white text-g600'
-                    }`}
-                  >
-                    {p.published ? 'Published' : 'Draft'}
-                  </span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded ${
+                        p.published ? 'bg-green-100 text-green-700' : 'bg-off-white text-g600'
+                      }`}
+                    >
+                      {p.published ? 'Published' : 'Draft'}
+                    </span>
+                    {p.category && (
+                      <span className="inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-g100 text-navy">
+                        {p.category}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <select
+                    value={p.category ?? ''}
+                    onChange={(e) => changeCategory(p, e.target.value as Category)}
+                    className="font-condensed text-xs px-2 py-1.5 rounded-lg border border-g100 outline-none focus:border-gold transition-colors"
+                  >
+                    <option value="" disabled>
+                      No category
+                    </option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     onClick={() => togglePublish(p)}
                     className="font-condensed font-bold text-xs uppercase px-3 py-1.5 rounded-lg border border-g100 hover:border-gold transition-colors"
