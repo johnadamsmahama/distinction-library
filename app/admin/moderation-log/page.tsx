@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 // Admins inside the main Admin Console." The underlying data (reviewed_by,
 // reviewed_at, rejection_reason) was already being saved by the Moderation
 // Queue on every approve/reject — this page is the first place any of it is
-// actually displayed.
+// actually displayed. Also includes "needs_revision" (Request Changes),
+// the third moderation action alongside approve/reject.
 
 type Row = {
   id: string;
@@ -18,6 +19,18 @@ type Row = {
   reviewer: { full_name: string | null } | null;
 };
 
+const STATUS_STYLES: Record<string, string> = {
+  approved: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-600',
+  needs_revision: 'bg-amber-100 text-amber-700',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  approved: 'approved',
+  rejected: 'rejected',
+  needs_revision: 'changes requested',
+};
+
 export default async function ModerationLogPage() {
   const supabase = createClient();
 
@@ -27,7 +40,7 @@ export default async function ModerationLogPage() {
       .select(
         'id, year, exam_type, status, rejection_reason, reviewed_at, courses(code), uploader:profiles!uploaded_by(full_name, student_id), reviewer:profiles!reviewed_by(full_name)'
       )
-      .in('status', ['approved', 'rejected'])
+      .in('status', ['approved', 'rejected', 'needs_revision'])
       .order('reviewed_at', { ascending: false })
       .limit(100),
 
@@ -36,7 +49,7 @@ export default async function ModerationLogPage() {
       .select(
         'id, title, status, rejection_reason, reviewed_at, courses(code), uploader:profiles!uploaded_by(full_name, student_id), reviewer:profiles!reviewed_by(full_name)'
       )
-      .in('status', ['approved', 'rejected'])
+      .in('status', ['approved', 'rejected', 'needs_revision'])
       .order('reviewed_at', { ascending: false })
       .limit(100),
   ]);
@@ -70,7 +83,7 @@ export default async function ModerationLogPage() {
     <div>
       <h2 className="font-display font-bold text-lg text-navy mb-1">Moderation Log</h2>
       <p className="font-body text-sm text-g600 mb-6">
-        Every approve/reject decision made in the Moderation Queue, most recent first.
+        Every approve / reject / request-changes decision made in the Moderation Queue, most recent first.
       </p>
 
       {rows.length === 0 ? (
@@ -87,10 +100,10 @@ export default async function ModerationLogPage() {
                     </span>
                     <span
                       className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
-                        r.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+                        STATUS_STYLES[r.status] ?? 'bg-g100 text-g600'
                       }`}
                     >
-                      {r.status}
+                      {STATUS_LABELS[r.status] ?? r.status}
                     </span>
                   </div>
                   <div className="font-condensed font-semibold text-sm text-g800">{r.label}</div>
@@ -98,7 +111,7 @@ export default async function ModerationLogPage() {
                     Uploaded by {r.uploader?.full_name ?? r.uploader?.student_id ?? 'unknown'} · Reviewed by{' '}
                     {r.reviewer?.full_name ?? 'unknown'}
                   </div>
-                  {r.status === 'rejected' && r.rejection_reason && (
+                  {(r.status === 'rejected' || r.status === 'needs_revision') && r.rejection_reason && (
                     <div className="font-body text-xs text-red-600 mt-1">Reason: {r.rejection_reason}</div>
                   )}
                 </div>
