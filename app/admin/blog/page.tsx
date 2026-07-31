@@ -11,7 +11,7 @@ export default async function AdminBlogPage() {
 
   const { data: posts } = await supabase
     .from('blog_posts')
-    .select('id, title, body, cover_image_url, published, published_at')
+    .select('id, title, body, cover_image_url, category, published, published_at')
     .order('created_at', { ascending: false });
 
   return <BlogManager posts={(posts as any) ?? []} authorId={user.id} />;
