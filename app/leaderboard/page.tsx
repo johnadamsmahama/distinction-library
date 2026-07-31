@@ -18,10 +18,17 @@ export default async function LeaderboardPage() {
 
   let semesterRows: any[] = [];
   if (period) {
+    // !inner + the profiles.leaderboard_opt_out filter excludes students who
+    // opted out under Settings → Account (spec 10.1 "Privacy controls —
+    // leaderboard visibility opt-out"). Without !inner, PostgREST can't use
+    // an embedded-table column as a row filter.
     const { data } = await supabase
       .from('leaderboard_entries')
-      .select('upload_count, rank, tier, profiles!user_id (id, full_name, student_id, department, level)')
+      .select(
+        'upload_count, rank, tier, profiles!user_id!inner (id, full_name, student_id, department, level, leaderboard_opt_out)'
+      )
       .eq('period_id', period.id)
+      .eq('profiles.leaderboard_opt_out', false)
       .order('rank', { ascending: true, nullsFirst: false })
       .order('upload_count', { ascending: false })
       .limit(50);
@@ -44,6 +51,7 @@ export default async function LeaderboardPage() {
   const { data: allTimeData } = await supabase
     .from('profiles')
     .select('id, full_name, student_id, department, level, upload_count, contributor_badge')
+    .eq('leaderboard_opt_out', false)
     .order('upload_count', { ascending: false })
     .limit(50);
 
