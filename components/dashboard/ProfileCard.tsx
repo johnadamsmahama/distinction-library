@@ -27,7 +27,7 @@ export default function ProfileCard({
 }) {
   return (
     <Link
-      href="/dashboard/leaderboard"
+      href="/profile"
       className="flex flex-col justify-center min-h-[150px] bg-gradient-to-br from-navy to-navy-deep rounded-[18px] p-5 text-white"
     >
       <div className="flex items-start justify-between mb-3">
