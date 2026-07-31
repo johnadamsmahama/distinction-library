@@ -40,6 +40,8 @@ const TYPE_LABELS: Record<string, string> = {
   other: 'Other',
 };
 
+type Decision = 'rejected' | 'needs_revision';
+
 export default function ModerationQueue({
   initialPapers,
   initialMaterials,
@@ -53,7 +55,9 @@ export default function ModerationQueue({
   const [papers, setPapers] = useState(initialPapers);
   const [materials, setMaterials] = useState(initialMaterials);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  // Which item has an open reason panel, and which of the two negative
+  // decisions (Reject vs Request Changes) it's for.
+  const [panel, setPanel] = useState<{ id: string; decision: Decision } | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [reason, setReason] = useState('');
   const [issueStrike, setIssueStrike] = useState(false);
@@ -111,16 +115,21 @@ export default function ModerationQueue({
     setMaterials((prev) => prev.filter((m) => m.id !== material.id));
   };
 
-  const submitRejection = async (kind: 'paper' | 'material', item: PendingPaper | PendingMaterial) => {
+  // Handles both Reject and Request Changes — same shape, different status
+  // and notification wording. Spec 8.2: "Approve, reject, or request changes,
+  // with an optional reason sent to the uploader via the Notification Centre."
+  const submitDecision = async (kind: 'paper' | 'material', item: PendingPaper | PendingMaterial, decision: Decision) => {
     setBusyId(item.id);
     const table = kind === 'paper' ? 'past_papers' : 'study_materials';
     const uploaderId = kind === 'paper' ? (item as PendingPaper).uploaded_by : (item as PendingMaterial).uploaded_by;
+    const defaultReason =
+      decision === 'rejected' ? 'Did not meet quality guidelines.' : 'Please review and resubmit with the requested changes.';
 
     const { error } = await supabase
       .from(table)
       .update({
-        status: 'rejected',
-        rejection_reason: reason || 'Did not meet quality guidelines.',
+        status: decision,
+        rejection_reason: reason || defaultReason,
         reviewed_by: staffId,
         reviewed_at: new Date().toISOString(),
       })
@@ -128,17 +137,20 @@ export default function ModerationQueue({
 
     if (!error && uploaderId) {
       const label = kind === 'paper' ? (item as PendingPaper).courses.code : (item as PendingMaterial).courses.code;
-      await notify(
-        uploaderId,
-        `Your ${kind === 'paper' ? 'past paper' : 'study material'} for ${label} was not approved. Reason: ${reason || 'Did not meet quality guidelines.'}`,
-        'upload_rejected'
-      );
+      const itemType = kind === 'paper' ? 'past paper' : 'study material';
+      const message =
+        decision === 'rejected'
+          ? `Your ${itemType} for ${label} was not approved. Reason: ${reason || defaultReason}`
+          : `Your ${itemType} for ${label} needs some changes before it can be approved. Feedback: ${reason || defaultReason} Please re-upload once it's updated.`;
+      await notify(uploaderId, message, decision === 'rejected' ? 'upload_rejected' : 'upload_needs_revision');
     }
 
-    if (!error && issueStrike && uploaderId) {
+    // A strike only makes sense alongside an outright rejection, never a
+    // request for changes.
+    if (!error && decision === 'rejected' && issueStrike && uploaderId) {
       await supabase.from('strikes').insert({
         user_id: uploaderId,
-        reason: reason || 'Rejected submission did not meet quality guidelines.',
+        reason: reason || defaultReason,
         related_paper_id: kind === 'paper' ? item.id : null,
         issued_by: staffId,
       });
@@ -156,7 +168,7 @@ export default function ModerationQueue({
     } else {
       setMaterials((prev) => prev.filter((m) => m.id !== item.id));
     }
-    setRejectingId(null);
+    setPanel(null);
     setReason('');
     setIssueStrike(false);
   };
@@ -219,7 +231,13 @@ export default function ModerationQueue({
                       {busyId === p.id ? 'Working…' : 'Approve'}
                     </button>
                     <button
-                      onClick={() => setRejectingId(rejectingId === p.id ? null : p.id)}
+                      onClick={() => setPanel(panel?.id === p.id && panel.decision === 'needs_revision' ? null : { id: p.id, decision: 'needs_revision' })}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                    >
+                      Request Changes
+                    </button>
+                    <button
+                      onClick={() => setPanel(panel?.id === p.id && panel.decision === 'rejected' ? null : { id: p.id, decision: 'rejected' })}
                       className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
                     >
                       Reject
@@ -227,14 +245,15 @@ export default function ModerationQueue({
                   </div>
                 </div>
                 {previewId === p.id && <FilePreview fileUrl={p.file_url} />}
-                {rejectingId === p.id && (
-                  <RejectPanel
+                {panel?.id === p.id && (
+                  <DecisionPanel
+                    decision={panel.decision}
                     reason={reason}
                     setReason={setReason}
                     issueStrike={issueStrike}
                     setIssueStrike={setIssueStrike}
-                    onConfirm={() => submitRejection('paper', p)}
-                    onCancel={() => setRejectingId(null)}
+                    onConfirm={() => submitDecision('paper', p, panel.decision)}
+                    onCancel={() => setPanel(null)}
                   />
                 )}
               </div>
@@ -284,7 +303,13 @@ export default function ModerationQueue({
                     {busyId === m.id ? 'Working…' : 'Approve'}
                   </button>
                   <button
-                    onClick={() => setRejectingId(rejectingId === m.id ? null : m.id)}
+                    onClick={() => setPanel(panel?.id === m.id && panel.decision === 'needs_revision' ? null : { id: m.id, decision: 'needs_revision' })}
+                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                  >
+                    Request Changes
+                  </button>
+                  <button
+                    onClick={() => setPanel(panel?.id === m.id && panel.decision === 'rejected' ? null : { id: m.id, decision: 'rejected' })}
                     className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
                   >
                     Reject
@@ -292,14 +317,15 @@ export default function ModerationQueue({
                 </div>
               </div>
               {previewId === m.id && <FilePreview fileUrl={m.file_url} />}
-              {rejectingId === m.id && (
-                <RejectPanel
+              {panel?.id === m.id && (
+                <DecisionPanel
+                  decision={panel.decision}
                   reason={reason}
                   setReason={setReason}
                   issueStrike={issueStrike}
                   setIssueStrike={setIssueStrike}
-                  onConfirm={() => submitRejection('material', m)}
-                  onCancel={() => setRejectingId(null)}
+                  onConfirm={() => submitDecision('material', m, panel.decision)}
+                  onCancel={() => setPanel(null)}
                 />
               )}
             </div>
@@ -374,7 +400,8 @@ function FilePreview({ fileUrl }: { fileUrl: string }) {
   );
 }
 
-function RejectPanel({
+function DecisionPanel({
+  decision,
   reason,
   setReason,
   issueStrike,
@@ -382,6 +409,7 @@ function RejectPanel({
   onConfirm,
   onCancel,
 }: {
+  decision: Decision;
   reason: string;
   setReason: (v: string) => void;
   issueStrike: boolean;
@@ -389,25 +417,30 @@ function RejectPanel({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const isReject = decision === 'rejected';
   return (
     <div className="mt-3 pt-3 border-t border-g100">
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        placeholder="Reason for rejection…"
+        placeholder={isReject ? 'Reason for rejection…' : 'What needs to change before this can be approved…'}
         rows={2}
         className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-2"
       />
-      <label className="flex items-center gap-2 font-body text-xs text-g600 mb-3">
-        <input type="checkbox" checked={issueStrike} onChange={(e) => setIssueStrike(e.target.checked)} />
-        Issue a strike to this student
-      </label>
+      {isReject && (
+        <label className="flex items-center gap-2 font-body text-xs text-g600 mb-3">
+          <input type="checkbox" checked={issueStrike} onChange={(e) => setIssueStrike(e.target.checked)} />
+          Issue a strike to this student
+        </label>
+      )}
       <div className="flex gap-2">
         <button
           onClick={onConfirm}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+          className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white transition-colors ${
+            isReject ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
+          }`}
         >
-          Confirm rejection
+          {isReject ? 'Confirm rejection' : 'Send back for changes'}
         </button>
         <button
           onClick={onCancel}
