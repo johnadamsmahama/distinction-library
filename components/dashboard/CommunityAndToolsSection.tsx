@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 const WHATSAPP_URL = 'https://chat.whatsapp.com/IbMtGP4aNvY6QGPDUQQDvV?s=cl&p=a&ilr=0&amv=1';
 const CLASSROOM_URL = 'https://classroom.google.com/c/ODU4NjYwODEwMDYw?cjc=imbrocnu';
 
@@ -42,8 +44,9 @@ export default function CommunityAndToolsSection() {
     <div className="space-y-4">
 
       {/* Buy Data — gold-to-rust gradient, everything stacked left */}
-      <div
-        className="relative overflow-hidden rounded-[18px] p-[22px] text-navy"
+      <Link
+        href="/buy-data"
+        className="relative overflow-hidden rounded-[18px] p-[22px] text-navy block hover:opacity-95 transition-opacity"
         style={{
           backgroundImage: `linear-gradient(135deg, #F0C240 0%, #D4A017 45%, #7A3E1D 100%)`,
         }}
@@ -71,7 +74,7 @@ export default function CommunityAndToolsSection() {
             Coming soon
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Community & Tools — rust gradient, stacked rows */}
       <div
