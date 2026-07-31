@@ -10,7 +10,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
 
   const { data: post } = await supabase
     .from('blog_posts')
-    .select('id, title, cover_image_url, body, published, published_at, profiles(full_name)')
+    .select('id, title, cover_image_url, category, body, published, published_at, profiles(full_name)')
     .eq('id', params.id)
     .single();
 
@@ -21,6 +21,11 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
       {post.cover_image_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={post.cover_image_url} alt="" className="w-full h-56 object-cover rounded-xl mb-6" />
+      )}
+      {post.category && (
+        <span className="inline-block font-condensed font-bold text-[10px] uppercase tracking-wide px-2 py-0.5 rounded bg-g100 text-navy mb-3">
+          {post.category}
+        </span>
       )}
       <p className="font-condensed text-xs uppercase tracking-wide text-gold mb-2">
         {(post.profiles as any)?.full_name ?? 'Distinction Library'} ·{' '}
