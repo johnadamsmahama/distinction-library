@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import SettingsForm from '@/components/dashboard/SettingsForm';
+import SettingsTabs from '@/components/dashboard/SettingsTabs';
 
 export default async function SettingsPage() {
   const supabase = createClient();
@@ -13,34 +12,33 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, department, level')
+    .select('full_name, department, level, leaderboard_opt_out, notification_prefs')
     .eq('id', user.id)
     .single();
+
+  const { data: tickets } = await supabase
+    .from('support_tickets')
+    .select('id, subject, message, resolved, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
   return (
     <div>
       <h1 className="font-display font-bold text-2xl text-navy mb-1">Settings</h1>
       <p className="font-body text-sm text-g600 mb-6">
-        Update your name, department, and level.
+        Manage your account, notifications, and support requests.
       </p>
-      <SettingsForm
+      <SettingsTabs
+        userId={user.id}
+        userEmail={user.email ?? ''}
+        emailConfirmed={!!user.email_confirmed_at}
         initialFullName={profile?.full_name ?? null}
         initialDepartment={profile?.department ?? null}
         initialLevel={profile?.level ?? null}
+        initialLeaderboardOptOut={profile?.leaderboard_opt_out ?? false}
+        initialNotificationPrefs={profile?.notification_prefs ?? null}
+        initialTickets={(tickets as any) ?? []}
       />
-
-      <Link
-        href="/support"
-        className="mt-6 flex items-center justify-between bg-white border border-g100 rounded-2xl px-5 py-4 hover:border-gold transition-colors"
-      >
-        <div>
-          <div className="font-condensed font-bold text-sm text-navy">Support</div>
-          <div className="font-body text-xs text-g600">Contact us or check your past messages</div>
-        </div>
-        <span className="font-condensed font-bold text-xs uppercase tracking-wide text-gold">
-          Open →
-        </span>
-      </Link>
     </div>
   );
 }
