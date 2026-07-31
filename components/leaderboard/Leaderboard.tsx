@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 const BADGE_STYLES: Record<string, string> = {
   gold: 'bg-gold text-navy',
   silver: 'bg-gray-300 text-g800',
@@ -13,16 +17,14 @@ type LeaderboardRow = {
   department: string | null;
   level: string | null;
   upload_count: number;
-  contributor_badge: string | null;
+  tier: string | null;
 };
 
-export default function Leaderboard({ rows, currentUserId }: { rows: LeaderboardRow[]; currentUserId: string }) {
+function RowList({ rows, currentUserId, emptyMessage }: { rows: LeaderboardRow[]; currentUserId: string; emptyMessage: string }) {
   if (rows.length === 0 || rows.every((r) => r.upload_count === 0)) {
     return (
       <div className="text-center py-16">
-        <p className="font-body text-sm text-g600">
-          No approved contributions yet this semester — be the first on the board.
-        </p>
+        <p className="font-body text-sm text-g600">{emptyMessage}</p>
       </div>
     );
   }
@@ -52,11 +54,11 @@ export default function Leaderboard({ rows, currentUserId }: { rows: Leaderboard
               </div>
             </div>
             <div className="flex items-center gap-3 flex-shrink-0">
-              {row.contributor_badge && (
+              {row.tier && (
                 <span
-                  className={`font-condensed font-bold text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full ${BADGE_STYLES[row.contributor_badge]}`}
+                  className={`font-condensed font-bold text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full ${BADGE_STYLES[row.tier]}`}
                 >
-                  {BADGE_ICON[row.contributor_badge]} {row.contributor_badge}
+                  {BADGE_ICON[row.tier]} {row.tier}
                 </span>
               )}
               <span className="font-display font-bold text-lg text-gold">{row.upload_count}</span>
@@ -64,6 +66,57 @@ export default function Leaderboard({ rows, currentUserId }: { rows: Leaderboard
           </div>
         );
       })}
+    </div>
+  );
+}
+
+export default function Leaderboard({
+  semesterRows,
+  allTimeRows,
+  currentUserId,
+  periodLabel,
+}: {
+  semesterRows: LeaderboardRow[];
+  allTimeRows: LeaderboardRow[];
+  currentUserId: string;
+  periodLabel: string | null;
+}) {
+  const [tab, setTab] = useState<'semester' | 'all-time'>('semester');
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-5 border-b border-g100">
+        <button
+          onClick={() => setTab('semester')}
+          className={`font-condensed font-semibold text-sm px-4 py-2.5 border-b-2 transition-colors ${
+            tab === 'semester' ? 'border-gold text-navy' : 'border-transparent text-g600'
+          }`}
+        >
+          {periodLabel ?? 'This Semester'}
+        </button>
+        <button
+          onClick={() => setTab('all-time')}
+          className={`font-condensed font-semibold text-sm px-4 py-2.5 border-b-2 transition-colors ${
+            tab === 'all-time' ? 'border-gold text-navy' : 'border-transparent text-g600'
+          }`}
+        >
+          All-Time
+        </button>
+      </div>
+
+      {tab === 'semester' ? (
+        <RowList
+          rows={semesterRows}
+          currentUserId={currentUserId}
+          emptyMessage="No approved contributions yet this semester — be the first on the board."
+        />
+      ) : (
+        <RowList
+          rows={allTimeRows}
+          currentUserId={currentUserId}
+          emptyMessage="No approved contributions yet — be the first on the board."
+        />
+      )}
     </div>
   );
 }
