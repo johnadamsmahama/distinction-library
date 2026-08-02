@@ -11,7 +11,7 @@ export default async function SuccessCentrePage() {
 
   return (
     <div>
-      <h1 className="font-display font-bold text-2xl text-navy mb-1">Success Centre</h1>
+      <h1 className="font-display font-bold text-2xl text-navy mb-1">Essentials</h1>
       <p className="font-body text-sm text-g600 mb-6">
         Support beyond the study materials — mentors, career tools, and opportunities.
       </p>
@@ -43,7 +43,7 @@ export default async function SuccessCentrePage() {
           <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             ◈
           </div>
-          <h2 className="font-display font-bold text-lg text-white mb-1.5">Opportunity Hub</h2>
+          <h2 className="font-display font-bold text-lg text-white mb-1.5">Jobs &amp; Opportunities</h2>
           <p className="font-body text-sm text-white/60">
             Scholarships, internships, graduate programmes, and jobs verified for UPSA students.
           </p>
@@ -73,7 +73,7 @@ export default async function SuccessCentrePage() {
               <path d="M3 12.5h18"></path>
             </svg>
           </div>
-          <h2 className="font-display font-bold text-lg text-white mb-1.5">Career Centre</h2>
+          <h2 className="font-display font-bold text-lg text-white mb-1.5">Career Resources</h2>
           <p className="font-body text-sm text-white/60">
             AI CV Builder, Cover Letter Generator, and career planning tools.
           </p>
