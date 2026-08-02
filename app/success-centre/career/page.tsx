@@ -47,22 +47,16 @@ export default async function CareerCentrePage() {
           </p>
         </Link>
 
-        <ComingSoonCard title="LinkedIn Optimizer" desc="Improve your LinkedIn headline, summary, and experience sections." />
+        <Link
+          href="/success-centre/career/linkedin-optimizer"
+          className="bg-white border border-g100 rounded-2xl p-6 hover:border-gold transition-colors"
+        >
+          <h2 className="font-display font-bold text-lg text-navy mb-1.5">LinkedIn Optimizer</h2>
+          <p className="font-body text-sm text-g600">
+            Improve your LinkedIn headline, summary, and experience sections.
+          </p>
+        </Link>
       </div>
-    </div>
-  );
-}
-
-function ComingSoonCard({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="bg-off-white border border-g100 rounded-2xl p-6 opacity-70">
-      <div className="flex items-center gap-2 mb-1.5">
-        <h2 className="font-display font-bold text-lg text-navy">{title}</h2>
-        <span className="font-condensed font-bold text-[10px] uppercase tracking-wide bg-g100 text-g600 px-2 py-0.5 rounded">
-          Coming soon
-        </span>
-      </div>
-      <p className="font-body text-sm text-g600">{desc}</p>
     </div>
   );
 }
