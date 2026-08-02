@@ -148,34 +148,37 @@ export default function RepositoryBrowser({
 
   return (
     <div>
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      {/* Tabs — full-width navy panel, gold-filled active state */}
+      <div className="flex w-full gap-1 bg-navy border border-gold rounded-xl p-1 mb-4">
         <button
           onClick={() => setTab('papers')}
-          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-lg transition-colors ${
-            tab === 'papers' ? 'bg-navy text-white' : 'bg-white border border-g100 text-g600'
+          className={`flex-1 font-condensed font-bold text-xs sm:text-sm uppercase tracking-wide px-5 py-3 rounded-lg transition-colors ${
+            tab === 'papers' ? 'bg-gold text-navy-deep' : 'text-white/55 hover:text-white'
           }`}
         >
           Past Papers
         </button>
         <button
           onClick={() => setTab('materials')}
-          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-lg transition-colors ${
-            tab === 'materials' ? 'bg-navy text-white' : 'bg-white border border-g100 text-g600'
+          className={`flex-1 font-condensed font-bold text-xs sm:text-sm uppercase tracking-wide px-5 py-3 rounded-lg transition-colors ${
+            tab === 'materials' ? 'bg-gold text-navy-deep' : 'text-white/55 hover:text-white'
           }`}
         >
           Study Materials
         </button>
       </div>
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search by course code or name…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-4 py-3 mb-4 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
-      />
+      {/* Search — same navy/gold panel language as the tabs above it */}
+      <div className="flex items-center gap-3 bg-navy border border-gold rounded-xl px-4 py-3 mb-4">
+        <span className="text-gold text-sm">⌕</span>
+        <input
+          type="text"
+          placeholder="Search by course code or name…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-transparent outline-none font-body text-[15px] text-white placeholder:text-white/40"
+        />
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
@@ -263,7 +266,9 @@ export default function RepositoryBrowser({
 
       {/* Results */}
       {loading ? (
-        <p className="font-body text-sm text-g600">Loading…</p>
+        <div className="bg-navy border border-gold/30 rounded-xl py-16 text-center">
+          <p className="font-body text-sm text-white/50">Loading…</p>
+        </div>
       ) : tab === 'papers' ? (
         <ResultsList
           empty="No past papers match those filters yet."
@@ -299,30 +304,34 @@ function ResultsList({
   empty: string;
 }) {
   if (items.length === 0) {
-    return <p className="font-body text-sm text-g600 text-center py-12">{empty}</p>;
+    return (
+      <div className="bg-navy border border-gold/30 rounded-xl py-16 text-center">
+        <p className="font-body text-sm text-white/50">{empty}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="bg-navy border border-gold/30 rounded-xl overflow-hidden divide-y divide-gold/10">
       {items.map((item) => (
         <div
           key={item.id}
-          className="flex items-center justify-between bg-white border border-g100 rounded-xl px-4 py-3.5 hover:border-gold transition-colors"
+          className="flex items-center justify-between px-4 py-3.5 hover:bg-gold/5 transition-colors"
         >
           <div className="min-w-0 flex items-center gap-3">
-            <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide text-gold bg-gold/10 px-2 py-1 rounded">
+            <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide text-gold bg-gold/15 px-2 py-1 rounded">
               {item.tag}
             </span>
             <div className="min-w-0">
-              <div className="font-condensed font-semibold text-sm text-g800 truncate">{item.title}</div>
-              <div className="font-body text-xs text-g600 truncate">{item.subtitle}</div>
+              <div className="font-condensed font-semibold text-sm text-white truncate">{item.title}</div>
+              <div className="font-body text-xs text-white/55 truncate">{item.subtitle}</div>
             </div>
           </div>
           <a
             href={item.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 ml-3 font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-2 hover:border-gold transition-colors"
+            className="flex-shrink-0 ml-3 font-condensed font-bold text-xs uppercase tracking-wide text-gold border border-gold/50 rounded-lg px-3 py-2 hover:bg-gold hover:text-navy-deep transition-colors"
           >
             Download
           </a>
