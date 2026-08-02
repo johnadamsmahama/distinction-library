@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 type EducationEntry = { institution: string; qualification: string; dates: string };
 type ExperienceEntry = { role: string; organisation: string; dates: string; bullets: string };
+type AttachedFile = { name: string; type: string; data: string }; // data = base64
 
 const emptyEducation: EducationEntry = { institution: '', qualification: '', dates: '' };
 const emptyExperience: ExperienceEntry = { role: '', organisation: '', dates: '', bullets: '' };
+const ACCEPTED_TYPES = '.pdf,.docx,.png,.jpg,.jpeg';
+const MAX_FILE_SIZE_MB = 15;
 
 export default function CvBuilder() {
   const [mode, setMode] = useState<'build' | 'improve'>('build');
@@ -17,6 +20,9 @@ export default function CvBuilder() {
   const [experience, setExperience] = useState<ExperienceEntry[]>([{ ...emptyExperience }]);
   const [skills, setSkills] = useState('');
   const [existingCv, setExistingCv] = useState('');
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+  const [fileError, setFileError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +36,33 @@ export default function CvBuilder() {
     setExperience((rows) => rows.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileError('');
+
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setFileError(`File too large — max ${MAX_FILE_SIZE_MB}MB.`);
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      setAttachedFile({ name: file.name, type: file.type, data: base64 });
+    };
+    reader.onerror = () => setFileError('Could not read that file — try again.');
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const removeFile = () => {
+    setAttachedFile(null);
+    setFileError('');
+  };
+
   const generate = async () => {
     setError(null);
     setResult(null);
@@ -38,8 +71,8 @@ export default function CvBuilder() {
       setError('Add your full name first.');
       return;
     }
-    if (mode === 'improve' && !existingCv.trim()) {
-      setError('Paste your existing CV text first.');
+    if (mode === 'improve' && !existingCv.trim() && !attachedFile) {
+      setError('Paste your existing CV text or upload a file first.');
       return;
     }
 
@@ -55,6 +88,7 @@ export default function CvBuilder() {
         experience,
         skills,
         existingCv: mode === 'improve' ? existingCv : undefined,
+        attachedFile: mode === 'improve' ? attachedFile ?? undefined : undefined,
       }),
     });
     const data = await res.json();
@@ -116,6 +150,44 @@ export default function CvBuilder() {
               placeholder="Paste the full text of your current CV here…"
               className={inputClass}
             />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-g100" />
+            <span className="font-condensed text-xs text-g600">OR</span>
+            <div className="flex-1 h-px bg-g100" />
+          </div>
+
+          <div>
+            <label className={labelClass}>Upload your CV file</label>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={smallActionClass}
+              >
+                {attachedFile ? 'Change file' : 'Choose file'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPTED_TYPES}
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              {attachedFile && (
+                <span className="font-condensed text-xs text-g600 flex items-center gap-1.5">
+                  📎 {attachedFile.name}
+                  <button onClick={removeFile} className="text-g600 hover:text-navy" aria-label="Remove file">
+                    ✕
+                  </button>
+                </span>
+              )}
+            </div>
+            <p className="font-body text-xs text-g600 mt-1.5">
+              Accepts PDF, Word (.docx), or a clear photo of your CV.
+            </p>
+            {fileError && <p className="font-body text-xs text-red-500 mt-1">{fileError}</p>}
           </div>
         </div>
       ) : (
