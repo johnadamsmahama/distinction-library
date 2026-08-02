@@ -9,12 +9,12 @@ import { createClient } from '@/lib/supabase/client';
 // hamburger (Section 2.1): Leaderboard now lives under Dashboard/Profile,
 // Tutors under Success Centre, Support under Settings — all still reachable,
 // just no longer top-level. See CHANGELOG_STEP3.md for the full mapping.
+// Opportunity Hub moved under Success Centre — no longer a top-level link.
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/papers', label: 'Library' },
   { href: '/ai-tools', label: 'AI Tools' },
   { href: '/predictor', label: 'Exam Predictor' },
-  { href: '/opportunity-hub', label: 'Opportunity Hub' },
   { href: '/success-centre', label: 'Success Centre' },
   { href: '/blog', label: 'Blog' },
   { href: '/dashboard/notifications', label: 'Notifications' },
