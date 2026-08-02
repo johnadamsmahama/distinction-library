@@ -10,6 +10,7 @@ const TABS = [
   { href: '/admin/courses', label: 'Courses' },
   { href: '/admin/tutors', label: 'Peer Tutors' },
   { href: '/admin/opportunities', label: 'Opportunities' },
+  { href: '/admin/events', label: 'Events' },
   { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/support', label: 'Support Tickets' },
   { href: '/admin/moderation-log', label: 'Moderation Log' },
