@@ -39,7 +39,7 @@ export default async function DashboardPage() {
           strikesCount={data.profile?.strikes_count ?? 0}
           uploadSuspended={data.profile?.upload_suspended ?? false}
           contributorBadge={data.profile?.contributor_badge ?? null}
-          leaderboardRank={data.leaderboardRank}
+          leaderboardRank={data.rank}
         />
         <BookmarkedCourses courses={data.bookmarks} />
         <StudyProgress items={data.studyProgress} />
