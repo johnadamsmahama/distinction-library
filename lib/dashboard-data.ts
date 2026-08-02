@@ -124,6 +124,7 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
       total: vaultItems.length,
       quizzes: vaultItems.filter((v) => v.item_type === 'quiz').length,
       companionSessions: vaultItems.filter((v) => v.item_type === 'companion_session').length,
+      summaries: vaultItems.filter((v) => v.item_type === 'summary').length,
     },
     notifications: notificationsRes.data ?? [],
     unreadCount: unreadCountRes.count ?? 0,
