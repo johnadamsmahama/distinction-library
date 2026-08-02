@@ -28,7 +28,7 @@ export default async function ProfilePage() {
         strikesCount={data.profile?.strikes_count ?? 0}
         uploadSuspended={data.profile?.upload_suspended ?? false}
         contributorBadge={data.profile?.contributor_badge ?? null}
-        leaderboardRank={data.leaderboardRank}
+        leaderboardRank={data.rank}
       />
 
       <div className="mt-4 bg-white border border-g100 rounded-2xl divide-y divide-g100">
