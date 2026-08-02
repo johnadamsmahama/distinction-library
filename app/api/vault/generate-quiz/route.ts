@@ -1,13 +1,20 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAnthropicClient, CLAUDE_MODEL } from '@/lib/anthropic';
+import mammoth from 'mammoth';
+import officeParser from 'officeparser';
 
 // POST /api/vault/generate-quiz
-// Accepts multipart/form-data: either a `file` (PDF) or `text`, plus
-// `sourceName` and `questionCount`. Extracts text if needed, asks Claude
-// for a strictly-JSON quiz, saves it to the student's private Study Vault,
-// and returns it. Nothing here is visible to anyone but the student —
-// enforced by RLS on study_vault_items (see supabase/rls_policies.sql).
+// Accepts multipart/form-data: either a `file` (PDF, DOCX, PPTX, image, or TXT)
+// or `text`, plus `sourceName` and `questionCount`.
+// - PDF: text extracted via pdf-parse
+// - DOCX: text extracted via mammoth
+// - PPTX: text extracted via officeparser
+// - Images: sent directly to Claude (native image support, no extraction needed)
+// - TXT/other: read as plain text
+// Asks Claude for a strictly-JSON quiz, saves it to the student's private
+// Study Vault, and returns it. Nothing here is visible to anyone but the
+// student — enforced by RLS on study_vault_items (see supabase/rls_policies.sql).
 export async function POST(request: Request) {
   const supabase = createClient();
   const {
@@ -25,25 +32,40 @@ export async function POST(request: Request) {
   const questionCount = Math.min(Math.max(Number(formData.get('questionCount')) || 8, 3), 15);
 
   let sourceText = pastedText ?? '';
+  let imagePart: { media_type: string; data: string } | null = null;
 
   if (file) {
+    const name = file.name.toLowerCase();
+    const isImage = file.type.startsWith('image/');
+
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
-      if (file.name.toLowerCase().endsWith('.pdf')) {
+
+      if (isImage) {
+        imagePart = { media_type: file.type, data: buffer.toString('base64') };
+      } else if (name.endsWith('.pdf')) {
         // Lazy import — pdf-parse touches the filesystem on import in some
         // versions, so keep it out of the module's top-level scope.
         const pdfParse = (await import('pdf-parse')).default;
         const parsed = await pdfParse(buffer);
         sourceText = parsed.text;
+      } else if (name.endsWith('.docx')) {
+        const result = await mammoth.extractRawText({ buffer });
+        sourceText = result.value;
+      } else if (name.endsWith('.pptx')) {
+        sourceText = await officeParser.parseOfficeAsync(buffer);
       } else {
         sourceText = buffer.toString('utf-8');
       }
     } catch {
-      return NextResponse.json({ error: 'Could not read that file. Try a PDF or plain text.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Could not read that file. Try a PDF, Word doc, PowerPoint, image, or plain text.' },
+        { status: 400 }
+      );
     }
   }
 
-  if (!sourceText || sourceText.trim().length < 100) {
+  if (!imagePart && (!sourceText || sourceText.trim().length < 100)) {
     return NextResponse.json(
       { error: 'Not enough text to work with — paste more content or upload a fuller document.' },
       { status: 400 }
@@ -53,7 +75,9 @@ export async function POST(request: Request) {
   // Cap input size to keep costs/latency predictable.
   const trimmedText = sourceText.slice(0, 20000);
 
-  const prompt = `You are generating a study quiz for a UPSA student from their own notes below. Create exactly ${questionCount} questions, mixing multiple-choice, true/false, and short-answer types, covering the material's most important, testable points.
+  const instructions = `You are generating a study quiz for a UPSA student from their own notes${
+    imagePart ? ' (attached as an image)' : ' below'
+  }. Create exactly ${questionCount} questions, mixing multiple-choice, true/false, and short-answer types, covering the material's most important, testable points.
 
 Return ONLY valid JSON — no markdown fences, no commentary — matching exactly this shape:
 {
@@ -66,12 +90,11 @@ Return ONLY valid JSON — no markdown fences, no commentary — matching exactl
       "explanation": "string"      // why this is correct, 1-2 sentences
     }
   ]
-}
-
-NOTES:
-"""
-${trimmedText}
-"""`;
+}${
+    imagePart
+      ? ''
+      : `\n\nNOTES:\n"""\n${trimmedText}\n"""`
+  }`;
 
   const anthropic = getAnthropicClient();
   let quiz: any;
@@ -80,7 +103,20 @@ ${trimmedText}
     const response = await anthropic.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 4000,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'user',
+          content: imagePart
+            ? [
+                {
+                  type: 'image',
+                  source: { type: 'base64', media_type: imagePart.media_type, data: imagePart.data },
+                },
+                { type: 'text', text: instructions },
+              ]
+            : instructions,
+        },
+      ] as any,
     });
 
     const textBlock = response.content.find((b) => b.type === 'text');
