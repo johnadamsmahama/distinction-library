@@ -27,7 +27,16 @@ export default async function CareerCentrePage() {
           </p>
         </Link>
 
-        <ComingSoonCard title="Cover Letter Generator" desc="Tailored cover letters for a specific role or application." />
+        <Link
+          href="/success-centre/career/cover-letter"
+          className="bg-white border border-g100 rounded-2xl p-6 hover:border-gold transition-colors"
+        >
+          <h2 className="font-display font-bold text-lg text-navy mb-1.5">Cover Letter Generator</h2>
+          <p className="font-body text-sm text-g600">
+            Tailored cover letters for a specific role or application.
+          </p>
+        </Link>
+
         <ComingSoonCard title="Interview Coach" desc="Practice common interview questions and get AI feedback." />
         <ComingSoonCard title="LinkedIn Optimizer" desc="Improve your LinkedIn headline, summary, and experience sections." />
       </div>
