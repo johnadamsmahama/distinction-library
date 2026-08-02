@@ -38,6 +38,16 @@ export default async function SuccessCentrePage() {
           </p>
         </Link>
 
+        <Link
+          href="/success-centre/achievements"
+          className="bg-white border border-g100 rounded-2xl p-6 hover:border-gold transition-colors"
+        >
+          <h2 className="font-display font-bold text-lg text-navy mb-1.5">Achievement Portfolio</h2>
+          <p className="font-body text-sm text-g600">
+            Your Gold, Silver, and Bronze badges from the Leaderboard — this semester and all-time.
+          </p>
+        </Link>
+
         <div className="bg-off-white border border-g100 rounded-2xl p-6 opacity-70">
           <div className="flex items-center gap-2 mb-1.5">
             <h2 className="font-display font-bold text-lg text-navy">Career Centre</h2>
