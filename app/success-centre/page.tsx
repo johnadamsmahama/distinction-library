@@ -29,7 +29,7 @@ export default async function SuccessCentrePage() {
         </Link>
 
         <Link
-          href="/opportunity-hub"
+          href="/success-centre/opportunity-hub"
           className="bg-white border border-g100 rounded-2xl p-6 hover:border-gold transition-colors"
         >
           <h2 className="font-display font-bold text-lg text-navy mb-1.5">Opportunity Hub</h2>
