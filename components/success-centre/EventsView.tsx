@@ -1,220 +1,252 @@
-'use client';
+'use client'
 
-import { useState, useMemo } from 'react';
-import type { EventItem } from '@/lib/events-data';
+import { useEffect, useState, useMemo } from 'react'
+import {
+  getPublishedEvents,
+  splitUpcomingPast,
+  EVENT_TYPE_LABELS,
+  EVENT_TYPE_COLORS,
+  type DLEvent,
+} from '@/lib/events-data'
 
-const TYPE_LABELS: Record<string, string> = {
-  workshop: 'Workshop',
-  revision_session: 'Revision Session',
-  career_fair: 'Career Fair',
-  info_session: 'Info Session',
-  other: 'Event',
-};
+type ViewMode = 'list' | 'calendar'
 
-const TYPE_COLORS: Record<string, string> = {
-  workshop: 'bg-blue-50 text-blue-700',
-  revision_session: 'bg-green-50 text-green-700',
-  career_fair: 'bg-purple-50 text-purple-700',
-  info_session: 'bg-gold/15 text-[#7A5A0E]',
-  other: 'bg-g100 text-g600',
-};
+export default function EventsView() {
+  const [events, setEvents] = useState<DLEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<ViewMode>('list')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [monthCursor, setMonthCursor] = useState(new Date())
 
-export default function EventsView({ events }: { events: EventItem[] }) {
-  const [view, setView] = useState<'list' | 'calendar'>('list');
+  useEffect(() => {
+    getPublishedEvents().then((data) => {
+      setEvents(data)
+      setLoading(false)
+    })
+  }, [])
+
+  const { upcoming, past } = useMemo(() => splitUpcomingPast(events), [events])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#0D2B5E] border-t-transparent" />
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <div className="flex gap-2 mb-5">
-        <ViewBtn active={view === 'list'} onClick={() => setView('list')}>
-          List
-        </ViewBtn>
-        <ViewBtn active={view === 'calendar'} onClick={() => setView('calendar')}>
-          Calendar
-        </ViewBtn>
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0D2B5E]">Events & Sessions</h1>
+          <p className="text-sm text-gray-500">Workshops, revision sessions, and career events</p>
+        </div>
+        <div className="flex rounded-lg bg-[#F7F8FC] p-1">
+          {(['list', 'calendar'] as ViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setView(mode)}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition ${
+                view === mode ? 'bg-[#0D2B5E] text-white shadow' : 'text-gray-500'
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
       </div>
 
       {events.length === 0 ? (
-        <div className="bg-white border border-g100 rounded-2xl p-8 text-center">
-          <p className="font-body text-sm text-g600">
-            No events scheduled yet — check back soon.
-          </p>
+        <div className="rounded-xl border border-dashed border-gray-300 bg-[#F7F8FC] py-16 text-center">
+          <p className="text-gray-500">No events scheduled yet</p>
+          <p className="mt-1 text-sm text-gray-400">Check back soon — new sessions are added regularly.</p>
         </div>
       ) : view === 'list' ? (
-        <ListView events={events} />
+        <ListView upcoming={upcoming} past={past} />
       ) : (
-        <CalendarView events={events} />
+        <CalendarView
+          events={events}
+          monthCursor={monthCursor}
+          setMonthCursor={setMonthCursor}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+        />
       )}
     </div>
-  );
+  )
 }
 
-function ViewBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function EventCard({ event }: { event: DLEvent }) {
+  const start = new Date(event.start_time)
+  const color = EVENT_TYPE_COLORS[event.event_type]
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg border transition-colors ${
-        active ? 'border-gold bg-gold/10 text-navy' : 'border-g100 text-g600'
-      }`}
-    >
-      {children}
-    </button>
-  );
+    <div className="flex gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex w-14 flex-shrink-0 flex-col items-center justify-center rounded-lg bg-[#F7F8FC] py-2">
+        <span className="text-xs font-semibold uppercase text-[#0D2B5E]">
+          {start.toLocaleDateString('en-GB', { month: 'short' })}
+        </span>
+        <span className="text-lg font-bold text-[#0D2B5E]">{start.getDate()}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <span
+          className="mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium text-white"
+          style={{ backgroundColor: color }}
+        >
+          {EVENT_TYPE_LABELS[event.event_type]}
+        </span>
+        <h3 className="truncate font-semibold text-gray-900">{event.title}</h3>
+        <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">{event.description}</p>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
+          <span>
+            {start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+            {event.end_time &&
+              ` – ${new Date(event.end_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`}
+          </span>
+          {event.location && <span>📍 {event.location}</span>}
+        </div>
+      </div>
+    </div>
+  )
 }
 
-function ListView({ events }: { events: EventItem[] }) {
+function ListView({ upcoming, past }: { upcoming: DLEvent[]; past: DLEvent[] }) {
   return (
-    <div className="space-y-3">
-      {events.map((e) => (
-        <div key={e.id} className="bg-white border border-g100 rounded-2xl p-5">
-          <div className="flex items-start justify-between gap-3 mb-1.5">
-            <h2 className="font-display font-bold text-base text-navy">{e.title}</h2>
-            <span
-              className={`flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide px-2 py-0.5 rounded ${TYPE_COLORS[e.event_type]}`}
-            >
-              {TYPE_LABELS[e.event_type]}
-            </span>
+    <div className="space-y-8">
+      <div>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#C9A02C]">Upcoming</h2>
+        {upcoming.length === 0 ? (
+          <p className="text-sm text-gray-400">No upcoming events right now.</p>
+        ) : (
+          <div className="space-y-3">
+            {upcoming.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
           </div>
-          <p className="font-body text-sm text-g600 mb-2">{e.description}</p>
-          <div className="flex flex-wrap items-center gap-3 font-condensed text-[11px] text-g600">
-            <span>{formatDateTime(e.start_time)}</span>
-            {e.location && <span>· {e.location}</span>}
+        )}
+      </div>
+      {past.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">Past</h2>
+          <div className="space-y-3 opacity-70">
+            {past.map((e) => (
+              <EventCard key={e.id} event={e} />
+            ))}
           </div>
         </div>
-      ))}
+      )}
     </div>
-  );
+  )
 }
 
-function CalendarView({ events }: { events: EventItem[] }) {
-  const today = new Date();
-  const [monthOffset, setMonthOffset] = useState(0);
-
-  const viewDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
+function CalendarView({
+  events,
+  monthCursor,
+  setMonthCursor,
+  selectedDate,
+  setSelectedDate,
+}: {
+  events: DLEvent[]
+  monthCursor: Date
+  setMonthCursor: (d: Date) => void
+  selectedDate: Date | null
+  setSelectedDate: (d: Date | null) => void
+}) {
+  const year = monthCursor.getFullYear()
+  const month = monthCursor.getMonth()
+  const firstDay = new Date(year, month, 1)
+  const startOffset = firstDay.getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
 
   const eventsByDay = useMemo(() => {
-    const map: Record<string, EventItem[]> = {};
-    for (const e of events) {
-      const d = new Date(e.start_time);
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-      if (!map[key]) map[key] = [];
-      map[key].push(e);
-    }
-    return map;
-  }, [events]);
+    const map: Record<number, DLEvent[]> = {}
+    events.forEach((e) => {
+      const d = new Date(e.start_time)
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        map[d.getDate()] = [...(map[d.getDate()] || []), e]
+      }
+    })
+    return map
+  }, [events, year, month])
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells: (number | null)[] = [
-    ...Array(firstDayOfMonth).fill(null),
+  const cells = [
+    ...Array(startOffset).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ];
+  ]
 
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const selectedKey = selectedDay ? `${year}-${month}-${selectedDay}` : null;
-  const selectedEvents = selectedKey ? eventsByDay[selectedKey] ?? [] : [];
+  const selectedDayEvents = selectedDate
+    ? eventsByDay[selectedDate.getDate()] || []
+    : []
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4">
+    <div>
+      <div className="mb-4 flex items-center justify-between">
         <button
-          onClick={() => {
-            setMonthOffset((m) => m - 1);
-            setSelectedDay(null);
-          }}
-          className="font-condensed font-bold text-xs uppercase text-g600 hover:text-navy px-2 py-1"
+          onClick={() => setMonthCursor(new Date(year, month - 1, 1))}
+          className="rounded-lg px-3 py-1 text-[#0D2B5E] hover:bg-[#F7F8FC]"
         >
-          ← Prev
+          ←
         </button>
-        <h3 className="font-display font-bold text-base text-navy">
-          {viewDate.toLocaleString('en-GB', { month: 'long', year: 'numeric' })}
+        <h3 className="font-semibold text-[#0D2B5E]">
+          {monthCursor.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
         </h3>
         <button
-          onClick={() => {
-            setMonthOffset((m) => m + 1);
-            setSelectedDay(null);
-          }}
-          className="font-condensed font-bold text-xs uppercase text-g600 hover:text-navy px-2 py-1"
+          onClick={() => setMonthCursor(new Date(year, month + 1, 1))}
+          className="rounded-lg px-3 py-1 text-[#0D2B5E] hover:bg-[#F7F8FC]"
         >
-          Next →
+          →
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 mb-1">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-          <div key={d} className="text-center font-condensed font-bold text-[10px] uppercase text-g600 py-1">
-            {d}
-          </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-400">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+          <div key={i} className="py-1">{d}</div>
         ))}
       </div>
 
       <div className="grid grid-cols-7 gap-1">
         {cells.map((day, i) => {
-          if (day === null) return <div key={i} />;
-          const key = `${year}-${month}-${day}`;
-          const dayEvents = eventsByDay[key] ?? [];
-          const isToday =
-            day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-          const isSelected = day === selectedDay;
-
+          if (day === null) return <div key={i} />
+          const hasEvents = !!eventsByDay[day]
+          const isSelected = selectedDate?.getDate() === day && selectedDate?.getMonth() === month
           return (
             <button
               key={i}
-              onClick={() => setSelectedDay(day)}
-              className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-0.5 font-body text-xs transition-colors ${
+              onClick={() => setSelectedDate(new Date(year, month, day))}
+              className={`relative aspect-square rounded-lg text-sm transition ${
                 isSelected
-                  ? 'bg-gold text-navy font-bold'
-                  : isToday
-                    ? 'border border-gold text-navy'
-                    : 'hover:bg-off-white text-g800'
+                  ? 'bg-[#0D2B5E] text-white'
+                  : hasEvents
+                  ? 'bg-[#C9A02C]/15 font-semibold text-[#0D2B5E]'
+                  : 'text-gray-600 hover:bg-[#F7F8FC]'
               }`}
             >
               {day}
-              {dayEvents.length > 0 && (
-                <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-navy' : 'bg-gold'}`} />
+              {hasEvents && !isSelected && (
+                <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#C9A02C]" />
               )}
             </button>
-          );
+          )
         })}
       </div>
 
-      {selectedDay && (
-        <div className="mt-5 pt-4 border-t border-g100 space-y-3">
-          {selectedEvents.length === 0 ? (
-            <p className="font-body text-sm text-g600">No events on this day.</p>
+      {selectedDate && (
+        <div className="mt-6">
+          <h4 className="mb-2 text-sm font-semibold text-gray-500">
+            {selectedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </h4>
+          {selectedDayEvents.length === 0 ? (
+            <p className="text-sm text-gray-400">No events on this day.</p>
           ) : (
-            selectedEvents.map((e) => (
-              <div key={e.id}>
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-display font-bold text-sm text-navy">{e.title}</h4>
-                  <span
-                    className={`font-condensed font-bold text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded ${TYPE_COLORS[e.event_type]}`}
-                  >
-                    {TYPE_LABELS[e.event_type]}
-                  </span>
-                </div>
-                <p className="font-body text-xs text-g600 mb-1">{e.description}</p>
-                <p className="font-condensed text-[11px] text-g600">
-                  {formatDateTime(e.start_time)}
-                  {e.location ? ` · ${e.location}` : ''}
-                </p>
-              </div>
-            ))
+            <div className="space-y-3">
+              {selectedDayEvents.map((e) => (
+                <EventCard key={e.id} event={e} />
+              ))}
+            </div>
           )}
         </div>
       )}
     </div>
-  );
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  )
 }
