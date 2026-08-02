@@ -213,10 +213,10 @@ export default function QuizGenerator() {
       </div>
 
       <div>
-        <label className={labelClass}>Upload a PDF</label>
+        <label className={labelClass}>Upload a file</label>
         <input
           type="file"
-          accept=".pdf,.txt"
+          accept=".pdf,.txt,.docx,.pptx,.png,.jpg,.jpeg"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="w-full font-body text-sm text-g600"
         />
