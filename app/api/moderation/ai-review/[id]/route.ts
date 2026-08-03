@@ -1,0 +1,138 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
+// pdf-parse is already a dependency (used by the vault quiz generator)
+import pdfParse from 'pdf-parse';
+import { extractPptxText } from '@/lib/pptx-text';
+
+// Which table + bucket a given kind lives in.
+const TABLE_BY_KIND = {
+  past_paper: 'past_papers',
+  study_material: 'study_materials',
+} as const;
+
+const BUCKET_BY_KIND = {
+  past_paper: 'past-papers',
+  study_material: 'study-materials',
+} as const;
+
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params;
+  const body = await req.json().catch(() => ({}));
+  const kind: 'past_paper' | 'study_material' = body.kind;
+
+  if (kind !== 'past_paper' && kind !== 'study_material') {
+    return NextResponse.json({ error: 'kind must be past_paper or study_material' }, { status: 400 });
+  }
+
+  const admin = createAdminClient();
+  const table = TABLE_BY_KIND[kind];
+  const bucket = BUCKET_BY_KIND[kind];
+
+  // Load the row + its course label, service-role so this works regardless
+  // of who (or what background job) triggered the review.
+  const { data: row, error: rowErr } = await admin
+    .from(table)
+    .select(
+      kind === 'past_paper'
+        ? 'id, file_url, year, exam_type, status, courses(code, name)'
+        : 'id, file_url, title, week_number, content_type, status, courses(code, name)'
+    )
+    .eq('id', id)
+    .single();
+
+  if (rowErr || !row) {
+    return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
+  }
+
+  // Don't re-review something already moderated by a human or a previous run.
+  if (row.status !== 'pending') {
+    return NextResponse.json({ skipped: true, reason: `status is already ${row.status}` });
+  }
+
+  // Pull the raw file from storage and try to extract text (PDF only for now —
+  // mirrors the existing quiz-generator extraction, see Stage 8 scope notes).
+  const filePath = row.file_url as string;
+  const fileName = filePath.split('/').pop() ?? filePath;
+  let extractedText: string | null = null;
+
+  const { data: fileBlob, error: downloadErr } = await admin.storage.from(bucket).download(filePath);
+  if (!downloadErr && fileBlob) {
+    const lowerName = fileName.toLowerCase();
+    const buffer = Buffer.from(await fileBlob.arrayBuffer());
+
+    if (lowerName.endsWith('.pdf')) {
+      try {
+        const parsed = await pdfParse(buffer);
+        extractedText = parsed.text?.trim() || null;
+      } catch (e) {
+        console.error(`PDF text extraction failed for ${table}/${id}:`, e);
+      }
+    } else if (lowerName.endsWith('.pptx')) {
+      extractedText = await extractPptxText(buffer);
+      // .ppt (old binary format, pre-2007) and .docx: no extractor wired up
+      // yet — extractedText stays null and the AI review will correctly
+      // default toward "review" for these.
+    }
+  }
+
+  const course = Array.isArray((row as any).courses) ? (row as any).courses[0] : (row as any).courses;
+
+  const result = await reviewUpload({
+    kind,
+    courseCode: course?.code ?? 'UNKNOWN',
+    courseName: course?.name ?? 'Unknown course',
+    year: kind === 'past_paper' ? (row as any).year : undefined,
+    examType: kind === 'past_paper' ? (row as any).exam_type : undefined,
+    title: kind === 'study_material' ? (row as any).title : undefined,
+    weekNumber: kind === 'study_material' ? (row as any).week_number : undefined,
+    contentType: kind === 'study_material' ? (row as any).content_type : undefined,
+    fileName,
+    extractedText,
+  });
+
+  const shouldAutoApprove = result.verdict === 'approve' && result.confidence >= AUTO_APPROVE_THRESHOLD;
+  const aiReviewStatus = shouldAutoApprove ? 'auto_approved' : 'needs_review';
+
+  if (kind === 'study_material') {
+    // Simple case: no watermarking pipeline involved.
+    await admin
+      .from('study_materials')
+      .update({
+        ai_review_status: aiReviewStatus,
+        ai_confidence: result.confidence,
+        ai_review_notes: result.notes,
+        ai_reviewed_at: new Date().toISOString(),
+        ...(shouldAutoApprove
+          ? { status: 'approved', reviewed_at: new Date().toISOString() }
+          : {}),
+      })
+      .eq('id', id);
+    // Approving here still fires the existing upload_approved notification +
+    // upload_count/badge triggers from Stage 9, since those are DB-level
+    // triggers on the status column, not app-level logic tied to who approved it.
+  } else {
+    // past_paper: only log the AI's verdict here. Auto-approval for papers is
+    // intentionally NOT flipped in this route — it must go through the
+    // watermarking pipeline in /api/moderation/approve-paper/[id], so as not
+    // to publish an unwatermarked file. See TODO wiring in that route.
+    await admin
+      .from('past_papers')
+      .update({
+        ai_review_status: aiReviewStatus,
+        ai_confidence: result.confidence,
+        ai_review_notes: result.notes,
+        ai_reviewed_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+  }
+
+  return NextResponse.json({
+    id,
+    kind,
+    verdict: result.verdict,
+    confidence: result.confidence,
+    notes: result.notes,
+    autoApproved: shouldAutoApprove && kind === 'study_material',
+  });
+}
