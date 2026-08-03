@@ -123,16 +123,33 @@ export default function UploadForm({
         return;
       }
 
-      const { error: insertErr } = await supabase.from('past_papers').insert({
-        course_id: courseId,
-        year: Number(year),
-        exam_type: examType,
-        file_url: path,
-        uploaded_by: user.id,
-      });
+      const { data: inserted, error: insertErr } = await supabase
+        .from('past_papers')
+        .insert({
+          course_id: courseId,
+          year: Number(year),
+          exam_type: examType,
+          file_url: path,
+          uploaded_by: user.id,
+        })
+        .select('id')
+        .single();
 
       setLoading(false);
       if (insertErr) return setError(insertErr.message);
+
+      // Fire the AI pre-screen in the background — don't block the
+      // "submitted" screen waiting for it to finish.
+      if (inserted) {
+        fetch(`/api/moderation/ai-review/${inserted.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: 'past_paper' }),
+        }).catch(() => {
+          // Non-fatal — it'll just sit in the queue for manual review.
+        });
+      }
+
       setDone(true);
     } else {
       const { error: uploadErr } = await supabase.storage.from('study-materials').upload(path, file);
@@ -144,17 +161,34 @@ export default function UploadForm({
 
       const { data: publicUrlData } = supabase.storage.from('study-materials').getPublicUrl(path);
 
-      const { error: insertErr } = await supabase.from('study_materials').insert({
-        course_id: courseId,
-        title: title.trim(),
-        content_type: contentType,
-        week_number: Number(week),
-        file_url: publicUrlData.publicUrl,
-        uploaded_by: user.id,
-      });
+      const { data: inserted, error: insertErr } = await supabase
+        .from('study_materials')
+        .insert({
+          course_id: courseId,
+          title: title.trim(),
+          content_type: contentType,
+          week_number: Number(week),
+          file_url: publicUrlData.publicUrl,
+          uploaded_by: user.id,
+        })
+        .select('id')
+        .single();
 
       setLoading(false);
       if (insertErr) return setError(insertErr.message);
+
+      // Fire the AI pre-screen in the background — don't block the
+      // "submitted" screen waiting for it to finish.
+      if (inserted) {
+        fetch(`/api/moderation/ai-review/${inserted.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: 'study_material' }),
+        }).catch(() => {
+          // Non-fatal — it'll just sit in the queue for manual review.
+        });
+      }
+
       setDone(true);
     }
   };
