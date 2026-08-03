@@ -66,6 +66,22 @@ type Action = {
 
 const ACTIONS: Action[] = [
   {
+    href: '/papers/upload',
+    label: 'Contribute',
+    desc: 'Upload slides, past papers, or notes for other students.',
+    path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
+    background: 'radial-gradient(140% 140% at 15% 0%, #163a72, #0a1f42 65%)',
+    aurora:
+      'radial-gradient(45% 50% at 90% 10%, rgba(224,193,88,.4), transparent 70%), radial-gradient(50% 55% at 10% 100%, rgba(30,70,160,.4), transparent 70%)',
+    textClass: 'text-white',
+    subClass: 'text-white/80',
+    iconBgClass: 'bg-white/[.14]',
+    iconColorClass: 'text-gold-light',
+    arrowColorClass: 'text-gold-light',
+    badge: 'New',
+    grain: true,
+  },
+  {
     href: '/papers',
     label: 'Library',
     desc: 'Browse, download, or upload past papers & materials',
@@ -78,7 +94,6 @@ const ACTIONS: Action[] = [
     iconBgClass: 'bg-navy-deep/20',
     iconColorClass: 'text-navy-deep',
     arrowColorClass: 'text-navy-deep',
-    badge: 'Core',
     grain: true,
   },
   {
@@ -213,9 +228,9 @@ export function QuickActions() {
               <span className="absolute top-0 -left-[60%] w-[40%] h-full bg-gradient-to-r from-transparent via-white/45 to-transparent -skew-x-[18deg] transition-all duration-500 ease-out group-hover:left-[130%] pointer-events-none z-[1]" />
             )}
 
-            {/* badge (Library only) */}
+            {/* badge (Contribute only, for now) */}
             {a.badge && (
-              <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-navy-deep/25 text-white px-[9px] py-[4px] rounded-full">
+              <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-white/20 text-white px-[9px] py-[4px] rounded-full">
                 {a.badge}
               </span>
             )}
