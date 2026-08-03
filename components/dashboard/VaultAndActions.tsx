@@ -78,14 +78,13 @@ const ACTIONS: Action[] = [
     iconBgClass: 'bg-white/[.14]',
     iconColorClass: 'text-gold-light',
     arrowColorClass: 'text-gold-light',
-    badge: 'New',
     grain: true,
   },
   {
     href: '/papers',
     label: 'Library',
     desc: 'Browse and download past papers & materials',
-    path: 'M7 8l5-5 5 5M12 3v12M4 15v4a2 2 0 002 2h12a2 2 0 002-2v-4',
+    path: 'M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z',
     background: 'radial-gradient(130% 140% at 15% 0%, #E0BE55, #9A7A1F 55%, #6B5416 100%)',
     aurora:
       'radial-gradient(45% 50% at 85% 10%, rgba(255,245,210,.55), transparent 70%), radial-gradient(50% 55% at 10% 90%, rgba(10,31,66,.35), transparent 70%)',
