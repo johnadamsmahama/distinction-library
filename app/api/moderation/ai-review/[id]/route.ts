@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
-// pdf-parse is already a dependency (used by the vault quiz generator)
+// pdf-parse is already a dependency (used by the vault quiz generator).
+// Imported from its internal lib path, NOT the package root — importing
+// 'pdf-parse' directly triggers a debug/demo block in its index.js that
+// tries to read a sample PDF from disk, which breaks Next.js's build-time
+// page analysis on Vercel (ENOENT for a test fixture file).
 // @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
 
