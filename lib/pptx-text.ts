@@ -29,7 +29,7 @@ export async function extractPptxText(buffer: Buffer): Promise<string | null> {
       // Pull every <a:t>...</a:t> text run. This is the run-level text node
       // used throughout OOXML slide markup — good enough for a content check
       // without pulling in a full XML parser dependency.
-      const matches = [...xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)];
+      const matches = Array.from(xml.matchAll(/<a:t>([^<]*)<\/a:t>/g));
       const slideText = matches
         .map((m) => decodeXmlEntities(m[1]))
         .join(' ')
