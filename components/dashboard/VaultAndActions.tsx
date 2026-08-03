@@ -43,7 +43,28 @@ export function VaultSummary({
 const GRAIN_URL =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
-const ACTIONS = [
+// Explicit type so optional fields (badge, sheen, border styling) can be
+// present on some tiles and absent on others without TypeScript complaining.
+type Action = {
+  href: string;
+  label: string;
+  desc: string;
+  path: string;
+  background: string;
+  aurora: string;
+  textClass: string;
+  subClass: string;
+  iconBgClass: string;
+  iconColorClass: string;
+  arrowColorClass: string;
+  grain?: boolean;
+  border?: boolean;
+  borderColorClass?: string;
+  badge?: string;
+  sheen?: boolean;
+};
+
+const ACTIONS: Action[] = [
   {
     href: '/papers',
     label: 'Library',
