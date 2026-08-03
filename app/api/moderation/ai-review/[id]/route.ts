@@ -31,15 +31,43 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   // Load the row + its course label, service-role so this works regardless
   // of who (or what background job) triggered the review.
-  const { data: row, error: rowErr } = await admin
-    .from(table)
-    .select(
-      kind === 'past_paper'
-        ? 'id, file_url, year, exam_type, status, courses(code, name)'
-        : 'id, file_url, title, week_number, content_type, status, courses(code, name)'
-    )
-    .eq('id', id)
-    .single();
+  //
+  // Split into two fully separate queries (rather than one shared query with
+  // a ternary select string) — Supabase's generated types statically parse
+  // the select() string, and a union of two different literal strings there
+  // breaks that parsing at build time.
+  type RowShape = {
+    id: string;
+    file_url: string;
+    status: string;
+    year?: number | null;
+    exam_type?: 'mid_semester' | 'end_of_semester' | null;
+    title?: string | null;
+    week_number?: number | null;
+    content_type?: 'lecture_slides' | 'study_notes' | 'study_guide' | null;
+    courses: { code: string; name: string } | { code: string; name: string }[] | null;
+  };
+
+  let row: RowShape | null = null;
+  let rowErr: unknown = null;
+
+  if (kind === 'past_paper') {
+    const res = await admin
+      .from('past_papers')
+      .select('id, file_url, year, exam_type, status, courses(code, name)')
+      .eq('id', id)
+      .single();
+    row = res.data as RowShape | null;
+    rowErr = res.error;
+  } else {
+    const res = await admin
+      .from('study_materials')
+      .select('id, file_url, title, week_number, content_type, status, courses(code, name)')
+      .eq('id', id)
+      .single();
+    row = res.data as RowShape | null;
+    rowErr = res.error;
+  }
 
   if (rowErr || !row) {
     return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
@@ -76,17 +104,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
   }
 
-  const course = Array.isArray((row as any).courses) ? (row as any).courses[0] : (row as any).courses;
+  const course = Array.isArray(row.courses) ? row.courses[0] : row.courses;
 
   const result = await reviewUpload({
     kind,
     courseCode: course?.code ?? 'UNKNOWN',
     courseName: course?.name ?? 'Unknown course',
-    year: kind === 'past_paper' ? (row as any).year : undefined,
-    examType: kind === 'past_paper' ? (row as any).exam_type : undefined,
-    title: kind === 'study_material' ? (row as any).title : undefined,
-    weekNumber: kind === 'study_material' ? (row as any).week_number : undefined,
-    contentType: kind === 'study_material' ? (row as any).content_type : undefined,
+    year: kind === 'past_paper' ? row.year : undefined,
+    examType: kind === 'past_paper' ? row.exam_type : undefined,
+    title: kind === 'study_material' ? row.title : undefined,
+    weekNumber: kind === 'study_material' ? row.week_number : undefined,
+    contentType: kind === 'study_material' ? row.content_type : undefined,
     fileName,
     extractedText,
   });
