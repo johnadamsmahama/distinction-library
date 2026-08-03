@@ -84,7 +84,7 @@ const ACTIONS: Action[] = [
   {
     href: '/papers',
     label: 'Library',
-    desc: 'Browse, download, or upload past papers & materials',
+    desc: 'Browse and download past papers & materials',
     path: 'M7 8l5-5 5 5M12 3v12M4 15v4a2 2 0 002 2h12a2 2 0 002-2v-4',
     background: 'radial-gradient(130% 140% at 15% 0%, #E0BE55, #9A7A1F 55%, #6B5416 100%)',
     aurora:
