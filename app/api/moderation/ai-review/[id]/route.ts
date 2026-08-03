@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // pdf-parse is already a dependency (used by the vault quiz generator)
+// @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
 
