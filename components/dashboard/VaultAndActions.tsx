@@ -39,19 +39,35 @@ export function VaultSummary({
   );
 }
 
-// Shared fine-grain texture (SVG turbulence), used on the three colored tiles.
+// Shared fine-grain texture (SVG turbulence), used on the colored tiles.
 const GRAIN_URL =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 const ACTIONS = [
   {
-    href: '/vault/quiz-generator',
-    label: 'Generate a Quiz',
-    desc: 'Turn notes into practice questions',
-    path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
-    background: 'radial-gradient(140% 140% at 15% 0%, #2A5FCC, #081B47 65%)',
+    href: '/papers',
+    label: 'Library',
+    desc: 'Browse, download, or upload past papers & materials',
+    path: 'M7 8l5-5 5 5M12 3v12M4 15v4a2 2 0 002 2h12a2 2 0 002-2v-4',
+    background: 'radial-gradient(130% 140% at 15% 0%, #E0BE55, #9A7A1F 55%, #6B5416 100%)',
     aurora:
-      'radial-gradient(38% 45% at 15% 15%, rgba(90,150,255,.55), transparent 70%), radial-gradient(45% 50% at 85% 30%, rgba(201,160,44,.35), transparent 70%), radial-gradient(50% 55% at 60% 90%, rgba(20,50,120,.6), transparent 70%)',
+      'radial-gradient(45% 50% at 85% 10%, rgba(255,245,210,.55), transparent 70%), radial-gradient(50% 55% at 10% 90%, rgba(10,31,66,.35), transparent 70%)',
+    textClass: 'text-navy-deep',
+    subClass: 'text-navy-deep/70',
+    iconBgClass: 'bg-navy-deep/20',
+    iconColorClass: 'text-navy-deep',
+    arrowColorClass: 'text-navy-deep',
+    badge: 'Core',
+    grain: true,
+  },
+  {
+    href: '/predictor',
+    label: 'Check Exam Predictions',
+    desc: 'See AI-ranked likely topics for your course',
+    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
+    background: 'radial-gradient(140% 140% at 85% 0%, #C9A02C, #0D2B5E 65%)',
+    aurora:
+      'radial-gradient(40% 45% at 85% 10%, rgba(240,210,120,.5), transparent 70%), radial-gradient(45% 50% at 15% 60%, rgba(30,70,160,.5), transparent 70%), radial-gradient(50% 55% at 60% 95%, rgba(10,30,70,.5), transparent 70%)',
     textClass: 'text-white',
     subClass: 'text-white/80',
     iconBgClass: 'bg-white/[.14]',
@@ -75,51 +91,50 @@ const ACTIONS = [
     grain: true,
   },
   {
-    href: '/papers/upload',
-    label: 'Upload a Past Paper',
-    desc: 'Contribute to the community library',
-    path: 'M7 8l5-5 5 5M12 3v12M4 15v4a2 2 0 002 2h12a2 2 0 002-2v-4',
-    background: '#F7F8FC',
+    href: '/vault/quiz-generator',
+    label: 'Generate a Quiz',
+    desc: 'Turn notes into practice questions',
+    path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+    background: 'radial-gradient(140% 140% at 15% 0%, #2A5FCC, #081B47 65%)',
     aurora:
-      'radial-gradient(40% 45% at 90% 0%, rgba(201,160,44,.30), transparent 70%), radial-gradient(45% 50% at 10% 100%, rgba(13,43,94,.16), transparent 70%)',
-    textClass: 'text-navy',
-    subClass: 'text-g600',
-    iconBgClass: 'bg-navy',
-    iconColorClass: 'text-gold-light',
-    arrowColorClass: 'text-navy',
-    border: true,
-    grain: false,
-  },
-  {
-    href: '/tutors',
-    label: 'Find a Peer Tutor',
-    desc: 'Get one-on-one help from a fellow student',
-    path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
-    background: 'linear-gradient(150deg,#F0C94A 0%,#C9A02C 55%,#9A7A1F 100%)',
-    aurora:
-      'radial-gradient(40% 45% at 20% 10%, rgba(255,235,180,.65), transparent 70%), radial-gradient(45% 50% at 90% 40%, rgba(154,122,31,.5), transparent 70%), radial-gradient(55% 55% at 55% 95%, rgba(10,32,73,.28), transparent 70%)',
-    textClass: 'text-navy',
-    subClass: 'text-navy/70',
-    iconBgClass: 'bg-navy/[.12]',
-    iconColorClass: 'text-navy',
-    arrowColorClass: 'text-navy',
-    sheen: true,
-    grain: true,
-  },
-  {
-    href: '/predictor',
-    label: 'Check Exam Predictions',
-    desc: 'See AI-ranked likely topics for your course',
-    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
-    background: 'radial-gradient(140% 140% at 85% 0%, #C9A02C, #0D2B5E 65%)',
-    aurora:
-      'radial-gradient(40% 45% at 85% 10%, rgba(240,210,120,.5), transparent 70%), radial-gradient(45% 50% at 15% 60%, rgba(30,70,160,.5), transparent 70%), radial-gradient(50% 55% at 60% 95%, rgba(10,30,70,.5), transparent 70%)',
+      'radial-gradient(38% 45% at 15% 15%, rgba(90,150,255,.55), transparent 70%), radial-gradient(45% 50% at 85% 30%, rgba(201,160,44,.35), transparent 70%), radial-gradient(50% 55% at 60% 90%, rgba(20,50,120,.6), transparent 70%)',
     textClass: 'text-white',
     subClass: 'text-white/80',
     iconBgClass: 'bg-white/[.14]',
     iconColorClass: 'text-gold-light',
     arrowColorClass: 'text-gold-light',
     grain: true,
+  },
+  {
+    href: '/tutors',
+    label: 'Find a Peer Tutor',
+    desc: 'Get one-on-one help from a fellow student',
+    path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+    background: '#D8E1F5',
+    aurora:
+      'radial-gradient(40% 45% at 90% 0%, rgba(201,160,44,.22), transparent 70%), radial-gradient(45% 50% at 10% 100%, rgba(13,43,94,.18), transparent 70%)',
+    textClass: 'text-navy',
+    subClass: 'text-g600',
+    iconBgClass: 'bg-navy',
+    iconColorClass: 'text-gold-light',
+    arrowColorClass: 'text-navy',
+    border: true,
+    borderColorClass: 'border-[1.5px] border-[#B8C7E8]',
+    grain: false,
+  },
+  {
+    href: '/success-centre',
+    label: 'Essentials',
+    desc: 'Mentors, jobs & opportunities, achievements',
+    path: 'M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z',
+    background: '#C9B67E',
+    aurora: 'none',
+    textClass: 'text-navy-deep',
+    subClass: 'text-navy-deep/70',
+    iconBgClass: 'bg-navy-deep/[.14]',
+    iconColorClass: 'text-navy-deep',
+    arrowColorClass: 'text-navy-deep',
+    grain: false,
   },
 ];
 
@@ -144,15 +159,17 @@ export function QuickActions() {
             key={a.href}
             href={a.href}
             className={`group relative isolate overflow-hidden rounded-2xl p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(13,43,94,.20)] ${
-              a.border ? 'border-[1.5px] border-navy' : 'border border-white/[.08]'
+              a.borderColorClass ? a.borderColorClass : a.border ? 'border-[1.5px] border-navy' : 'border border-white/[.08]'
             }`}
             style={{ background: a.background }}
           >
             {/* aurora mesh-gradient blobs */}
-            <span
-              className="absolute -inset-[20%] pointer-events-none z-0"
-              style={{ background: a.aurora, filter: 'blur(28px)' }}
-            />
+            {a.aurora !== 'none' && (
+              <span
+                className="absolute -inset-[20%] pointer-events-none z-0"
+                style={{ background: a.aurora, filter: 'blur(28px)' }}
+              />
+            )}
             {/* fine grain texture */}
             {a.grain && (
               <span
@@ -170,13 +187,20 @@ export function QuickActions() {
             >
               <path d={a.path} />
             </svg>
-            {/* gold sheen sweep (Find a Peer Tutor only) */}
+            {/* gold sheen sweep */}
             {a.sheen && (
               <span className="absolute top-0 -left-[60%] w-[40%] h-full bg-gradient-to-r from-transparent via-white/45 to-transparent -skew-x-[18deg] transition-all duration-500 ease-out group-hover:left-[130%] pointer-events-none z-[1]" />
             )}
 
+            {/* badge (Library only) */}
+            {a.badge && (
+              <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-navy-deep/25 text-white px-[9px] py-[4px] rounded-full">
+                {a.badge}
+              </span>
+            )}
+
             <span
-              className={`absolute top-[18px] right-[18px] opacity-0 -translate-x-1 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 z-10 ${a.arrowColorClass}`}
+              className={`absolute top-[18px] right-[18px] opacity-0 -translate-x-1 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 z-10 ${a.arrowColorClass} ${a.badge ? 'group-hover:!opacity-0' : ''}`}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none" strokeWidth={2.2}>
                 <path d="M7 17L17 7M7 7h10v10" />
