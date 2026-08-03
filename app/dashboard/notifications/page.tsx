@@ -15,6 +15,14 @@ export default async function NotificationsPage() {
     .order('created_at', { ascending: false })
     .limit(50);
 
+  // Mark every unread notification as read now that the student has
+  // opened this page. This is what makes the gold dot on the bell
+  // disappear — nothing was ever writing `read = true` before.
+  const unreadIds = (notifications ?? []).filter((n) => !n.read).map((n) => n.id);
+  if (unreadIds.length > 0) {
+    await supabase.from('notifications').update({ read: true }).in('id', unreadIds);
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="font-display font-bold text-2xl text-navy mb-6">Notifications</h1>
