@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getDashboardData } from '@/lib/dashboard-data';
-import ProfileCard from '@/components/dashboard/ProfileCard';
 import CommunityAndToolsSection from '@/components/dashboard/CommunityAndToolsSection';
 import BookmarkedCourses from '@/components/dashboard/BookmarkedCourses';
 import RecentActivity from '@/components/dashboard/RecentActivity';
@@ -31,16 +30,6 @@ export default async function DashboardPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <InstallPrompt />
         <CommunityAndToolsSection />
-        <ProfileCard
-          fullName={fullName}
-          department={data.profile?.department ?? null}
-          level={data.profile?.level ?? null}
-          uploadCount={data.profile?.upload_count ?? 0}
-          strikesCount={data.profile?.strikes_count ?? 0}
-          uploadSuspended={data.profile?.upload_suspended ?? false}
-          contributorBadge={data.profile?.contributor_badge ?? null}
-          leaderboardRank={data.rank}
-        />
         <BookmarkedCourses courses={data.bookmarks} />
         <StudyProgress items={data.studyProgress} />
         <MyRecentViews items={data.myRecentViews as any} />
