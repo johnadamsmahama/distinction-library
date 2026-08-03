@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // pdf-parse is already a dependency (used by the vault quiz generator)
-import pdfParse from 'pdf-parse';
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
 
 // Which table + bucket a given kind lives in.
