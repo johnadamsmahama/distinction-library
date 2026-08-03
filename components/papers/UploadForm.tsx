@@ -408,6 +408,13 @@ function BulkUploadPanel() {
     }
 
     setJobId(job.id);
+
+    // Kick off processing — nothing else triggers this automatically.
+    fetch('/api/bulk-upload/process', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jobId: job.id }),
+    }).catch((e) => console.error('Failed to start bulk processing:', e));
   };
 
   if (jobId) {
@@ -467,8 +474,9 @@ function BulkUploadPanel() {
           Upload a zip file containing multiple past papers or study materials — no need to sort
           them first. Each document is automatically read, matched to the right course, and
           categorized. Confident study material matches go live immediately; past papers always
-          go to the moderation queue for a quick final approval (to preserve watermarking). Only
-          PDF files can currently be auto-processed.
+          go to the moderation queue for a quick final approval (to preserve watermarking). PDF
+          and PowerPoint (.pptx) files can be auto-processed — other formats are flagged for
+          manual review.
         </p>
       </div>
 
