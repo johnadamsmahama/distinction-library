@@ -5,7 +5,7 @@
 // specific predictions page.
 
 import { createClient } from "@supabase/supabase-js";
-import Link from "next/link";
+import CourseSearchList from "@/components/predictor/CourseSearchList";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +32,7 @@ export default async function PredictorLandingPage() {
           and course materials.
         </p>
 
-        {(!courses || courses.length === 0) && (
+        {(!courses || courses.length === 0) ? (
           <div className="mt-12 rounded-lg border border-white/10 bg-white/5 p-8 text-center">
             <p className="font-condensed text-lg text-gold">
               No courses available yet
@@ -41,29 +41,8 @@ export default async function PredictorLandingPage() {
               Check back once courses have been added to the library.
             </p>
           </div>
-        )}
-
-        {courses && courses.length > 0 && (
-          <ul className="mt-8 space-y-3">
-            {courses.map((course) => (
-              <li key={course.id}>
-                <Link
-                  href={`/predictor/${course.id}`}
-                  className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4 transition-colors hover:border-gold/50 hover:bg-white/10"
-                >
-                  <div>
-                    <p className="font-condensed text-base">{course.name}</p>
-                    <p className="font-body mt-0.5 text-xs text-white/50">
-                      {course.code} · {course.department} · {course.level}
-                    </p>
-                  </div>
-                  <span className="font-body text-gold opacity-0 transition-opacity group-hover:opacity-100">
-                    →
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        ) : (
+          <CourseSearchList courses={courses} />
         )}
       </div>
     </main>
