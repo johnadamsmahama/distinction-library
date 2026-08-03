@@ -5,16 +5,17 @@ import Reveal from './Reveal';
 
 const CARDS = [
   {
-    title: 'Past Question Repository',
-    desc: 'Verified UPSA past papers, searchable by course, level, semester, and year.',
-    tag: 'Community-contributed · Moderated · Watermarked',
+    title: 'Study Library',
+    desc: 'Past papers and curated study materials — notes, slides, summaries — searchable by course, level, and week. Browse, download, or upload your own.',
+    tag: 'Community-contributed & platform-curated · Moderated · Watermarked',
     path: 'M4 4h16v16H4z M8 9h8M8 13h5',
+    badge: 'Core',
   },
   {
-    title: 'Study Materials',
-    desc: 'Curated notes, slides, and summaries — PDF, DOCX, PPTX.',
-    tag: 'Platform-curated · Organised by course & week',
-    path: 'M4 19V6a2 2 0 012-2h12a2 2 0 012 2v13 M4 19a2 2 0 002 2h12a2 2 0 002-2',
+    title: 'Exam Predictor',
+    desc: 'AI-ranked predictions of likely exam questions, built from past papers, course materials, and examiner patterns.',
+    tag: 'Beta · Course-specific rankings',
+    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
   },
   {
     title: 'AI Study Companion',
@@ -29,6 +30,18 @@ const CARDS = [
     path: 'M9 12l2 2 4-4',
   },
   {
+    title: 'Find a Peer Tutor',
+    desc: 'Get one-on-one help from a fellow student — book revision sessions with peer tutors and Distinction Programme facilitators.',
+    tag: 'Distinction Mentors · Book a session',
+    path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+  },
+  {
+    title: 'Essentials',
+    desc: 'Mentors, jobs & opportunities, and your achievement portfolio — support beyond the study materials.',
+    tag: 'Scholarships · Internships · Achievement badges',
+    path: 'M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z',
+  },
+  {
     title: 'Private Study Vault',
     desc: 'Encrypted personal space — AI quizzes, sessions, notes. Only you can see it.',
     tag: 'Zero visibility to others · Fully private',
@@ -39,12 +52,6 @@ const CARDS = [
     desc: 'Gold, Silver, and Bronze recognition for top past-paper contributors each semester.',
     tag: 'Resets each semester · All-time archive kept',
     path: 'M8 21V9M13 21V4M18 21v-6M3 21h18',
-  },
-  {
-    title: 'Exam Predictor',
-    desc: 'AI-ranked predictions of likely exam questions, built from past papers, course materials, and examiner patterns.',
-    tag: 'Beta · Course-specific rankings',
-    path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
   },
 ];
 
@@ -96,6 +103,11 @@ export default function Features() {
                 className="relative flex-none w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] bg-white border border-[#E2E6EF] rounded-[14px] p-7 group hover:border-gold hover:-translate-y-[3px] transition-all overflow-hidden"
               >
                 <span className="absolute left-0 right-0 bottom-0 h-[3px] bg-gold scale-x-0 origin-left group-hover:scale-x-100 transition-transform" />
+                {c.badge && (
+                  <span className="absolute top-5 right-5 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-gold text-navy px-[9px] py-[4px] rounded-full">
+                    {c.badge}
+                  </span>
+                )}
                 <div className="w-[46px] h-[46px] bg-navy rounded-[11px] flex items-center justify-center mb-[18px]">
                   <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] stroke-gold fill-none" strokeWidth={1.8}>
                     <path d={c.path} />
