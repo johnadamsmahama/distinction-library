@@ -9,6 +9,7 @@ import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
+import mammoth from 'mammoth';
 
 // Which table + bucket a given kind lives in.
 const TABLE_BY_KIND = {
@@ -83,11 +84,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ skipped: true, reason: `status is already ${row.status}` });
   }
 
-  // Pull the raw file from storage and try to extract text (PDF only for now —
-  // mirrors the existing quiz-generator extraction, see Stage 8 scope notes).
+  // Pull the raw file from storage and try to extract text/image content.
   const filePath = row.file_url as string;
   const fileName = filePath.split('/').pop() ?? filePath;
   let extractedText: string | null = null;
+  let imageBase64: string | undefined;
+  let imageMediaType: 'image/jpeg' | 'image/png' | undefined;
 
   const { data: fileBlob, error: downloadErr } = await admin.storage.from(bucket).download(filePath);
   if (!downloadErr && fileBlob) {
@@ -98,15 +100,26 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       try {
         const parsed = await pdfParse(buffer);
         extractedText = parsed.text?.trim() || null;
+        // Scanned PDFs (image-only, no text layer) come back empty here.
+        // We don't rasterize PDF pages to images yet — see handover notes.
       } catch (e) {
         console.error(`PDF text extraction failed for ${table}/${id}:`, e);
       }
     } else if (lowerName.endsWith('.pptx')) {
       extractedText = await extractPptxText(buffer);
-      // .ppt (old binary format, pre-2007) and .docx: no extractor wired up
-      // yet — extractedText stays null and the AI review will correctly
-      // default toward "review" for these.
+    } else if (lowerName.endsWith('.docx')) {
+      try {
+        const result = await mammoth.extractRawText({ buffer });
+        extractedText = result.value?.trim() || null;
+      } catch (e) {
+        console.error(`DOCX extraction failed for ${table}/${id}:`, e);
+      }
+    } else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg') || lowerName.endsWith('.png')) {
+      imageBase64 = buffer.toString('base64');
+      imageMediaType = lowerName.endsWith('.png') ? 'image/png' : 'image/jpeg';
     }
+    // Old binary .doc / .ppt: no extractor available yet — extractedText
+    // stays null and the AI review will correctly default toward "review".
   }
 
   const course = Array.isArray(row.courses) ? row.courses[0] : row.courses;
@@ -115,6 +128,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     kind,
     courseCode: course?.code ?? 'UNKNOWN',
     courseName: course?.name ?? 'Unknown course',
+    imageBase64,
+    imageMediaType,
     year: kind === 'past_paper' ? row.year : undefined,
     examType: kind === 'past_paper' ? row.exam_type : undefined,
     title: kind === 'study_material' ? row.title : undefined,
