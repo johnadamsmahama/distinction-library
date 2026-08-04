@@ -57,7 +57,7 @@ export default async function AiToolsPage() {
   return (
     <div>
       <div className="font-condensed font-bold text-[10.5px] uppercase tracking-widest mb-2 text-gold">
-        Distinction Library · Intelligence
+        Distinction Library - Intelligence
       </div>
       <h1 className="font-display font-bold text-3xl text-white mb-1.5">AI Tools</h1>
       <p className="font-body text-sm text-white/55 mb-10">
