@@ -26,6 +26,8 @@ export type ReviewInput = {
   // shared
   fileName: string;
   extractedText: string | null; // null if extraction failed/unsupported
+  imageBase64?: string;
+  imageMediaType?: 'image/jpeg' | 'image/png';
 };
 
 const SYSTEM_PROMPT = `You are a content moderator for Distinction Library, an academic
@@ -77,12 +79,25 @@ Extracted content (may be truncated):
 ${textExcerpt}
 """`;
 
+  const content: any = input.imageBase64
+    ? [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: input.imageMediaType ?? 'image/jpeg', data: input.imageBase64 },
+        },
+        {
+          type: 'text',
+          text: `File name: ${input.fileName}\n\nClaimed label:\n${labelDescription}\n\nThis file has no extractable text — look at the image above directly to verify it matches the claimed label.`,
+        },
+      ]
+    : userMessage;
+
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 300,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [{ role: 'user', content }],
     });
 
     const textBlock = response.content.find((b) => b.type === 'text');
