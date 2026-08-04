@@ -2,7 +2,7 @@ import Constellation from '@/components/ai-tools/Constellation';
 
 export default function CompanionLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ backgroundColor: '#0E1830' }}>
+    <div className="relative overflow-hidden" style={{ backgroundColor: '#0E1830' }}>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
