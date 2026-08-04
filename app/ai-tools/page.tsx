@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
@@ -7,15 +6,46 @@ const TOOLS = [
     href: '/vault/companion',
     title: 'AI Study Companion',
     desc: 'Ask questions about your own course material and get patient, step-by-step explanations.',
-    icon: '✦',
   },
   {
     href: '/vault/quiz-generator',
     title: 'AI Quiz Generator',
     desc: 'Turn your notes or a past paper into a practice quiz in seconds.',
-    icon: '?',
   },
 ];
+
+function CompanionIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M12 12 5.5 7.5M12 12l7 -3.8M12 12v7.3M12 12 5 16.2M12 12l7 4.5"
+        stroke="#D4A017"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        opacity="0.75"
+      />
+      <circle cx="12" cy="12" r="2.5" fill="#D4A017" />
+      <circle cx="5.5" cy="7.5" r="1.5" fill="#D4A017" opacity="0.85" />
+      <circle cx="19" cy="8.2" r="1.5" fill="#D4A017" opacity="0.85" />
+      <circle cx="12" cy="19.3" r="1.5" fill="#D4A017" opacity="0.85" />
+      <circle cx="5" cy="16.2" r="1.5" fill="#D4A017" opacity="0.85" />
+      <circle cx="19" cy="16.5" r="1.5" fill="#D4A017" opacity="0.85" />
+    </svg>
+  );
+}
+
+function QuizIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="3" width="14" height="18" rx="1.5" stroke="#D4A017" strokeWidth="1.5" />
+      <path d="M8.2 8.3 9.4 9.5l2.1-2.3" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.6 8.3H16" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M8.2 13.3 9.4 14.5l2.1-2.3" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13.6 13.3H16" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M8.2 18h7.8" stroke="rgba(212,160,23,0.4)" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default async function AiToolsPage() {
   const supabase = createClient();
@@ -26,24 +56,55 @@ export default async function AiToolsPage() {
 
   return (
     <div>
-      <h1 className="font-display font-bold text-2xl text-navy mb-1">AI Tools</h1>
-      <p className="font-body text-sm text-g600 mb-6">
+      <div className="font-condensed font-bold text-[10.5px] uppercase tracking-widest mb-2 text-gold">
+        Distinction Library · Intelligence
+      </div>
+      <h1 className="font-display font-bold text-3xl text-white mb-1.5">AI Tools</h1>
+      <p className="font-body text-sm text-white/55 mb-10">
         AI-powered study help, built on your own material.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {TOOLS.map((tool) => (
-          <Link
-            key={tool.href}
-            href={tool.href}
-            className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
-          >
-            <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-base mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
-              {tool.icon}
+        {TOOLS.map((tool, i) => (
+          <a key={tool.href} href={tool.href} className="relative block group">
+            <div
+              className="absolute -top-16 left-1/2 -translate-x-1/2 w-[220px] h-[220px] pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(212,160,23,0.35) 0%, rgba(212,160,23,0) 70%)',
+                filter: 'blur(2px)',
+              }}
+            />
+            <div
+              className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden"
+              style={{
+                backgroundColor: 'rgba(20,33,61,0.55)',
+                border: '1px solid rgba(212,160,23,0.25)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#D4A017';
+                e.currentTarget.style.boxShadow = '0 0 28px rgba(212,160,23,0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(212,160,23,0.25)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <div
+                className="absolute top-0 left-0 right-0 h-20 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(212,160,23,0.12) 0%, rgba(212,160,23,0) 100%)',
+                }}
+              />
+              <div
+                className="relative w-11 h-11 rounded-full flex items-center justify-center mb-4"
+                style={{ border: '1px solid rgba(212,160,23,0.6)', background: 'rgba(212,160,23,0.06)' }}
+              >
+                {i === 0 ? <CompanionIcon /> : <QuizIcon />}
+              </div>
+              <h2 className="relative font-display font-bold text-lg text-white mb-1.5">{tool.title}</h2>
+              <p className="relative font-body text-sm text-white/60">{tool.desc}</p>
             </div>
-            <h2 className="font-display font-bold text-lg text-white mb-1.5">{tool.title}</h2>
-            <p className="font-body text-sm text-white/60">{tool.desc}</p>
-          </Link>
+          </a>
         ))}
       </div>
     </div>
