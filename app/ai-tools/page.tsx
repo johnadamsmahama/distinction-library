@@ -75,19 +75,8 @@ export default async function AiToolsPage() {
               }}
             />
             <div
-              className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden"
-              style={{
-                backgroundColor: 'rgba(20,33,61,0.55)',
-                border: '1px solid rgba(212,160,23,0.25)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#D4A017';
-                e.currentTarget.style.boxShadow = '0 0 28px rgba(212,160,23,0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212,160,23,0.25)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+              className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
+              style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
             >
               <div
                 className="absolute top-0 left-0 right-0 h-20 pointer-events-none"
