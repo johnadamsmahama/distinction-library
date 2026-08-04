@@ -17,8 +17,9 @@ function DataIcon() {
 function ClassroomIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2">
-      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M9 20h6M12 16v4" />
+      <path d="M8 10.5l2.3 2 4.2-4.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -110,7 +111,7 @@ export default function CommunityAndToolsSection() {
               <ClassroomIcon />
             </div>
             <div className="flex-1 min-w-0">
-              <b className="block font-condensed font-bold text-[14.5px]">Open Classroom</b>
+              <b className="block font-condensed font-bold text-[14.5px]">Join our Google Classroom</b>
               <span className="block text-[11.5px] text-white/70 mt-0.5">Free online classes</span>
             </div>
             <div className="w-7 h-7 rounded-full bg-white/14 flex items-center justify-center flex-shrink-0">
