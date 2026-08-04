@@ -6,6 +6,7 @@ import { AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
+import mammoth from 'mammoth';
 
 // How many files to process per invocation. Kept small so each call stays
 // well under Vercel's function timeout — the route re-triggers itself for
@@ -77,22 +78,42 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await entry.async('arraybuffer'));
 
       let extractedText: string | null = null;
+      let imageBase64: string | undefined;
+      let imageMediaType: 'image/jpeg' | 'image/png' | undefined;
+
       if (lowerName.endsWith('.pdf')) {
         try {
           const parsed = await pdfParse(buffer);
           extractedText = parsed.text?.trim() || null;
+          // A scanned PDF (photo of a page, no real text layer) comes back
+          // empty or near-empty here. We don't rasterize PDF pages to images
+          // yet, so these currently fall through to manual review rather
+          // than erroring — see handover notes for the follow-up.
         } catch (e) {
           console.error(`PDF extraction failed for ${fileName}:`, e);
         }
       } else if (lowerName.endsWith('.pptx')) {
         extractedText = await extractPptxText(buffer);
+      } else if (lowerName.endsWith('.docx')) {
+        try {
+          const result = await mammoth.extractRawText({ buffer });
+          extractedText = result.value?.trim() || null;
+        } catch (e) {
+          console.error(`DOCX extraction failed for ${fileName}:`, e);
+        }
+      } else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg') || lowerName.endsWith('.png')) {
+        // No text to extract — send the image itself to the classifier.
+        imageBase64 = buffer.toString('base64');
+        imageMediaType = lowerName.endsWith('.png') ? 'image/png' : 'image/jpeg';
       }
-      // Other formats (.docx, old .ppt): no extractor yet, classification
+      // Old binary .doc / .ppt: no extractor available, classification
       // falls back to filename alone with lower confidence.
 
       const classification = await classifyUpload({
         fileName,
         extractedText,
+        imageBase64,
+        imageMediaType,
         courses: courseList.map((c) => ({ code: c.code, name: c.name })),
       });
 
