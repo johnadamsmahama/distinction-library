@@ -53,6 +53,8 @@ Guidance:
 export async function classifyUpload(input: {
   fileName: string;
   extractedText: string | null;
+  imageBase64?: string;
+  imageMediaType?: 'image/jpeg' | 'image/png';
   courses: { code: string; name: string }[];
 }): Promise<ClassificationResult> {
   const courseList = input.courses.map((c) => `${c.code} — ${c.name}`).join('\n');
@@ -70,12 +72,28 @@ Extracted content (may be truncated):
 ${textExcerpt}
 """`;
 
+  // For images (or scanned pages with no text layer), send the image itself
+  // to Claude instead of relying on extracted text — Claude can read the
+  // page content directly.
+  const content: any = input.imageBase64
+    ? [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: input.imageMediaType ?? 'image/jpeg', data: input.imageBase64 },
+        },
+        {
+          type: 'text',
+          text: `File name: ${input.fileName}\n\nValid course codes:\n${courseList}\n\nThis file has no extractable text — look at the image above directly to classify it.`,
+        },
+      ]
+    : userMessage;
+
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 400,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [{ role: 'user', content }],
     });
 
     const textBlock = response.content.find((b) => b.type === 'text');
