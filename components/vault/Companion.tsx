@@ -10,12 +10,14 @@ type AttachedFile = {
   data: string; // base64
 };
 
+type Mode = 'ask' | 'notes' | 'file';
+
 const ACCEPTED_TYPES = '.pdf,.docx,.pptx,.png,.jpg,.jpeg';
 const MAX_FILE_SIZE_MB = 15;
 
 export default function Companion() {
+  const [mode, setMode] = useState<Mode>('ask');
   const [notesContext, setNotesContext] = useState('');
-  const [showNotes, setShowNotes] = useState(false);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const [fileError, setFileError] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -63,6 +65,7 @@ export default function Companion() {
     setInput('');
     setLoading(true);
     setSaved(false);
+    setMode('ask');
 
     const res = await fetch('/api/vault/companion', {
       method: 'POST',
@@ -93,42 +96,176 @@ export default function Companion() {
     if (res.ok) setSaved(true);
   };
 
+  const tabs: { id: Mode; label: string; hasContent: boolean; icon: React.ReactNode }[] = [
+    {
+      id: 'ask',
+      label: 'Ask',
+      hasContent: false,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" className="w-3.5 h-3.5">
+          <path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'notes',
+      label: 'Paste notes',
+      hasContent: notesContext.trim().length > 0,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />
+          <line x1="8" y1="7" x2="15" y2="7" />
+          <line x1="8" y1="11" x2="15" y2="11" />
+        </svg>
+      ),
+    },
+    {
+      id: 'file',
+      label: 'Attach',
+      hasContent: !!attachedFile,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <div className="bg-white border border-g100 rounded-2xl flex flex-col h-[52vh]">
-      <div className="p-4 border-b border-g100 flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-4">
+    <div className="bg-white border border-g100 rounded-2xl shadow-[0_14px_34px_-16px_rgba(10,27,61,0.4)] flex flex-col h-[56vh] overflow-hidden">
+      {/* tabs */}
+      <div className="flex border-b border-g100 flex-shrink-0">
+        {tabs.map((t) => (
           <button
-            onClick={() => setShowNotes((s) => !s)}
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline"
+            key={t.id}
+            onClick={() => setMode(t.id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-4 font-condensed font-bold text-[11px] uppercase tracking-wide transition-colors relative ${
+              mode === t.id ? 'text-gold' : 'text-g600 hover:text-g800'
+            }`}
           >
-            {showNotes ? 'Hide notes panel' : notesContext ? 'Notes attached ✓' : 'Paste notes'}
+            {t.icon}
+            {t.label}
+            {t.hasContent && (
+              <span className="w-1.5 h-1.5 rounded-full bg-gold" aria-hidden />
+            )}
+            {mode === t.id && (
+              <span className="absolute -bottom-px left-3.5 right-3.5 h-0.5 rounded-full bg-gold" />
+            )}
           </button>
+        ))}
+      </div>
 
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline"
-          >
-            {attachedFile ? 'Change file' : 'Attach file'}
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={ACCEPTED_TYPES}
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-
-          {attachedFile && (
-            <span className="font-condensed text-xs text-g600 flex items-center gap-1.5">
-              📎 {attachedFile.name}
-              <button onClick={removeFile} className="text-g600 hover:text-navy" aria-label="Remove file">
-                ✕
-              </button>
-            </span>
-          )}
+      {fileError && (
+        <div className="px-5 py-2 bg-red-50 border-b border-g100 flex-shrink-0">
+          <p className="font-body text-xs text-red-600">{fileError}</p>
         </div>
+      )}
 
-        {messages.length > 0 && (
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_TYPES}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {/* content pane */}
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col">
+        {mode === 'ask' && (
+          <>
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
+                <div className="w-12 h-12 rounded-xl bg-off-white border border-g100 flex items-center justify-center mb-3.5">
+                  <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                </div>
+                <p className="font-body text-sm text-g600 leading-relaxed max-w-[28ch]">
+                  Ask about a concept, request a summary, or switch to Paste notes / Attach to ground your answer.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {messages.map((m, i) => (
+                  <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`max-w-[80%] rounded-xl px-4 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap ${
+                        m.role === 'user' ? 'bg-navy text-white' : 'bg-off-white text-g800'
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-off-white rounded-xl px-4 py-2.5 font-body text-sm text-g600">Thinking…</div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </div>
+            )}
+          </>
+        )}
+
+        {mode === 'notes' && (
+          <div className="flex-1 flex flex-col">
+            <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
+              Your notes
+            </div>
+            <textarea
+              value={notesContext}
+              onChange={(e) => setNotesContext(e.target.value)}
+              placeholder="Paste your notes here, then ask a question below…"
+              className="flex-1 min-h-[110px] w-full px-3.5 py-3 rounded-xl border border-g100 bg-off-white font-body text-sm leading-relaxed outline-none focus:border-gold resize-none"
+            />
+          </div>
+        )}
+
+        {mode === 'file' && (
+          <div className="flex-1 flex flex-col">
+            {!attachedFile ? (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center rounded-xl border-[1.5px] border-dashed border-gold bg-gold/[0.06] px-4 py-6 hover:bg-gold/[0.1] transition-colors"
+              >
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold mb-2">
+                  <path d="M12 16V4M6 10l6-6 6 6" />
+                  <path d="M4 20h16" />
+                </svg>
+                <p className="font-body text-xs text-g600 mb-2">
+                  <span className="font-semibold text-g800">Tap to attach</span> a file, or drop it here
+                </p>
+                <div className="flex gap-1.5 flex-wrap justify-center">
+                  {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
+                    <span key={t} className="font-condensed text-[9.5px] font-bold px-2 py-1 bg-white border border-g100 rounded text-g600">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2.5 bg-off-white border border-g100 rounded-xl px-3 py-3">
+                <div className="w-9 h-9 rounded-lg bg-navy text-gold-light flex items-center justify-center font-condensed font-bold text-[9px] flex-shrink-0">
+                  {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-body font-semibold text-sm text-g800 truncate">{attachedFile.name}</div>
+                  <div className="font-condensed text-[10.5px] text-g600">Attached</div>
+                </div>
+                <button onClick={removeFile} className="text-g600 hover:text-navy text-base px-1" aria-label="Remove file">
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* save session */}
+      {messages.length > 0 && (
+        <div className="px-5 pb-2 flex-shrink-0 flex justify-end">
           <button
             onClick={saveSession}
             disabled={saved}
@@ -136,73 +273,34 @@ export default function Companion() {
           >
             {saved ? 'Saved to Vault ✓' : 'Save session'}
           </button>
-        )}
-      </div>
-
-      {fileError && (
-        <div className="px-4 py-2 bg-red-50 border-b border-g100">
-          <p className="font-body text-xs text-red-600">{fileError}</p>
         </div>
       )}
 
-      {showNotes && (
-        <div className="p-4 border-b border-g100 bg-off-white">
-          <textarea
-            rows={4}
-            value={notesContext}
-            onChange={(e) => setNotesContext(e.target.value)}
-            placeholder="Paste your notes here so the Companion can ground its answers in them…"
-            className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm outline-none focus:border-gold"
-          />
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="h-full flex items-center justify-center text-center px-8">
-            <p className="font-body text-sm text-g600">
-              Ask about a concept, request a summary, or attach a PDF, Word doc, PowerPoint, or
-              photo of your notes above and ask questions directly about them.
-            </p>
-          </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[80%] rounded-xl px-4 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap ${
-                m.role === 'user' ? 'bg-navy text-white' : 'bg-off-white text-g800'
-              }`}
-            >
-              {m.content}
-            </div>
-          </div>
-        ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-off-white rounded-xl px-4 py-2.5 font-body text-sm text-g600">Thinking…</div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-
+      {/* composer — always visible, never requires scrolling */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
         }}
-        className="p-4 border-t border-g100 flex gap-2"
+        className="p-4 border-t border-g100 flex gap-2 flex-shrink-0"
       >
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question…"
-          className="flex-1 px-4 py-2.5 rounded-lg border border-g100 font-body text-sm outline-none focus:border-gold"
+          placeholder={
+            mode === 'notes'
+              ? 'Ask a question about the notes above…'
+              : mode === 'file'
+              ? 'Ask a question about the attached file…'
+              : 'Ask a question…'
+          }
+          className="flex-1 px-4 py-2.5 rounded-lg border border-g100 bg-off-white font-body text-sm outline-none focus:border-gold"
         />
         <button
           type="submit"
           disabled={loading || (!input.trim() && !attachedFile)}
-          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50"
+          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
         >
           Send
         </button>
