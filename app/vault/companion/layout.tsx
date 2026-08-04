@@ -10,7 +10,7 @@ export default function CompanionLayout({ children }: { children: React.ReactNod
         }}
       />
       <Constellation />
-      <div className="relative z-10 px-6 py-14">{children}</div>
+      <div className="relative z-10 px-6 py-6">{children}</div>
     </div>
   );
 }
