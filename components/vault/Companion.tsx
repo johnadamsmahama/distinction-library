@@ -43,7 +43,6 @@ export default function Companion() {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      // result looks like "data:application/pdf;base64,XXXX" — strip the prefix
       const base64 = result.split(',')[1];
       setAttachedFile({ name: file.name, type: file.type, data: base64 });
     };
@@ -95,7 +94,7 @@ export default function Companion() {
   };
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl flex flex-col h-[70vh]">
+    <div className="bg-white border border-g100 rounded-2xl flex flex-col h-[52vh]">
       <div className="p-4 border-b border-g100 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-4">
           <button
