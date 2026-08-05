@@ -79,7 +79,7 @@ export default function QuizGenerator() {
     setSubmitted(false);
     setSaved(false);
 
-    const res = await fetch('/api/vault/quiz-generator', {
+    const res = await fetch('/api/vault/generate-quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -127,7 +127,7 @@ export default function QuizGenerator() {
 
   const saveSession = async () => {
     if (!quiz) return;
-    const res = await fetch('/api/vault/quiz-generator/save', {
+    const res = await fetch('/api/vault/generate-quiz/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -166,7 +166,7 @@ export default function QuizGenerator() {
   ];
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl shadow-[0_14px_34px_-16px_rgba(10,27,61,0.4)] flex flex-col overflow-hidden">
+    <div className="bg-white border border-g100 rounded-2xl shadow-[0_14px_34px_-16px_rgba(10,27,61,0.4)] flex flex-col h-[56vh] overflow-hidden">
       {!quiz ? (
         <>
           {/* tabs */}
@@ -203,8 +203,8 @@ export default function QuizGenerator() {
             className="hidden"
           />
 
-          {/* content pane */}
-          <div className="p-5 min-h-[220px] flex flex-col">
+          {/* content pane — scrolls internally, card height stays fixed */}
+          <div className="flex-1 overflow-y-auto p-5 flex flex-col">
             {mode === 'notes' && (
               <div className="flex-1 flex flex-col">
                 <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
@@ -214,7 +214,7 @@ export default function QuizGenerator() {
                   value={notesContext}
                   onChange={(e) => setNotesContext(e.target.value)}
                   placeholder="Paste your notes or past paper text here…"
-                  className="flex-1 min-h-[140px] w-full px-3.5 py-3 rounded-xl border border-g100 bg-off-white font-body text-sm leading-relaxed outline-none focus:border-gold resize-none"
+                  className="flex-1 min-h-[110px] w-full px-3.5 py-3 rounded-xl border border-g100 bg-off-white font-body text-sm leading-relaxed outline-none focus:border-gold resize-none"
                 />
               </div>
             )}
@@ -224,7 +224,7 @@ export default function QuizGenerator() {
                 {!attachedFile ? (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 min-h-[140px] flex flex-col items-center justify-center text-center rounded-xl border-[1.5px] border-dashed border-gold bg-gold/[0.06] px-4 py-6 hover:bg-gold/[0.1] transition-colors"
+                    className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center rounded-xl border-[1.5px] border-dashed border-gold bg-gold/[0.06] px-4 py-6 hover:bg-gold/[0.1] transition-colors"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold mb-2">
                       <path d="M12 16V4M6 10l6-6 6 6" />
@@ -259,7 +259,7 @@ export default function QuizGenerator() {
             )}
 
             {/* optional focus/topic hint — applies to either tab */}
-            <div className="mt-4">
+            <div className="mt-4 flex-shrink-0">
               <input
                 type="text"
                 value={topic}
@@ -323,14 +323,10 @@ export default function QuizGenerator() {
             </div>
           )}
 
-          {/* quiz questions */}
-          <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto">
+          {/* quiz questions — scrolls internally within the fixed-height card */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-5">
             {quiz.map((q, i) => {
               const userAnswer = answers[i] ?? '';
-              const isCorrect =
-                submitted && q.type !== 'short'
-                  ? userAnswer.trim().toLowerCase() === q.answer.trim().toLowerCase()
-                  : null;
 
               return (
                 <div key={i} className="border border-g100 rounded-xl p-4">
