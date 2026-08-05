@@ -28,7 +28,7 @@ export default async function OpportunityHubPage() {
 
   return (
     <div>
-      <h1 className="font-display font-bold text-2xl text-navy mb-1">Opportunity Hub</h1>
+      <h1 className="font-display font-bold text-2xl text-navy mb-1">Jobs & Opportunities </h1>
       <p className="font-body text-sm text-g600 mb-6">
         Scholarships, internships, graduate programmes, and jobs — verified for UPSA students.
       </p>
