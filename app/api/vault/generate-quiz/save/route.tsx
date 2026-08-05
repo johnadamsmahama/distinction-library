@@ -31,17 +31,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nothing to save yet.' }, { status: 400 });
   }
 
-  const firstQuestion = quiz[0]?.question ?? 'Quiz session';
-  const title = firstQuestion.slice(0, 80);
+  const title = (quiz[0]?.question ?? 'Quiz session').slice(0, 80);
+
+  // Match the shape VaultList.tsx already expects for item_type "quiz":
+  // content.questions[]  with  { question, correctAnswer, explanation }
+  const questions = quiz.map((q, i) => ({
+    question: q.question,
+    type: q.type,
+    options: q.options ?? null,
+    correctAnswer: q.answer,
+    studentAnswer: answers[i] ?? null,
+    explanation: q.explanation ?? null,
+  }));
 
   const { data: vaultItem, error } = await supabase
     .from('study_vault_items')
     .insert({
       user_id: user.id,
-      item_type: 'quiz_session',
+      item_type: 'quiz',
       title,
       source_material_name: sourceName ?? null,
-      content: { quiz, answers, score: score ?? null },
+      content: { questions, score: score ?? null },
     })
     .select()
     .single();
