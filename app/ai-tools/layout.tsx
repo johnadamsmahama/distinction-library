@@ -30,11 +30,11 @@ export default async function AiToolsLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="relative overflow-hidden min-h-screen" style={{ backgroundColor: '#0E1830' }}>
+    <div className="relative overflow-hidden min-h-screen bg-gradient-to-b from-navy to-navy-deep">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(120% 90% at 50% -10%, rgba(20,33,61,0) 0%, #0E1830 65%)',
+          background: 'radial-gradient(120% 90% at 50% -10%, rgba(13,43,94,0) 0%, #081A3D 65%)',
         }}
       />
       <Constellation />
