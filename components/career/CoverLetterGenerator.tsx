@@ -131,7 +131,7 @@ export default function CoverLetterGenerator() {
 
         <div>
           <label className={labelClass}>Tone</label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <ToneBtn active={tone === 'professional'} onClick={() => setTone('professional')}>
               Professional
             </ToneBtn>
@@ -180,8 +180,10 @@ function ToneBtn({ active, onClick, children }: { active: boolean; onClick: () =
     <button
       type="button"
       onClick={onClick}
-      className={`font-condensed font-bold text-xs uppercase px-3 py-2 rounded-lg border transition-colors ${
-        active ? 'border-gold bg-gold/10 text-navy' : 'border-g100 text-g600'
+      className={`font-condensed font-bold text-xs uppercase px-4 py-2.5 rounded-xl transition-all ${
+        active
+          ? 'bg-gold text-navy shadow-md'
+          : 'bg-white text-g600 border border-g100'
       }`}
     >
       {children}
