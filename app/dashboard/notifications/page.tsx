@@ -116,7 +116,6 @@ export default async function NotificationsPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <p className="font-condensed text-[11px] font-semibold uppercase tracking-widest text-gold mb-2">
-        Essentials
       </p>
       <h1 className="font-display font-bold text-2xl text-navy mb-6">Notifications</h1>
 
