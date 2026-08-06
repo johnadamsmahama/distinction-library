@@ -67,6 +67,9 @@ export default async function LeaderboardPage() {
 
   return (
     <div>
+      <p className="font-condensed text-[11px] font-semibold uppercase tracking-widest text-gold mb-2">
+        Honor Roll
+      </p>
       <h1 className="font-display font-bold text-2xl text-navy mb-1">Leaderboard</h1>
       <p className="font-body text-sm text-g600 mb-6">
         Top contributors by approved past papers and study materials. Gold, Silver, and Bronze badges reset each
