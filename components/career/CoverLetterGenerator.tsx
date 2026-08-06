@@ -78,37 +78,39 @@ export default function CoverLetterGenerator() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white border border-g100 rounded-2xl p-6 space-y-5">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Full name</label>
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Contact info (phone, email)</label>
-            <input value={contactInfo} onChange={(e) => setContactInfo(e.target.value)} className={inputClass} />
-          </div>
-        </div>
+    <div className="space-y-6 mt-6">
+      <div className="relative bg-off-white rounded-2xl border border-g100 shadow-sm px-5 pb-7 pt-2">
+        {/* gold dotted thread */}
+        <div
+          className="absolute left-[34px] top-0 bottom-8 w-[2px] opacity-50"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(to bottom, #C9A02C 0, #C9A02C 4px, transparent 4px, transparent 9px)',
+          }}
+        />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Role you're applying for</label>
-            <input
-              value={roleTitle}
-              onChange={(e) => setRoleTitle(e.target.value)}
-              placeholder="e.g. Marketing Intern"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Company (optional)</label>
-            <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} />
-          </div>
-        </div>
+        <Section num={1} label="Full Name">
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
+        </Section>
 
-        <div>
-          <label className={labelClass}>Job description (optional, but helps tailor the letter)</label>
+        <Section num={2} label="Contact Info" hint="Phone, email">
+          <input value={contactInfo} onChange={(e) => setContactInfo(e.target.value)} className={inputClass} />
+        </Section>
+
+        <Section num={3} label="Role You're Applying For">
+          <input
+            value={roleTitle}
+            onChange={(e) => setRoleTitle(e.target.value)}
+            placeholder="e.g. Marketing Intern"
+            className={inputClass}
+          />
+        </Section>
+
+        <Section num={4} label="Company" hint="Optional">
+          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} />
+        </Section>
+
+        <Section num={5} label="Job Description" hint="Optional, but helps tailor the letter">
           <textarea
             rows={5}
             value={jobDescription}
@@ -116,10 +118,9 @@ export default function CoverLetterGenerator() {
             placeholder="Paste the job posting here if you have it…"
             className={inputClass}
           />
-        </div>
+        </Section>
 
-        <div>
-          <label className={labelClass}>Your relevant background, experience, and skills</label>
+        <Section num={6} label="Your Background" hint="Relevant experience and skills">
           <textarea
             rows={5}
             value={background}
@@ -127,10 +128,9 @@ export default function CoverLetterGenerator() {
             placeholder="Write freely — courses, projects, internships, skills, why you want this role. The AI will shape it into a proper letter."
             className={inputClass}
           />
-        </div>
+        </Section>
 
-        <div>
-          <label className={labelClass}>Tone</label>
+        <Section num={7} label="Tone" isLast>
           <div className="flex gap-2 flex-wrap">
             <ToneBtn active={tone === 'professional'} onClick={() => setTone('professional')}>
               Professional
@@ -142,7 +142,7 @@ export default function CoverLetterGenerator() {
               Concise
             </ToneBtn>
           </div>
-        </div>
+        </Section>
       </div>
 
       {error && <p className="font-body text-sm text-red-500">{error}</p>}
@@ -150,13 +150,13 @@ export default function CoverLetterGenerator() {
       <button
         onClick={generate}
         disabled={loading}
-        className="w-full sm:w-auto bg-gold text-navy font-condensed font-bold text-sm px-6 py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
       >
         {loading ? 'Generating…' : 'Generate cover letter'}
       </button>
 
       {result && (
-        <div className="bg-white border border-g100 rounded-2xl p-6">
+        <div className="bg-off-white border border-g100 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-lg text-navy">Your cover letter</h2>
             <div className="flex gap-2">
@@ -171,6 +171,33 @@ export default function CoverLetterGenerator() {
           <pre className="font-body text-sm text-g800 whitespace-pre-wrap leading-relaxed">{result}</pre>
         </div>
       )}
+    </div>
+  );
+}
+
+function Section({
+  num,
+  label,
+  hint,
+  isLast,
+  children,
+}: {
+  num: number;
+  label: string;
+  hint?: string;
+  isLast?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`relative pt-6 pb-1 ${!isLast ? 'border-b border-g100' : ''}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-7 h-7 rounded-full bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
+          {num}
+        </div>
+        <div className="font-condensed font-bold text-xs uppercase tracking-wide text-navy">{label}</div>
+      </div>
+      {hint && <div className="text-xs text-g600 ml-10 -mt-2 mb-3">{hint}</div>}
+      <div className="ml-10">{children}</div>
     </div>
   );
 }
@@ -191,8 +218,7 @@ function ToneBtn({ active, onClick, children }: { active: boolean; onClick: () =
   );
 }
 
-const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5';
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
 const smallActionClass =
   'font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-1.5 hover:border-gold transition-colors';
