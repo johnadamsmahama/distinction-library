@@ -13,7 +13,7 @@ export default function EventsPage() {
           href="/success-centre"
           className="inline-flex items-center gap-1 text-sm font-medium text-[#0D2B5E] hover:underline"
         >
-          ← Back to Success Centre
+          ← Back to Essentials
         </Link>
       </div>
       <EventsView />
