@@ -7,9 +7,9 @@ import { createClient } from '@/lib/supabase/client';
 
 // Primary nav per spec Section 2. Reconciled against the live app's old
 // hamburger (Section 2.1): Leaderboard now lives under Dashboard/Profile,
-// Tutors under Success Centre, Support under Settings — all still reachable,
+// Tutors under Essentials, Support under Settings — all still reachable,
 // just no longer top-level. See CHANGELOG_STEP3.md for the full mapping.
-// Opportunity Hub moved under Success Centre — no longer a top-level link.
+// Opportunity Hub moved under Essentials — no longer a top-level link.
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/papers', label: 'Library' },
