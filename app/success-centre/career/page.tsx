@@ -11,7 +11,7 @@ export default async function CareerCentrePage() {
 
   return (
     <div>
-      <h1 className="font-display font-bold text-2xl text-navy mb-1">Career Centre</h1>
+      <h1 className="font-display font-bold text-2xl text-navy mb-1">Career Resources</h1>
       <p className="font-body text-sm text-g600 mb-6">
         AI-powered tools to help you land your next role.
       </p>
