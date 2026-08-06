@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type Opportunity = {
   id: string;
@@ -60,6 +60,25 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
   const filtered = tab === 'all' ? opportunities : opportunities.filter(o => o.category === tab);
   const activeLabel = FILTERS.find(f => f.id === tab)?.label ?? '';
 
+  // Scroll-fade affordance for the filter tab strip — only shows a side's fade
+  // when there's actually more content to scroll to on that side.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, []);
+
   return (
     <div>
       {/* Header — copy unchanged from the live version */}
@@ -70,16 +89,20 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
 
       {/* Everything below sits in a self-contained navy panel */}
       <div className="bg-navy-deep rounded-2xl overflow-hidden">
-        {/* Filter tabs */}
-        <div className="border-b border-white/6 overflow-x-auto">
-          <div className="flex gap-1.5 px-4 py-3 min-w-max">
+        {/* Filter tabs, with scroll-fade edges to signal there's more to swipe to */}
+        <div className="relative border-b border-white/6">
+          <div
+            ref={scrollRef}
+            onScroll={checkScroll}
+            className="flex gap-1.5 px-4 py-3 overflow-x-auto"
+          >
             {FILTERS.map(f => {
               const active = tab === f.id;
               return (
                 <button
                   key={f.id}
                   onClick={() => setTab(f.id)}
-                  className={`px-3 py-1.5 rounded-full font-condensed text-[11.5px] font-semibold whitespace-nowrap border transition-colors ${
+                  className={`px-3 py-1.5 rounded-full font-condensed text-[11.5px] font-semibold whitespace-nowrap border transition-colors flex-shrink-0 ${
                     active
                       ? 'bg-gold/15 border-gold text-gold'
                       : 'border-white/10 text-white/45 hover:text-white/70'
@@ -90,6 +113,15 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
               );
             })}
           </div>
+
+          {canScrollLeft && (
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-navy-deep to-transparent" />
+          )}
+          {canScrollRight && (
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-navy-deep via-navy-deep/80 to-transparent flex items-center justify-end pr-1.5">
+              <span className="text-gold text-sm">›</span>
+            </div>
+          )}
         </div>
 
         {/* Card list */}
