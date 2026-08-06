@@ -61,72 +61,107 @@ export default function SupportForm({
   };
 
   return (
-    <div>
-      <div className="bg-navy rounded-2xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <div className="font-condensed font-bold text-xs uppercase tracking-wide text-white/70 mb-1">
+    <div className="space-y-4">
+      {/* vault dial */}
+      <div className="w-14 h-14 rounded-full mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
+        <div className="absolute inset-1.5 rounded-full border border-dashed border-gold-light/40" />
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[22px] h-[22px] stroke-gold-light">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      </div>
+
+      {/* contact banner */}
+      <div className={`${panelClass} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}>
+        <div className={panelTexture} />
+        <div className="relative">
+          <div className="font-condensed font-bold text-[10.5px] uppercase tracking-widest text-gold-light mb-1">
             Prefer to reach us directly?
           </div>
-          <div className="font-body text-sm text-white">Call or WhatsApp: 024 811 1310</div>
+          <div className="font-body text-[13.5px] text-[#F0F2F8]">Call or WhatsApp: 024 811 1310</div>
         </div>
         <a
           href="https://wa.me/233248111310"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2.5 rounded-lg hover:bg-gold-light transition-colors flex-shrink-0"
+          className="relative inline-flex items-center justify-center gap-2 bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[11px] uppercase tracking-wide px-4 py-2.5 rounded-lg flex-shrink-0"
         >
           Chat on WhatsApp
         </a>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
-          <div>
-            <label className={labelClass}>Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* form */}
+        <form onSubmit={handleSubmit} className={`${panelClass} h-fit`}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <h2 className={panelTitle}>New Request</h2>
           </div>
-          <div>
-            <label className={labelClass}>Your UPSA email</label>
-            <input value={studentEmail} disabled className={`${inputClass} bg-off-white text-g600`} />
+          <div className="space-y-3 relative">
+            <div>
+              <label className={labelClass}>Name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Your UPSA email</label>
+              <input value={studentEmail} disabled className={`${inputClass} opacity-55`} />
+            </div>
+            <div>
+              <label className={labelClass}>Subject</label>
+              <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Message</label>
+              <textarea
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            {error && <p className="font-body text-sm text-red-400">{error}</p>}
+            <button type="submit" disabled={loading} className={btnGold}>
+              {loading ? 'Sending…' : 'Send message'}
+            </button>
           </div>
-          <div>
-            <label className={labelClass}>Subject</label>
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Message</label>
-            <textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} className={inputClass} />
-          </div>
-          {error && <p className="font-body text-sm text-red-500">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
-          >
-            {loading ? 'Sending…' : 'Send message'}
-          </button>
         </form>
 
-        <div>
-          <h2 className="font-display font-bold text-lg text-navy mb-4">Your past messages</h2>
+        {/* ticket history */}
+        <div className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2m18 0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2m18 0v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" />
+            </svg>
+            <h2 className={panelTitle}>Your Requests</h2>
+          </div>
           {tickets.length === 0 ? (
-            <p className="font-body text-sm text-g600">Nothing sent yet.</p>
+            <p className="font-body text-[12.5px] text-[#8593B8] relative">Nothing sent yet.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5 relative">
               {tickets.map((t) => (
-                <div key={t.id} className="bg-white border border-g100 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-condensed font-semibold text-sm text-g800">{t.subject}</span>
+                <div
+                  key={t.id}
+                  className="bg-gold-light/5 border border-dashed border-gold-light/35 rounded-[10px] px-3.5 py-3"
+                >
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <span className="font-body font-semibold text-[12.5px] text-[#F0F2F8] truncate">
+                      {t.subject}
+                    </span>
                     <span
-                      className={`font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded ${
-                        t.resolved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                      className={`font-condensed font-bold text-[9px] uppercase tracking-wide px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                        t.resolved
+                          ? 'text-green-300 bg-green-400/10 border-green-400/30'
+                          : 'text-amber-300 bg-amber-400/10 border-amber-400/30'
                       }`}
                     >
                       {t.resolved ? 'Resolved' : 'Open'}
                     </span>
                   </div>
-                  <p className="font-body text-xs text-g600">{t.message}</p>
-                  <p className="font-condensed text-[10px] text-g600 mt-2">
+                  <p className="font-body text-[11.5px] text-[#8593B8] leading-relaxed">{t.message}</p>
+                  <p className="font-condensed text-[9.5px] text-[#5C6785] mt-2 uppercase tracking-wide">
                     {new Date(t.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -139,6 +174,14 @@ export default function SupportForm({
   );
 }
 
-const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
+const panelClass = 'relative overflow-hidden bg-navy rounded-2xl p-[18px]';
+const panelTexture =
+  'absolute inset-0 pointer-events-none [background-image:repeating-linear-gradient(115deg,rgba(223,190,94,0.04)_0px,rgba(223,190,94,0.04)_1px,transparent_1px,transparent_12px)]';
+const panelHead = 'flex items-center gap-2.5 mb-4 relative';
+const panelTitle = 'font-display font-semibold text-[14.5px] text-[#F9F5E9]';
+const lockIcon = 'w-[18px] h-[18px] stroke-gold-light flex-shrink-0';
+const labelClass = 'block font-condensed text-[9.5px] tracking-wide uppercase text-[#8593B8] mb-1.5';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-[11px] py-[9px] rounded-lg bg-white/[0.06] border border-gold-light/25 font-body text-[13.5px] text-[#F0F2F8] placeholder:text-[#5C6785] outline-none focus:border-gold-light transition-colors';
+const btnGold =
+  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-lg disabled:opacity-60 transition-opacity';
