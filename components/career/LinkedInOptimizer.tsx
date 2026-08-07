@@ -55,30 +55,36 @@ export default function LinkedInOptimizer() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white border border-g100 rounded-2xl p-6 space-y-5">
-        <div>
-          <label className={labelClass}>Target role or field</label>
+    <div className="space-y-6 mt-6">
+      <div className="relative bg-off-white rounded-2xl border border-g100 shadow-sm px-5 pb-7 pt-2">
+        {/* gold dotted thread */}
+        <div
+          className="absolute left-[34px] top-0 bottom-8 w-[2px] opacity-50"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(to bottom, #C9A02C 0, #C9A02C 4px, transparent 4px, transparent 9px)',
+          }}
+        />
+
+        <Section num={1} label="Target Role or Field">
           <input
             value={targetRole}
             onChange={(e) => setTargetRole(e.target.value)}
             placeholder="e.g. Data Analyst, Finance graduate roles"
             className={inputClass}
           />
-        </div>
+        </Section>
 
-        <div>
-          <label className={labelClass}>Current headline (optional)</label>
+        <Section num={2} label="Current Headline" hint="Optional">
           <input
             value={currentHeadline}
             onChange={(e) => setCurrentHeadline(e.target.value)}
             placeholder="What your LinkedIn headline currently says"
             className={inputClass}
           />
-        </div>
+        </Section>
 
-        <div>
-          <label className={labelClass}>Current "About" section (optional)</label>
+        <Section num={3} label="Current About Section" hint="Optional">
           <textarea
             rows={4}
             value={currentAbout}
@@ -86,10 +92,9 @@ export default function LinkedInOptimizer() {
             placeholder="Paste your current About section if you have one…"
             className={inputClass}
           />
-        </div>
+        </Section>
 
-        <div>
-          <label className={labelClass}>Your background, experience, and skills</label>
+        <Section num={4} label="Your Background" hint="Experience, education, skills" isLast>
           <textarea
             rows={5}
             value={background}
@@ -97,7 +102,7 @@ export default function LinkedInOptimizer() {
             placeholder="Write freely — courses, projects, internships, skills, what you're aiming for. The AI will use this to write your headline and About section."
             className={inputClass}
           />
-        </div>
+        </Section>
       </div>
 
       {error && <p className="font-body text-sm text-red-500">{error}</p>}
@@ -105,13 +110,13 @@ export default function LinkedInOptimizer() {
       <button
         onClick={generate}
         disabled={loading}
-        className="w-full sm:w-auto bg-gold text-navy font-condensed font-bold text-sm px-6 py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
       >
         {loading ? 'Generating…' : 'Optimize my LinkedIn'}
       </button>
 
       {result && (
-        <div className="bg-white border border-g100 rounded-2xl p-6">
+        <div className="bg-off-white border border-g100 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-lg text-navy">Suggestions</h2>
             <button onClick={copyResult} className={smallActionClass}>
@@ -125,8 +130,34 @@ export default function LinkedInOptimizer() {
   );
 }
 
-const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5';
+function Section({
+  num,
+  label,
+  hint,
+  isLast,
+  children,
+}: {
+  num: number;
+  label: string;
+  hint?: string;
+  isLast?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`relative pt-6 pb-1 ${!isLast ? 'border-b border-g100' : ''}`}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-7 h-7 rounded-full bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
+          {num}
+        </div>
+        <div className="font-condensed font-bold text-xs uppercase tracking-wide text-navy">{label}</div>
+      </div>
+      {hint && <div className="text-xs text-g600 ml-10 -mt-2 mb-3">{hint}</div>}
+      <div className="ml-10">{children}</div>
+    </div>
+  );
+}
+
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
 const smallActionClass =
   'font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-1.5 hover:border-gold transition-colors';
