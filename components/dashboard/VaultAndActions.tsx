@@ -39,12 +39,9 @@ export function VaultSummary({
   );
 }
 
-// Shared fine-grain texture (SVG turbulence), used on the colored tiles.
 const GRAIN_URL =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
-// Explicit type so optional fields (badge, sheen, border styling) can be
-// present on some tiles and absent on others without TypeScript complaining.
 type Action = {
   href: string;
   label: string;
@@ -70,9 +67,9 @@ const ACTIONS: Action[] = [
     label: 'Contribute',
     desc: 'Upload slides, past papers, or notes for other students.',
     path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
-    background: 'radial-gradient(140% 140% at 15% 0%, #163a72, #0a1f42 65%)',
+    background: 'radial-gradient(140% 140% at 15% 0%, #24478a, #12295c 65%)',
     aurora:
-      'radial-gradient(45% 50% at 90% 10%, rgba(224,193,88,.4), transparent 70%), radial-gradient(50% 55% at 10% 100%, rgba(30,70,160,.4), transparent 70%)',
+      'radial-gradient(45% 50% at 90% 10%, rgba(224,193,88,.4), transparent 70%), radial-gradient(50% 55% at 10% 100%, rgba(60,100,190,.4), transparent 70%)',
     textClass: 'text-white',
     subClass: 'text-white/80',
     iconBgClass: 'bg-white/[.14]',
@@ -145,17 +142,15 @@ const ACTIONS: Action[] = [
     label: 'Find a Peer Tutor',
     desc: 'Get one-on-one help from a fellow student',
     path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
-    background: '#D8E1F5',
+    background: 'radial-gradient(130% 140% at 15% 0%, #E8C875, #C9A02C 70%)',
     aurora:
-      'radial-gradient(40% 45% at 90% 0%, rgba(201,160,44,.22), transparent 70%), radial-gradient(45% 50% at 10% 100%, rgba(13,43,94,.18), transparent 70%)',
-    textClass: 'text-navy',
-    subClass: 'text-g600',
-    iconBgClass: 'bg-navy',
+      'radial-gradient(40% 45% at 90% 0%, rgba(13,43,94,.18), transparent 70%), radial-gradient(45% 50% at 10% 100%, rgba(255,245,210,.35), transparent 70%)',
+    textClass: 'text-navy-deep',
+    subClass: 'text-navy-deep/70',
+    iconBgClass: 'bg-navy-deep/[.85]',
     iconColorClass: 'text-gold-light',
-    arrowColorClass: 'text-navy',
-    border: true,
-    borderColorClass: 'border-[1.5px] border-[#B8C7E8]',
-    grain: false,
+    arrowColorClass: 'text-navy-deep',
+    grain: true,
   },
   {
     href: '/success-centre',
@@ -173,7 +168,16 @@ const ACTIONS: Action[] = [
   },
 ];
 
-export function QuickActions() {
+export function QuickActions({
+  vaultSummary,
+}: {
+  vaultSummary: { quizzes: number; companionSessions: number; summaries: number; total: number };
+}) {
+  const vaultDesc =
+    vaultSummary.total === 0
+      ? 'Private to you — notes, quizzes, and AI sessions saved here.'
+      : `${vaultSummary.quizzes} quizzes · ${vaultSummary.companionSessions} sessions · ${vaultSummary.summaries} summaries`;
+
   return (
     <div>
       <div className="mb-[18px]">
@@ -198,21 +202,18 @@ export function QuickActions() {
             }`}
             style={{ background: a.background }}
           >
-            {/* aurora mesh-gradient blobs */}
             {a.aurora !== 'none' && (
               <span
                 className="absolute -inset-[20%] pointer-events-none z-0"
                 style={{ background: a.aurora, filter: 'blur(28px)' }}
               />
             )}
-            {/* fine grain texture */}
             {a.grain && (
               <span
                 className="absolute inset-0 pointer-events-none z-0 opacity-50 mix-blend-overlay"
                 style={{ backgroundImage: GRAIN_URL }}
               />
             )}
-            {/* oversized watermark icon */}
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -222,12 +223,10 @@ export function QuickActions() {
             >
               <path d={a.path} />
             </svg>
-            {/* gold sheen sweep */}
             {a.sheen && (
               <span className="absolute top-0 -left-[60%] w-[40%] h-full bg-gradient-to-r from-transparent via-white/45 to-transparent -skew-x-[18deg] transition-all duration-500 ease-out group-hover:left-[130%] pointer-events-none z-[1]" />
             )}
 
-            {/* badge (Contribute only, for now) */}
             {a.badge && (
               <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-white/20 text-white px-[9px] py-[4px] rounded-full">
                 {a.badge}
@@ -256,6 +255,44 @@ export function QuickActions() {
             </div>
           </Link>
         ))}
+
+        {/* Study Vault — now the 8th tile in the same grid, using real summary data */}
+        <Link
+          href="/vault"
+          className="group relative isolate overflow-hidden rounded-2xl p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(201,160,44,.25)] border border-[#E6D6A8]"
+          style={{ background: 'linear-gradient(150deg, #F3E7C9 0%, #F0D9A0 100%)' }}
+        >
+          <span
+            className="absolute inset-0 pointer-events-none z-0 opacity-50 mix-blend-overlay"
+            style={{ backgroundImage: GRAIN_URL }}
+          />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+            className="absolute -right-[14px] -bottom-[14px] w-24 h-24 opacity-[.13] pointer-events-none z-0 text-navy-deep"
+          >
+            <path d="M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4" />
+          </svg>
+
+          <span className="absolute top-[18px] right-[18px] opacity-0 -translate-x-1 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 z-10 text-navy-deep">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 stroke-current fill-none" strokeWidth={2.2}>
+              <path d="M7 17L17 7M7 7h10v10" />
+            </svg>
+          </span>
+
+          <div className="relative z-10 w-11 h-11 rounded-xl flex items-center justify-center bg-navy-deep/[.85] transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-[4deg]">
+            <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] stroke-current fill-none text-gold-light" strokeWidth={1.8}>
+              <path d="M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4" />
+            </svg>
+          </div>
+
+          <div className="relative z-10">
+            <div className="font-display font-semibold text-[16px] text-navy-deep">Your Study Vault</div>
+            <div className="font-body text-xs mt-1 leading-snug text-navy-deep/70">{vaultDesc}</div>
+          </div>
+        </Link>
       </div>
     </div>
   );
