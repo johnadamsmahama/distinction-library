@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'No Vault item selected.' }, { status: 400 });
       }
 
-      const supabase = await createClient();
+      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
