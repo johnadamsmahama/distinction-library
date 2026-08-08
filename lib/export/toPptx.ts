@@ -1,8 +1,4 @@
-// lib/export/toPptx.ts
-// Client-side only — turns an AI-generated slide outline into a real, downloadable
-// .pptx file using pptxgenjs. No backend involved; runs entirely in the browser.
-
-import type PptxGenJS from 'pptxgenjs';
+'use client';
 
 type SlideOutlineItem = {
   title: string;
@@ -14,212 +10,112 @@ type Outline = {
   slides: SlideOutlineItem[];
 };
 
-// Brand tokens, mirrored from tailwind.config.js
 const NAVY = '0D2B5E';
-const NAVY_DEEP = '060F1E';
 const GOLD = 'C9A02C';
-const GOLD_LIGHT = 'E2BE5A';
 const OFF_WHITE = 'F7F8FC';
+const WHITE = 'FFFFFF';
+const GREY_TEXT = '3A3F4B';
 
-type ThemeColors = {
-  background: string;
-  titleColor: string;
-  bodyColor: string;
-  accent: string;
-  titleFont: string;
-  bodyFont: string;
-};
-
-const THEMES: Record<string, ThemeColors> = {
-  distinction: {
-    background: NAVY,
-    titleColor: OFF_WHITE,
-    bodyColor: 'D7DCEA',
-    accent: GOLD_LIGHT,
-    titleFont: 'Playfair Display',
-    bodyFont: 'Barlow',
-  },
-  academic: {
-    background: OFF_WHITE,
-    titleColor: NAVY,
-    bodyColor: '3C4457',
-    accent: GOLD,
-    titleFont: 'Playfair Display',
-    bodyFont: 'Barlow',
-  },
-  bold: {
-    background: NAVY_DEEP,
-    titleColor: GOLD_LIGHT,
-    bodyColor: 'F7F8FC',
-    accent: GOLD,
-    titleFont: 'Barlow Condensed',
-    bodyFont: 'Barlow',
-  },
-};
-
-// Fallback theme used for a freeform "custom" style description — defaults to
-// the brand theme so output still looks intentional rather than generic black-on-white.
-function resolveTheme(styleId: string): ThemeColors {
-  return THEMES[styleId] ?? THEMES.distinction;
+function resolveStyle(styleId: string) {
+  switch (styleId) {
+    case 'academic':
+      return { bg: WHITE, accent: NAVY, titleColor: NAVY, bodyColor: GREY_TEXT, bandColor: NAVY };
+    case 'bold':
+      return { bg: NAVY, accent: GOLD, titleColor: WHITE, bodyColor: OFF_WHITE, bandColor: GOLD };
+    case 'distinction':
+    default:
+      // custom free-text styles fall back to the brand default at render time
+      return { bg: OFF_WHITE, accent: GOLD, titleColor: NAVY, bodyColor: GREY_TEXT, bandColor: NAVY };
+  }
 }
 
-export async function renderOutlineToPptx(
-  outline: Outline,
-  styleId: string,
-  positionId: string = 'centered'
-) {
-  const PptxGenJSModule = (await import('pptxgenjs')).default;
-  const pptx = new PptxGenJSModule() as PptxGenJS;
+function resolveLayout(positionId: string): 'centered' | 'split' | 'titlelist' {
+  if (positionId === 'split' || positionId === 'titlelist') return positionId;
+  return 'centered';
+}
+
+export async function renderOutlineToPptx(outline: Outline, styleId: string, positionId: string) {
+  const PptxGenJS = (await import('pptxgenjs')).default;
+  const pptx = new PptxGenJS();
 
   pptx.defineLayout({ name: 'WIDE', width: 13.33, height: 7.5 });
   pptx.layout = 'WIDE';
 
-  const theme = resolveTheme(styleId);
+  const colors = resolveStyle(styleId);
+  const layout = resolveLayout(positionId);
 
-  // ===== Title slide =====
-  const titleSlide = pptx.addSlide();
-  titleSlide.background = { color: theme.background };
-  titleSlide.addShape(pptx.ShapeType.rect, {
-    x: 0,
-    y: 3.55,
-    w: 1.4,
-    h: 0.06,
-    fill: { color: theme.accent },
-    line: { color: theme.accent },
-  });
-  titleSlide.addText(outline.deckTitle, {
-    x: 0.8,
-    y: 2.9,
-    w: 11.7,
-    h: 1.4,
-    fontFace: theme.titleFont,
+  const title = pptx.addSlide();
+  title.background = { color: colors.bg };
+  title.addShape('rect', { x: 0, y: 0, w: 13.33, h: 1.2, fill: { color: colors.bandColor } });
+  title.addText(outline.deckTitle, {
+    x: 0.7,
+    y: 2.6,
+    w: 11.9,
+    h: 1.8,
+    fontFace: 'Playfair Display',
     fontSize: 40,
     bold: true,
-    color: theme.titleColor,
-    align: 'left',
+    color: colors.titleColor,
   });
-  titleSlide.addText('Distinction Library', {
-    x: 0.8,
-    y: 6.7,
-    w: 6,
-    h: 0.4,
-    fontFace: theme.bodyFont,
-    fontSize: 12,
-    color: theme.accent,
-    align: 'left',
+  title.addShape('rect', { x: 0.7, y: 4.3, w: 1.4, h: 0.06, fill: { color: colors.accent } });
+  title.addText('Distinction is not accidental. It is built.', {
+    x: 0.7,
+    y: 4.55,
+    w: 11.9,
+    h: 0.5,
+    fontFace: 'Barlow',
+    fontSize: 14,
+    italic: true,
+    color: colors.accent,
   });
 
-  // ===== Content slides =====
-  outline.slides.forEach((slide) => {
+  outline.slides.forEach((slide, i) => {
     const s = pptx.addSlide();
-    s.background = { color: theme.background };
+    s.background = { color: colors.bg };
 
-    if (positionId === 'split') {
-      // Image + Text: text block on one side, placeholder visual block on the other
-      s.addShape(pptx.ShapeType.rect, {
-        x: 8.3,
-        y: 0,
-        w: 5.03,
-        h: 7.5,
-        fill: { color: theme.accent, transparency: 88 },
-        line: { color: theme.accent, width: 1 },
+    if (layout === 'split') {
+      s.addShape('rect', { x: 0, y: 0, w: 4.2, h: 7.5, fill: { color: colors.bandColor } });
+      s.addText(String(i + 1).padStart(2, '0'), {
+        x: 0.5, y: 0.5, w: 3.2, h: 1,
+        fontFace: 'Playfair Display', fontSize: 48, bold: true, color: colors.accent,
       });
       s.addText(slide.title, {
-        x: 0.7,
-        y: 0.6,
-        w: 7.2,
-        h: 1,
-        fontFace: theme.titleFont,
-        fontSize: 28,
-        bold: true,
-        color: theme.titleColor,
+        x: 0.5, y: 1.6, w: 3.2, h: 2.5,
+        fontFace: 'Barlow Condensed', fontSize: 22, bold: true, color: WHITE,
       });
       s.addText(
         slide.bullets.map((b) => ({ text: b, options: { bullet: true, breakLine: true } })),
-        {
-          x: 0.7,
-          y: 1.8,
-          w: 7.2,
-          h: 5,
-          fontFace: theme.bodyFont,
-          fontSize: 16,
-          color: theme.bodyColor,
-          valign: 'top',
-          lineSpacingMultiple: 1.3,
-        }
+        { x: 4.7, y: 0.9, w: 8.0, h: 5.8, fontFace: 'Barlow', fontSize: 18, color: colors.bodyColor, valign: 'top', lineSpacingMultiple: 1.4 }
       );
-    } else if (positionId === 'titlelist') {
-      // Title + List: title bar at top, numbered/bulleted list filling the rest
-      s.addShape(pptx.ShapeType.rect, {
-        x: 0,
-        y: 0,
-        w: 13.33,
-        h: 1.4,
-        fill: { color: theme.accent, transparency: 90 },
-      });
+    } else if (layout === 'titlelist') {
+      s.addShape('rect', { x: 0, y: 0, w: 13.33, h: 1.0, fill: { color: colors.bandColor } });
       s.addText(slide.title, {
-        x: 0.7,
-        y: 0.35,
-        w: 11.9,
-        h: 0.8,
-        fontFace: theme.titleFont,
-        fontSize: 28,
-        bold: true,
-        color: theme.titleColor,
+        x: 0.6, y: 0.15, w: 12.1, h: 0.7,
+        fontFace: 'Barlow Condensed', fontSize: 26, bold: true, color: WHITE,
       });
       s.addText(
         slide.bullets.map((b) => ({ text: b, options: { bullet: true, breakLine: true } })),
-        {
-          x: 0.9,
-          y: 1.8,
-          w: 11.5,
-          h: 5.2,
-          fontFace: theme.bodyFont,
-          fontSize: 17,
-          color: theme.bodyColor,
-          valign: 'top',
-          lineSpacingMultiple: 1.35,
-        }
+        { x: 0.9, y: 1.5, w: 11.5, h: 5.5, fontFace: 'Barlow', fontSize: 20, color: colors.bodyColor, valign: 'top', lineSpacingMultiple: 1.5 }
       );
     } else {
-      // Centered (default): title and bullets centered on the slide
       s.addText(slide.title, {
-        x: 0.9,
-        y: 0.8,
-        w: 11.5,
-        h: 1,
-        fontFace: theme.titleFont,
-        fontSize: 28,
-        bold: true,
-        color: theme.titleColor,
-        align: 'center',
+        x: 0.9, y: 0.6, w: 11.5, h: 1.0,
+        fontFace: 'Barlow Condensed', fontSize: 28, bold: true, color: colors.titleColor, align: 'center',
       });
+      s.addShape('rect', { x: 5.8, y: 1.55, w: 1.7, h: 0.05, fill: { color: colors.accent } });
       s.addText(
         slide.bullets.map((b) => ({ text: b, options: { bullet: true, breakLine: true } })),
-        {
-          x: 2.2,
-          y: 2.1,
-          w: 8.9,
-          h: 4.8,
-          fontFace: theme.bodyFont,
-          fontSize: 16,
-          color: theme.bodyColor,
-          valign: 'top',
-          align: 'left',
-          lineSpacingMultiple: 1.3,
-        }
+        { x: 1.8, y: 2.0, w: 9.7, h: 5.0, fontFace: 'Barlow', fontSize: 19, color: colors.bodyColor, valign: 'top', align: 'left', lineSpacingMultiple: 1.5 }
       );
     }
 
-    s.addShape(pptx.ShapeType.rect, {
-      x: 0,
-      y: 7.32,
-      w: 13.33,
-      h: 0.04,
-      fill: { color: theme.accent },
+    s.addText(`${i + 1}`, {
+      x: 12.6, y: 7.05, w: 0.6, h: 0.35,
+      fontFace: 'Barlow', fontSize: 10, color: colors.accent, align: 'right',
     });
   });
 
-  const safeName = outline.deckTitle.replace(/[^\w\s-]/g, '').trim().slice(0, 60) || 'Presentation';
-  await pptx.writeFile({ fileName: `${safeName}.pptx` });
+  const safeTitle =
+    outline.deckTitle.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'presentation';
+  await pptx.writeFile({ fileName: `${safeTitle}.pptx` });
 }
