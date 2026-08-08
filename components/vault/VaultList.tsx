@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
 
@@ -88,10 +89,56 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-16">
-        <p className="font-body text-sm text-g600">
-          Nothing here yet. Generate a quiz or save a Study Companion session to see it here.
-        </p>
+      <div className="relative overflow-hidden rounded-2xl bg-navy px-6 py-10 text-center">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse at 50% 0%, rgba(226,190,90,0.10), transparent 55%)',
+          }}
+        />
+        <div className="relative">
+          <p className="font-condensed font-semibold text-[11px] uppercase tracking-[0.22em] text-gold-light mb-2">
+            Private · Members Only
+          </p>
+          <h2 className="font-display font-bold text-2xl text-off-white leading-tight mb-3">
+            Your Study Vault
+          </h2>
+          <p className="font-body text-sm text-off-white/70 max-w-xs mx-auto mb-8">
+            Quizzes and Companion sessions you&apos;ve saved, organized by course or your own folders.
+          </p>
+
+          <div className="flex justify-center mb-8">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-gold/50">
+              <div className="absolute inset-3 rounded-full border border-gold/25" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E2BE5A" strokeWidth="1.4" className="h-9 w-9">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                <circle cx="12" cy="15.5" r="1.6" fill="#E2BE5A" stroke="none" />
+              </svg>
+            </div>
+          </div>
+
+          <p className="font-body text-sm text-off-white/80 max-w-[260px] mx-auto mb-7 leading-relaxed">
+            The vault is <span className="font-semibold text-off-white">sealed and empty</span>. Generate a
+            quiz or save a Companion session to unlock it.
+          </p>
+
+          <div className="mx-auto max-w-xs space-y-3">
+            <Link
+              href="/vault/quiz-generator"
+              className="block w-full rounded-xl bg-gradient-to-br from-gold-light to-gold px-4 py-3.5 text-center font-condensed font-bold text-sm uppercase tracking-wide text-navy shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
+            >
+              Generate a Quiz
+            </Link>
+            <Link
+              href="/vault/companion"
+              className="block w-full rounded-xl border border-gold/35 px-4 py-3.5 text-center font-condensed font-semibold text-sm uppercase tracking-wide text-gold-light transition-colors hover:bg-gold/10"
+            >
+              Open Study Companion
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
