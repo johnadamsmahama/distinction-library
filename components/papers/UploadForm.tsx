@@ -10,6 +10,34 @@ type Tab = 'paper' | 'material' | 'bulk';
 
 const LEVELS_WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
 
+const labelClass = 'font-mono text-[10px] uppercase tracking-wide text-[#4E9C7C] mb-1.5 block';
+const ruledField = 'pb-2.5 mb-4 border-b border-dashed border-[#C9BFA0] last:border-0 last:mb-0';
+const inputClass =
+  'w-full bg-transparent border-none outline-none font-body text-[15px] text-g800 placeholder:text-g600/50 px-0 py-0';
+
+function CatalogShell({
+  tabLabel,
+  tabColor,
+  children,
+}: {
+  tabLabel: string;
+  tabColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative bg-[#FBF6E8] rounded-[3px] shadow-[0_18px_40px_rgba(6,15,30,0.45)] -rotate-[0.6deg]">
+      <div className="absolute top-3.5 left-4 w-2.5 h-2.5 rounded-full bg-g100 shadow-inner" />
+      <div
+        className="absolute -top-[11px] right-5 text-white font-condensed font-bold text-[9.5px] tracking-wide uppercase px-3 pt-1 pb-1 rounded-t-[3px]"
+        style={{ backgroundColor: tabColor }}
+      >
+        {tabLabel}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function UploadForm({
   courses,
   uploadSuspended,
@@ -32,31 +60,35 @@ export default function UploadForm({
 
   if (uploadSuspended) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-        <h2 className="font-display font-bold text-lg text-red-700 mb-2">Uploads suspended</h2>
-        <p className="font-body text-sm text-red-600">
-          Your upload privileges are currently suspended after reaching 3 strikes. Contact support
-          if you believe this is a mistake.
-        </p>
-      </div>
+      <CatalogShell tabLabel="Suspended" tabColor="#C0433A">
+        <div className="px-6 pt-8 pb-8 pl-10 text-center">
+          <h2 className="font-display font-bold text-lg text-navy mb-2">Uploads suspended</h2>
+          <p className="font-body text-sm text-g600 leading-relaxed">
+            Your upload privileges are currently suspended after reaching 3 strikes. Contact support
+            if you believe this is a mistake.
+          </p>
+        </div>
+      </CatalogShell>
     );
   }
 
   if (done) {
     return (
-      <div className="bg-white border border-g100 rounded-2xl p-6 text-center">
-        <h2 className="font-display font-bold text-lg text-navy mb-2">Submitted for review</h2>
-        <p className="font-body text-sm text-g600 mb-5">
-          Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
-          notification once it&apos;s approved or rejected.
-        </p>
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors"
-        >
-          Back to dashboard
-        </button>
-      </div>
+      <CatalogShell tabLabel="Submitted" tabColor="#4E9C7C">
+        <div className="px-6 pt-8 pb-8 pl-10 text-center">
+          <h2 className="font-display font-bold text-lg text-navy mb-2">Submitted for review</h2>
+          <p className="font-body text-sm text-g600 mb-6 leading-relaxed">
+            Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
+            notification once it&apos;s approved or rejected.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="bg-navy text-white font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-[3px] hover:bg-navy-mid transition-colors"
+          >
+            Back to dashboard
+          </button>
+        </div>
+      </CatalogShell>
     );
   }
 
@@ -138,16 +170,12 @@ export default function UploadForm({
       setLoading(false);
       if (insertErr) return setError(insertErr.message);
 
-      // Fire the AI pre-screen in the background — don't block the
-      // "submitted" screen waiting for it to finish.
       if (inserted) {
         fetch(`/api/moderation/ai-review/${inserted.id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ kind: 'past_paper' }),
-        }).catch(() => {
-          // Non-fatal — it'll just sit in the queue for manual review.
-        });
+        }).catch(() => {});
       }
 
       setDone(true);
@@ -177,16 +205,12 @@ export default function UploadForm({
       setLoading(false);
       if (insertErr) return setError(insertErr.message);
 
-      // Fire the AI pre-screen in the background — don't block the
-      // "submitted" screen waiting for it to finish.
       if (inserted) {
         fetch(`/api/moderation/ai-review/${inserted.id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ kind: 'study_material' }),
-        }).catch(() => {
-          // Non-fatal — it'll just sit in the queue for manual review.
-        });
+        }).catch(() => {});
       }
 
       setDone(true);
@@ -194,136 +218,146 @@ export default function UploadForm({
   };
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          type="button"
-          onClick={() => setTab('paper')}
-          className={`font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-lg transition-colors ${
-            tab === 'paper' ? 'bg-navy text-white' : 'bg-off-white text-g600'
-          }`}
-        >
-          Past Paper
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('material')}
-          className={`font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-lg transition-colors ${
-            tab === 'material' ? 'bg-navy text-white' : 'bg-off-white text-g600'
-          }`}
-        >
-          Study Material
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('bulk')}
-          className={`font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-lg transition-colors ${
-            tab === 'bulk' ? 'bg-navy text-white' : 'bg-off-white text-g600'
-          }`}
-        >
-          Bulk Upload (Zip)
-        </button>
+    <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C">
+      <div className="flex items-baseline justify-between px-6 pt-6 pb-3.5 pl-10 border-b-2 border-[#C9BFA0]">
+        <span className="font-mono text-[11px] text-g600 tracking-wide">UPSA / {year}</span>
+        <span className="font-display font-bold text-base text-navy">New Entry</span>
       </div>
 
-      {tab === 'bulk' ? (
-        <BulkUploadPanel />
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={labelClass}>Course</label>
-            <CustomSelect
-              value={courseId}
-              onChange={setCourseId}
-              placeholder="Select a course…"
-              options={courses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
-            />
+      <div className="px-6 pt-4 pb-6 pl-10">
+        <div className={ruledField}>
+          <div className={labelClass}>Resource Type</div>
+          <div className="flex gap-1.5">
+            {(['paper', 'material', 'bulk'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTab(t)}
+                className={`flex-1 min-w-0 font-condensed font-bold text-[9.5px] uppercase text-center leading-tight rounded-[3px] py-2.5 px-1 border-[1.5px] transition-colors ${
+                  tab === t ? 'bg-navy border-navy text-white -rotate-1 shadow-sm' : 'bg-transparent border-navy text-navy'
+                }`}
+              >
+                {t === 'paper' ? 'Past Paper' : t === 'material' ? 'Study Material' : 'Bulk Upload'}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {tab === 'paper' ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Exam type</label>
-                <CustomSelect
-                  value={examType}
-                  onChange={(v) => setExamType(v as any)}
-                  options={[
-                    { value: 'mid_semester', label: 'Mid-Semester' },
-                    { value: 'end_of_semester', label: 'End of Semester' },
-                  ]}
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Year</label>
-                <input
-                  type="number"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className={inputClass}
-                  min={2000}
-                  max={2100}
-                />
-              </div>
+        {tab === 'bulk' ? (
+          <BulkUploadPanel />
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className={ruledField}>
+              <label className={labelClass}>Course</label>
+              <CustomSelect
+                value={courseId}
+                onChange={setCourseId}
+                placeholder="Select a course…"
+                options={courses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+              />
             </div>
-          ) : (
-            <>
-              <div>
-                <label className={labelClass}>Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className={inputClass}
-                  placeholder="e.g. Week 4 — Sampling Methods"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Type</label>
+
+            {tab === 'paper' ? (
+              <div className="flex gap-5">
+                <div className={`${ruledField} flex-1`}>
+                  <label className={labelClass}>Exam Type</label>
                   <CustomSelect
-                    value={contentType}
-                    onChange={(v) => setContentType(v as any)}
+                    value={examType}
+                    onChange={(v) => setExamType(v as any)}
                     options={[
-                      { value: 'lecture_slides', label: 'Lecture Slides' },
-                      { value: 'study_notes', label: 'Study Notes' },
-                      { value: 'study_guide', label: 'Study Guide' },
+                      { value: 'mid_semester', label: 'Mid-Semester' },
+                      { value: 'end_of_semester', label: 'End of Semester' },
                     ]}
                   />
                 </div>
-                <div>
-                  <label className={labelClass}>Week</label>
-                  <CustomSelect
-                    value={week}
-                    onChange={setWeek}
-                    options={LEVELS_WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))}
+                <div className={`${ruledField} flex-1`}>
+                  <label className={labelClass}>Year</label>
+                  <input
+                    type="number"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className={inputClass}
+                    min={2000}
+                    max={2100}
                   />
                 </div>
               </div>
-            </>
-          )}
+            ) : (
+              <>
+                <div className={ruledField}>
+                  <label className={labelClass}>Title</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className={inputClass}
+                    placeholder="e.g. Week 4 — Sampling Methods"
+                  />
+                </div>
+                <div className="flex gap-5">
+                  <div className={`${ruledField} flex-1`}>
+                    <label className={labelClass}>Type</label>
+                    <CustomSelect
+                      value={contentType}
+                      onChange={(v) => setContentType(v as any)}
+                      options={[
+                        { value: 'lecture_slides', label: 'Lecture Slides' },
+                        { value: 'study_notes', label: 'Study Notes' },
+                        { value: 'study_guide', label: 'Study Guide' },
+                      ]}
+                    />
+                  </div>
+                  <div className={`${ruledField} flex-1`}>
+                    <label className={labelClass}>Week</label>
+                    <CustomSelect
+                      value={week}
+                      onChange={setWeek}
+                      options={LEVELS_WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
-          <div>
-            <label className={labelClass}>File</label>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="w-full font-body text-sm text-g600"
-            />
-            <p className="font-body text-xs text-g600 mt-1.5">PDF, Word, PowerPoint, or a photo/scan (JPG, PNG).</p>
-          </div>
+            <div className="mb-1">
+              <label className={labelClass}>File</label>
+              <label
+                htmlFor="resource-file"
+                className="block border border-dashed border-[#4E9C7C] rounded-md bg-[#4E9C7C]/5 py-3.5 px-3 text-center cursor-pointer"
+              >
+                <span className="block font-mono font-bold text-[11.5px] text-navy underline mb-1 truncate">
+                  {file ? file.name : 'Attach file'}
+                </span>
+                <span className="block font-mono text-[10px] text-g600 tracking-wide">
+                  PDF · WORD · POWERPOINT · JPG · PNG
+                </span>
+              </label>
+              <input
+                id="resource-file"
+                type="file"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                className="hidden"
+              />
+            </div>
 
-          {error && <p className="font-body text-sm text-red-500">{error}</p>}
+            {error && <p className="font-body text-sm text-red-500 mt-4">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
-          >
-            {loading ? 'Uploading…' : 'Submit for review'}
-          </button>
-        </form>
-      )}
-    </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-5 bg-[#4E9C7C] text-white font-condensed font-bold text-[13.5px] uppercase tracking-wide py-3.5 rounded-[3px] shadow-[0_4px_10px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-2 hover:brightness-105 transition-all"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+              {loading ? 'Uploading…' : 'File for Review'}
+            </button>
+          </form>
+        )}
+      </div>
+    </CatalogShell>
   );
 }
 
@@ -409,7 +443,6 @@ function BulkUploadPanel() {
 
     setJobId(job.id);
 
-    // Kick off processing — nothing else triggers this automatically.
     fetch('/api/bulk-upload/process', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -420,29 +453,26 @@ function BulkUploadPanel() {
   if (jobId) {
     const percent = totalFiles ? Math.round((cursor / totalFiles) * 100) : 0;
     return (
-      <div>
+      <div className={ruledField}>
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="font-condensed font-bold text-sm text-navy">
               {jobStatus === 'completed' ? 'Done' : jobStatus === 'failed' ? 'Something went wrong' : 'Processing…'}
             </span>
-            <span className="font-body text-xs text-g600">
+            <span className="font-mono text-[10.5px] text-g600">
               {totalFiles !== null ? `${cursor} / ${totalFiles} files` : 'Reading zip…'}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-off-white overflow-hidden">
-            <div
-              className="h-full bg-gold transition-all"
-              style={{ width: `${percent}%` }}
-            />
+          <div className="h-2 rounded-full bg-[#EAF5F0] overflow-hidden">
+            <div className="h-full bg-[#4E9C7C] transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
 
         {results.length > 0 && (
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {results.map((r, i) => (
-              <div key={i} className="border border-g100 rounded-lg p-3">
-                <div className="font-condensed font-bold text-xs text-navy break-all">{r.filename}</div>
+              <div key={i} className="border border-[#C9BFA0] rounded-[4px] p-3 bg-white/50">
+                <div className="font-mono font-bold text-[11px] text-navy break-all">{r.filename}</div>
                 <div className={`font-body text-xs mt-1 ${statusColor(r.status)}`}>{r.note}</div>
               </div>
             ))}
@@ -458,7 +488,7 @@ function BulkUploadPanel() {
               setCursor(0);
               setTotalFiles(null);
             }}
-            className="w-full mt-4 bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors"
+            className="w-full mt-4 bg-[#4E9C7C] text-white font-condensed font-bold text-sm py-3 rounded-[3px] hover:brightness-105 transition-all"
           >
             Upload another zip
           </button>
@@ -468,9 +498,9 @@ function BulkUploadPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="bg-off-white rounded-lg p-4">
-        <p className="font-body text-sm text-g600">
+    <div>
+      <div className="bg-[#4E9C7C]/8 rounded-[4px] p-4 mb-4">
+        <p className="font-body text-[13px] text-g800 leading-relaxed">
           Upload a zip file containing multiple past papers or study materials — no need to sort
           them first. Each document is automatically read, matched to the right course, and
           categorized. Confident study material matches go live immediately; past papers always
@@ -480,25 +510,34 @@ function BulkUploadPanel() {
         </p>
       </div>
 
-      <div>
-        <label className={labelClass}>Zip file</label>
+      <div className="mb-1">
+        <label className={labelClass}>Zip File</label>
+        <label
+          htmlFor="zip-file"
+          className="block border border-dashed border-[#4E9C7C] rounded-md bg-[#4E9C7C]/5 py-3.5 px-3 text-center cursor-pointer"
+        >
+          <span className="block font-mono font-bold text-[11.5px] text-navy underline mb-1 truncate">
+            {zipFile ? zipFile.name : 'Attach zip file'}
+          </span>
+        </label>
         <input
+          id="zip-file"
           type="file"
           accept=".zip"
           onChange={(e) => setZipFile(e.target.files?.[0] ?? null)}
-          className="w-full font-body text-sm text-g600"
+          className="hidden"
         />
       </div>
 
-      {error && <p className="font-body text-sm text-red-500">{error}</p>}
+      {error && <p className="font-body text-sm text-red-500 mt-4">{error}</p>}
 
       <button
         type="button"
         disabled={uploading}
         onClick={handleZipUpload}
-        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full mt-5 bg-[#4E9C7C] text-white font-condensed font-bold text-[13.5px] uppercase tracking-wide py-3.5 rounded-[3px] shadow-[0_4px_10px_rgba(78,156,124,0.35)] disabled:opacity-60 hover:brightness-105 transition-all"
       >
-        {uploading ? 'Uploading…' : 'Upload and process'}
+        {uploading ? 'Uploading…' : 'Upload and Process'}
       </button>
     </div>
   );
@@ -512,7 +551,3 @@ function statusColor(status: string): string {
   if (status === 'error') return 'text-red-500';
   return 'text-g600';
 }
-
-const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
-const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
