@@ -22,9 +22,9 @@ export default async function VaultPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <h1 className="font-display font-bold text-2xl text-navy">Your Study Vault</h1>
+        <h1 className="font-display font-bold text-xl text-navy">Your Study Vault</h1>
       </div>
-      <p className="font-body text-sm text-g600 mb-6">
+      <p className="font-body text-xs text-g600 mb-3">
         Private to you — quizzes and Companion sessions you've saved. Organize them by course or
         your own folders.
       </p>
