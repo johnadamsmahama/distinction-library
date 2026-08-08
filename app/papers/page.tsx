@@ -12,14 +12,7 @@ export default async function PapersPage({
   const departments = await getDepartmentOptions(courses);
 
   return (
-    <div>
-      <h1 className="font-display font-bold text-2xl text-navy mb-1">
-        Past Questions &amp; Study Materials
-      </h1>
-      <p className="font-body text-sm text-g600 mb-6">
-        Every approved resource, organised by course and week.
-      </p>
-
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
       <RepositoryBrowser
         courses={courses}
         departments={departments}
