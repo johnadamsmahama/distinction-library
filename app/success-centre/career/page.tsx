@@ -92,8 +92,15 @@ export default async function CareerCentrePage() {
                   href={tool.href}
                   className="flex-1 bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5 hover:border-gold hover:border-l-navy transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-[9px] bg-navy flex items-center justify-center mb-3">
-                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#E4C878]" fill="none" strokeWidth={1.8}>
+                  <div className="w-9 h-9 shrink-0 overflow-hidden rounded-[9px] bg-navy flex items-center justify-center mb-3">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width={18}
+                      height={18}
+                      className="w-[18px] h-[18px] shrink-0 stroke-[#E4C878]"
+                      fill="none"
+                      strokeWidth={1.8}
+                    >
                       {tool.icon}
                     </svg>
                   </div>
@@ -101,7 +108,7 @@ export default async function CareerCentrePage() {
                   <p className="font-body text-sm text-g600 leading-relaxed">{tool.description}</p>
                   <div className="mt-3.5 flex items-center gap-1.5 font-body text-[12.5px] font-semibold text-gold">
                     {tool.cta}
-                    <svg viewBox="0 0 24 24" className="w-3 h-3 stroke-gold" fill="none" strokeWidth={2}>
+                    <svg viewBox="0 0 24 24" width={12} height={12} className="w-3 h-3 shrink-0 stroke-gold" fill="none" strokeWidth={2}>
                       <path d="M5 12h14M13 6l6 6-6 6" />
                     </svg>
                   </div>
