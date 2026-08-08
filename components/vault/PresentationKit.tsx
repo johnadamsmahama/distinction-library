@@ -44,6 +44,80 @@ const POSITION_OPTIONS = [
   { id: 'custom', label: 'Type your own…' },
 ];
 
+type DropdownOption = { id: string; label: string };
+
+function BrandDropdown({
+  options,
+  value,
+  onChange,
+}: {
+  options: DropdownOption[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.id === value) ?? options[0];
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg border bg-off-white font-body text-sm text-left transition-colors ${
+          open ? 'border-gold' : 'border-g100'
+        }`}
+      >
+        <span className="truncate text-g800">{selected.label}</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`w-3.5 h-3.5 flex-shrink-0 text-g600 transition-transform ${open ? 'rotate-180' : ''}`}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-20 mt-1.5 w-full bg-white border border-g100 rounded-xl shadow-[0_14px_34px_-12px_rgba(10,27,61,0.25)] overflow-hidden">
+          {options.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => {
+                onChange(o.id);
+                setOpen(false);
+              }}
+              className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 font-body text-sm text-left transition-colors ${
+                o.id === value ? 'bg-gold/[0.08] text-navy font-semibold' : 'text-g800 hover:bg-off-white'
+              }`}
+            >
+              <span className="truncate">{o.label}</span>
+              {o.id === value && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0 text-gold">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PresentationKit() {
   const [source, setSource] = useState<Source>('topic');
 
@@ -267,18 +341,11 @@ export default function PresentationKit() {
                     Nothing in your Vault yet — save a quiz or summary first, or start from a topic instead.
                   </p>
                 ) : (
-                  <select
+                  <BrandDropdown
+                    options={[{ id: '', label: 'Select a saved item…' }, ...vaultItems.map((i) => ({ id: i.id, label: i.title }))]}
                     value={vaultItemId}
-                    onChange={(e) => setVaultItemId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-g100 bg-off-white font-body text-sm outline-none focus:border-gold"
-                  >
-                    <option value="">Select a saved item…</option>
-                    {vaultItems.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.title}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setVaultItemId}
+                  />
                 )}
               </div>
             )}
@@ -335,58 +402,36 @@ export default function PresentationKit() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
-                  Style
-                </div>
-                <select
-                  value={styleId}
-                  onChange={(e) => setStyleId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-g100 bg-off-white font-body text-sm outline-none focus:border-gold"
-                >
-                  {STYLE_OPTIONS.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                {styleId === 'custom' && (
-                  <input
-                    type="text"
-                    value={customStyle}
-                    onChange={(e) => setCustomStyle(e.target.value)}
-                    placeholder="Describe the style…"
-                    className="mt-2 w-full px-3 py-2 rounded-lg border border-g100 bg-off-white font-body text-xs outline-none focus:border-gold"
-                  />
-                )}
+            <div>
+              <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
+                Style
               </div>
+              <BrandDropdown options={STYLE_OPTIONS} value={styleId} onChange={setStyleId} />
+              {styleId === 'custom' && (
+                <input
+                  type="text"
+                  value={customStyle}
+                  onChange={(e) => setCustomStyle(e.target.value)}
+                  placeholder="Describe the style…"
+                  className="mt-2 w-full px-3 py-2 rounded-lg border border-g100 bg-off-white font-body text-xs outline-none focus:border-gold"
+                />
+              )}
+            </div>
 
-              <div>
-                <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
-                  Position / Layout
-                </div>
-                <select
-                  value={positionId}
-                  onChange={(e) => setPositionId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-g100 bg-off-white font-body text-sm outline-none focus:border-gold"
-                >
-                  {POSITION_OPTIONS.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                {positionId === 'custom' && (
-                  <input
-                    type="text"
-                    value={customPosition}
-                    onChange={(e) => setCustomPosition(e.target.value)}
-                    placeholder="Describe the layout…"
-                    className="mt-2 w-full px-3 py-2 rounded-lg border border-g100 bg-off-white font-body text-xs outline-none focus:border-gold"
-                  />
-                )}
+            <div>
+              <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
+                Position / Layout
               </div>
+              <BrandDropdown options={POSITION_OPTIONS} value={positionId} onChange={setPositionId} />
+              {positionId === 'custom' && (
+                <input
+                  type="text"
+                  value={customPosition}
+                  onChange={(e) => setCustomPosition(e.target.value)}
+                  placeholder="Describe the layout…"
+                  className="mt-2 w-full px-3 py-2 rounded-lg border border-g100 bg-off-white font-body text-xs outline-none focus:border-gold"
+                />
+              )}
             </div>
 
             <div>
