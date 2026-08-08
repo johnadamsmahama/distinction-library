@@ -138,6 +138,21 @@ const ACTIONS: Action[] = [
     grain: true,
   },
   {
+    href: '/vault/presentation-kit',
+    label: 'Presentation Kit',
+    desc: 'Turn a topic, a Vault item, or a document into a PowerPoint (PPTX) ready to present.',
+    path: 'M3 4h18v13H3V4zM8 21h8M12 17v4M7 12l3-4 2.5 3L17 6',
+    background: 'radial-gradient(140% 140% at 85% 0%, #C9A02C, #4A1942 68%)',
+    aurora:
+      'radial-gradient(42% 48% at 15% 10%, rgba(240,210,120,.55), transparent 70%), radial-gradient(45% 50% at 85% 65%, rgba(140,50,105,.5), transparent 70%), radial-gradient(50% 55% at 50% 100%, rgba(30,10,40,.55), transparent 70%)',
+    textClass: 'text-white',
+    subClass: 'text-white/80',
+    iconBgClass: 'bg-white/[.14]',
+    iconColorClass: 'text-gold-light',
+    arrowColorClass: 'text-gold-light',
+    grain: true,
+  },
+  {
     href: '/tutors',
     label: 'Find a Peer Tutor',
     desc: 'Get one-on-one help from a fellow student',
