@@ -21,7 +21,7 @@ export default async function UploadPage() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl px-5 pt-9 pb-11 max-w-lg mx-auto"
+      className="relative overflow-hidden px-4 pt-6 pb-6 -mx-4 sm:-mx-6 lg:-mx-8"
       style={{
         backgroundImage: 'radial-gradient(120% 90% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
       }}
@@ -31,7 +31,6 @@ export default async function UploadPage() {
         style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay' }}
       />
 
-      {/* constellation dust, matching AI Tools */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 400 500">
         <g style={{ animation: 'contribDriftA 15s ease-in-out infinite', transformOrigin: '60px 90px' }}>
           <g stroke="#E2BE5A" strokeWidth="0.7" opacity="0.22" fill="none">
@@ -53,31 +52,29 @@ export default async function UploadPage() {
         <circle cx="360" cy="460" r="1.2" fill="#E2BE5A" opacity="0.3" />
       </svg>
 
-      <div className="relative z-10 flex items-center gap-2 mb-2">
-        <span className="font-condensed font-bold text-[11px] uppercase tracking-wide text-gold-light">
-          Community Contribution
-        </span>
-        <Link
-          href="/papers/my-uploads"
-          className="ml-auto font-condensed font-bold text-[10.5px] uppercase text-gold border border-gold/40 rounded-full px-2.5 py-1 hover:bg-gold/10 transition-colors"
-        >
-          My Uploads
-        </Link>
-      </div>
+      <div className="relative z-10 max-w-lg mx-auto">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-gold-light">
+            Community Contribution
+          </span>
+          <Link
+            href="/papers/my-uploads"
+            className="ml-auto font-condensed font-bold text-[10px] uppercase text-gold border border-gold/40 rounded-full px-2.5 py-1 hover:bg-gold/10 transition-colors"
+          >
+            My Uploads
+          </Link>
+        </div>
 
-      <h1 className="relative z-10 font-display font-bold text-[28px] text-white mb-2">
-        Contribute a resource
-      </h1>
-      <p className="relative z-10 text-sm text-white/70 leading-relaxed mb-7 max-w-[340px]">
-        Submissions go to a moderator for review before appearing in the library.
-      </p>
+        <h1 className="font-display font-bold text-[23px] text-white mb-1.5">Contribute a resource</h1>
+        <p className="text-[12.5px] text-white/65 leading-snug mb-4">
+          Submissions go to a moderator for review before appearing in the library.
+        </p>
 
-      <div className="relative z-10">
         <UploadForm courses={courses} uploadSuspended={profile?.upload_suspended ?? false} />
-      </div>
 
-      <div className="relative z-10 mt-4 text-center font-mono text-[10.5px] text-white/40">
-        — catalogued by the Distinction Library community —
+        <div className="mt-2.5 text-center font-mono text-[9px] text-white/40">
+          — catalogued by the Distinction Library community —
+        </div>
       </div>
 
       <style>{`
