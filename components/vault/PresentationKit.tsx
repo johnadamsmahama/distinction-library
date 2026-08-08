@@ -165,7 +165,7 @@ export default function PresentationKit() {
     setDownloading(true);
     try {
       const { renderOutlineToPptx } = await import('@/lib/export/toPptx');
-      await renderOutlineToPptx(outline, styleId);
+      await renderOutlineToPptx(outline, styleId, positionId);
     } finally {
       setDownloading(false);
     }
