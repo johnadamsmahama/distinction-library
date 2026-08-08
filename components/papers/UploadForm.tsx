@@ -151,21 +151,11 @@ export default function UploadForm({
 
     if (tab === 'paper') {
       const { error: uploadErr } = await supabase.storage.from('past-papers').upload(path, file);
-      if (uploadErr) {
-        setLoading(false);
-        setError(uploadErr.message);
-        return;
-      }
+      if (uploadErr) { setLoading(false); setError(uploadErr.message); return; }
 
       const { data: inserted, error: insertErr } = await supabase
         .from('past_papers')
-        .insert({
-          course_id: courseId,
-          year: Number(year),
-          exam_type: examType,
-          file_url: path,
-          uploaded_by: user.id,
-        })
+        .insert({ course_id: courseId, year: Number(year), exam_type: examType, file_url: path, uploaded_by: user.id })
         .select('id')
         .single();
 
@@ -179,15 +169,10 @@ export default function UploadForm({
           body: JSON.stringify({ kind: 'past_paper' }),
         }).catch(() => {});
       }
-
       setDone(true);
     } else {
       const { error: uploadErr } = await supabase.storage.from('study-materials').upload(path, file);
-      if (uploadErr) {
-        setLoading(false);
-        setError(uploadErr.message);
-        return;
-      }
+      if (uploadErr) { setLoading(false); setError(uploadErr.message); return; }
 
       const { data: publicUrlData } = supabase.storage.from('study-materials').getPublicUrl(path);
 
@@ -214,19 +199,22 @@ export default function UploadForm({
           body: JSON.stringify({ kind: 'study_material' }),
         }).catch(() => {});
       }
-
       setDone(true);
     }
   };
 
   return (
     <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C" className="flex flex-col flex-1 min-h-0">
+      {/* Card header row */}
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
         <span className="font-mono text-[10px] text-g600 tracking-wide">UPSA / {year}</span>
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
 
+      {/* Card body — grows to fill card */}
       <div className="px-4 pt-3 pb-4 pl-8 flex-1 flex flex-col min-h-0">
+
+        {/* Resource type toggle */}
         <div className={`${ruledField} shrink-0`}>
           <div className={labelClass}>Resource Type</div>
           <div className="flex gap-1">
@@ -249,6 +237,7 @@ export default function UploadForm({
           <BulkUploadPanel />
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+            {/* Course */}
             <div className={`${ruledField} shrink-0`}>
               <label className={labelClass}>Course</label>
               <CustomSelect
@@ -259,9 +248,10 @@ export default function UploadForm({
               />
             </div>
 
+            {/* Paper-specific or material-specific fields */}
             {tab === 'paper' ? (
               <div className={`flex gap-3.5 shrink-0 ${ruledField}`}>
-                <div className="flex-1 border-0 pb-0 mb-0">
+                <div className="flex-1">
                   <label className={labelClass}>Exam Type</label>
                   <CustomSelect
                     value={examType}
@@ -272,7 +262,7 @@ export default function UploadForm({
                     ]}
                   />
                 </div>
-                <div className="flex-1 border-0 pb-0 mb-0">
+                <div className="flex-1">
                   <label className={labelClass}>Year</label>
                   <input
                     type="number"
@@ -297,7 +287,7 @@ export default function UploadForm({
                   />
                 </div>
                 <div className={`flex gap-3.5 ${ruledField}`}>
-                  <div className="flex-1 border-0 pb-0 mb-0">
+                  <div className="flex-1">
                     <label className={labelClass}>Type</label>
                     <CustomSelect
                       value={contentType}
@@ -309,7 +299,7 @@ export default function UploadForm({
                       ]}
                     />
                   </div>
-                  <div className="flex-1 border-0 pb-0 mb-0">
+                  <div className="flex-1">
                     <label className={labelClass}>Week</label>
                     <CustomSelect
                       value={week}
@@ -321,7 +311,7 @@ export default function UploadForm({
               </div>
             )}
 
-            {/* File + submit pinned to the bottom of the growing form */}
+            {/* File + submit — mt-auto pins this group to the bottom of the growing form */}
             <div className="mt-auto pt-1">
               <div className="mb-1">
                 <label className={labelClass}>File</label>
@@ -382,72 +372,46 @@ function BulkUploadPanel() {
   useEffect(() => {
     if (!jobId) return;
     const supabase = createClient();
-
     const poll = async () => {
       const { data } = await supabase
         .from('bulk_upload_jobs')
         .select('status, total_files, cursor, results')
         .eq('id', jobId)
         .single();
-
       if (data) {
         setJobStatus(data.status);
         setTotalFiles(data.total_files);
         setCursor(data.cursor);
         setResults((data.results as JobResult[]) ?? []);
-
         if (data.status === 'completed' || data.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
         }
       }
     };
-
     poll();
     pollRef.current = setInterval(poll, 3000);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [jobId]);
 
   const handleZipUpload = async () => {
     setError(null);
     if (!zipFile) return setError('Choose a zip file first.');
     if (!zipFile.name.toLowerCase().endsWith('.zip')) return setError('Please choose a .zip file.');
-
     setUploading(true);
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setUploading(false);
-      setError('Your session expired — please log in again.');
-      return;
-    }
-
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setUploading(false); setError('Your session expired — please log in again.'); return; }
     const path = `${user.id}/${Date.now()}-${zipFile.name}`;
     const { error: uploadErr } = await supabase.storage.from('bulk-uploads').upload(path, zipFile);
-    if (uploadErr) {
-      setUploading(false);
-      setError(uploadErr.message);
-      return;
-    }
-
+    if (uploadErr) { setUploading(false); setError(uploadErr.message); return; }
     const { data: job, error: insertErr } = await supabase
       .from('bulk_upload_jobs')
       .insert({ uploaded_by: user.id, zip_path: path })
       .select('id')
       .single();
-
     setUploading(false);
-    if (insertErr || !job) {
-      setError(insertErr?.message ?? 'Could not start the upload job.');
-      return;
-    }
-
+    if (insertErr || !job) { setError(insertErr?.message ?? 'Could not start the upload job.'); return; }
     setJobId(job.id);
-
     fetch('/api/bulk-upload/process', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -472,7 +436,6 @@ function BulkUploadPanel() {
             <div className="h-full bg-[#4E9C7C] transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
-
         {results.length > 0 && (
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
             {results.map((r, i) => (
@@ -483,16 +446,9 @@ function BulkUploadPanel() {
             ))}
           </div>
         )}
-
         {jobStatus === 'completed' && (
           <button
-            onClick={() => {
-              setJobId(null);
-              setZipFile(null);
-              setResults([]);
-              setCursor(0);
-              setTotalFiles(null);
-            }}
+            onClick={() => { setJobId(null); setZipFile(null); setResults([]); setCursor(0); setTotalFiles(null); }}
             className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-xs py-2.5 rounded-[3px] hover:brightness-105 transition-all"
           >
             Upload another zip
@@ -514,28 +470,16 @@ function BulkUploadPanel() {
           else is flagged for manual review.
         </p>
       </div>
-
       <div className="mb-1">
         <label className={labelClass}>Zip File</label>
-        <label
-          htmlFor="zip-file"
-          className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
-        >
+        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer">
           <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
             {zipFile ? zipFile.name : 'Attach zip file'}
           </span>
         </label>
-        <input
-          id="zip-file"
-          type="file"
-          accept=".zip"
-          onChange={(e) => setZipFile(e.target.files?.[0] ?? null)}
-          className="hidden"
-        />
+        <input id="zip-file" type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] ?? null)} className="hidden" />
       </div>
-
       {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
-
       <button
         type="button"
         disabled={uploading}
