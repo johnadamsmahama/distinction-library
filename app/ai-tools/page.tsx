@@ -21,7 +21,7 @@ const TOOLS = [
 
 function CompanionIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 12 5.5 7.5M12 12l7 -3.8M12 12v7.3M12 12 5 16.2M12 12l7 4.5"
         stroke="#D4A017"
@@ -41,7 +41,7 @@ function CompanionIcon() {
 
 function QuizIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="3" width="14" height="18" rx="1.5" stroke="#D4A017" strokeWidth="1.5" />
       <path d="M8.2 8.3 9.4 9.5l2.1-2.3" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M13.6 8.3H16" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
@@ -54,7 +54,7 @@ function QuizIcon() {
 
 function PresentationIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="4" width="18" height="13" rx="1.5" stroke="#D4A017" strokeWidth="1.5" />
       <path d="M8 21h8" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
       <path d="M12 17v4" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
@@ -74,15 +74,15 @@ export default async function AiToolsPage() {
 
   return (
     <div>
-      <div className="font-condensed font-bold text-[10.5px] uppercase tracking-widest mb-2 text-gold">
+      <div className="font-condensed font-bold text-[10px] uppercase tracking-widest mb-1.5 text-gold">
         Distinction Library Intelligence
       </div>
-      <h1 className="font-display font-bold text-3xl text-white mb-1.5">AI Tools</h1>
-      <p className="font-body text-sm text-white/55 mb-10">
+      <h1 className="font-display font-bold text-2xl text-white mb-1">AI Tools</h1>
+      <p className="font-body text-xs text-white/55 mb-5">
         AI-powered study help, built on your own material.
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {TOOLS.map((tool, i) => {
           const Icon = ICONS[i];
           return (
@@ -95,7 +95,7 @@ export default async function AiToolsPage() {
                 }}
               />
               <div
-                className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
+                className="relative rounded-2xl p-4 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
                 style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
               >
                 <div
@@ -105,13 +105,13 @@ export default async function AiToolsPage() {
                   }}
                 />
                 <div
-                  className="relative w-11 h-11 rounded-full flex items-center justify-center mb-4"
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center mb-2.5"
                   style={{ border: '1px solid rgba(212,160,23,0.6)', background: 'rgba(212,160,23,0.06)' }}
                 >
                   <Icon />
                 </div>
-                <h2 className="relative font-display font-bold text-lg text-white mb-1.5">{tool.title}</h2>
-                <p className="relative font-body text-sm text-white/60">{tool.desc}</p>
+                <h2 className="relative font-display font-bold text-base text-white mb-1">{tool.title}</h2>
+                <p className="relative font-body text-xs text-white/60 leading-snug">{tool.desc}</p>
               </div>
             </a>
           );
