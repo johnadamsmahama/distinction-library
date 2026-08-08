@@ -90,7 +90,7 @@ export default async function CareerCentrePage() {
 
                 <Link
                   href={tool.href}
-                  className="flex-1 bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5 hover:border-gold hover:border-l-navy transition-colors"
+                  className="flex-1 block bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5 hover:border-gold hover:border-l-navy transition-colors"
                 >
                   <div className="w-9 h-9 shrink-0 overflow-hidden rounded-[9px] bg-navy flex items-center justify-center mb-3">
                     <svg
