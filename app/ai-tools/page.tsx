@@ -12,6 +12,11 @@ const TOOLS = [
     title: 'AI Quiz Generator',
     desc: 'Turn your notes or a past paper into a practice quiz in seconds.',
   },
+  {
+    href: '/vault/presentation-kit',
+    title: 'Presentation Kit',
+    desc: 'Turn a topic, a Vault item, or an uploaded document into a PowerPoint (PPTX) ready to present.',
+  },
 ];
 
 function CompanionIcon() {
@@ -47,6 +52,19 @@ function QuizIcon() {
   );
 }
 
+function PresentationIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="13" rx="1.5" stroke="#D4A017" strokeWidth="1.5" />
+      <path d="M8 21h8" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M12 17v4" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M7 13.2 10 9l2.3 2.6L17 7" stroke="#D4A017" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+    </svg>
+  );
+}
+
+const ICONS = [CompanionIcon, QuizIcon, PresentationIcon];
+
 export default async function AiToolsPage() {
   const supabase = createClient();
   const {
@@ -65,36 +83,39 @@ export default async function AiToolsPage() {
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {TOOLS.map((tool, i) => (
-          <a key={tool.href} href={tool.href} className="relative block group">
-            <div
-              className="absolute -top-16 left-1/2 -translate-x-1/2 w-[220px] h-[220px] pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(212,160,23,0.35) 0%, rgba(212,160,23,0) 70%)',
-                filter: 'blur(2px)',
-              }}
-            />
-            <div
-              className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
-              style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
-            >
+        {TOOLS.map((tool, i) => {
+          const Icon = ICONS[i];
+          return (
+            <a key={tool.href} href={tool.href} className="relative block group">
               <div
-                className="absolute top-0 left-0 right-0 h-20 pointer-events-none"
+                className="absolute -top-16 left-1/2 -translate-x-1/2 w-[220px] h-[220px] pointer-events-none"
                 style={{
-                  background: 'linear-gradient(to bottom, rgba(212,160,23,0.12) 0%, rgba(212,160,23,0) 100%)',
+                  background: 'radial-gradient(circle, rgba(212,160,23,0.35) 0%, rgba(212,160,23,0) 70%)',
+                  filter: 'blur(2px)',
                 }}
               />
               <div
-                className="relative w-11 h-11 rounded-full flex items-center justify-center mb-4"
-                style={{ border: '1px solid rgba(212,160,23,0.6)', background: 'rgba(212,160,23,0.06)' }}
+                className="relative rounded-2xl p-6 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
+                style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
               >
-                {i === 0 ? <CompanionIcon /> : <QuizIcon />}
+                <div
+                  className="absolute top-0 left-0 right-0 h-20 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(to bottom, rgba(212,160,23,0.12) 0%, rgba(212,160,23,0) 100%)',
+                  }}
+                />
+                <div
+                  className="relative w-11 h-11 rounded-full flex items-center justify-center mb-4"
+                  style={{ border: '1px solid rgba(212,160,23,0.6)', background: 'rgba(212,160,23,0.06)' }}
+                >
+                  <Icon />
+                </div>
+                <h2 className="relative font-display font-bold text-lg text-white mb-1.5">{tool.title}</h2>
+                <p className="relative font-body text-sm text-white/60">{tool.desc}</p>
               </div>
-              <h2 className="relative font-display font-bold text-lg text-white mb-1.5">{tool.title}</h2>
-              <p className="relative font-body text-sm text-white/60">{tool.desc}</p>
-            </div>
-          </a>
-        ))}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
