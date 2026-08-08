@@ -11,7 +11,7 @@ type Tab = 'paper' | 'material' | 'bulk';
 const LEVELS_WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
 
 const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#4E9C7C] mb-1 block';
-const ruledField = 'pb-1.5 mb-2.5 border-b border-dashed border-[#C9BFA0] last:border-0 last:mb-0 last:pb-0';
+const ruledField = 'pb-1.5 mb-2.5 border-b border-dashed border-[#C9BFA0]';
 const inputClass =
   'w-full bg-transparent border-none outline-none font-body text-[13.5px] text-g800 placeholder:text-g600/50 px-0 py-0';
 
@@ -19,13 +19,15 @@ function CatalogShell({
   tabLabel,
   tabColor,
   children,
+  className = '',
 }: {
   tabLabel: string;
   tabColor: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="relative bg-[#FBF6E8] rounded-[3px] shadow-[0_12px_28px_rgba(6,15,30,0.4)]">
+    <div className={`relative bg-[#FBF6E8] rounded-[3px] shadow-[0_12px_28px_rgba(6,15,30,0.4)] ${className}`}>
       <div className="absolute top-[11px] left-[13px] w-[7px] h-[7px] rounded-full bg-g100 shadow-inner" />
       <div
         className="absolute -top-[9px] right-4 text-white font-condensed font-bold text-[8.5px] tracking-wide uppercase px-2.5 pt-1 pb-[3px] rounded-t-[2px]"
@@ -218,14 +220,14 @@ export default function UploadForm({
   };
 
   return (
-    <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C">
-      <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0]">
+    <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C" className="flex flex-col flex-1 min-h-0">
+      <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
         <span className="font-mono text-[10px] text-g600 tracking-wide">UPSA / {year}</span>
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
 
-      <div className="px-4 pt-3 pb-4 pl-8">
-        <div className={ruledField}>
+      <div className="px-4 pt-3 pb-4 pl-8 flex-1 flex flex-col min-h-0">
+        <div className={`${ruledField} shrink-0`}>
           <div className={labelClass}>Resource Type</div>
           <div className="flex gap-1">
             {(['paper', 'material', 'bulk'] as Tab[]).map((t) => (
@@ -246,8 +248,8 @@ export default function UploadForm({
         {tab === 'bulk' ? (
           <BulkUploadPanel />
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div className={ruledField}>
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+            <div className={`${ruledField} shrink-0`}>
               <label className={labelClass}>Course</label>
               <CustomSelect
                 value={courseId}
@@ -258,8 +260,8 @@ export default function UploadForm({
             </div>
 
             {tab === 'paper' ? (
-              <div className="flex gap-3.5">
-                <div className={`${ruledField} flex-1`}>
+              <div className={`flex gap-3.5 shrink-0 ${ruledField}`}>
+                <div className="flex-1 border-0 pb-0 mb-0">
                   <label className={labelClass}>Exam Type</label>
                   <CustomSelect
                     value={examType}
@@ -270,7 +272,7 @@ export default function UploadForm({
                     ]}
                   />
                 </div>
-                <div className={`${ruledField} flex-1`}>
+                <div className="flex-1 border-0 pb-0 mb-0">
                   <label className={labelClass}>Year</label>
                   <input
                     type="number"
@@ -283,7 +285,7 @@ export default function UploadForm({
                 </div>
               </div>
             ) : (
-              <>
+              <div className="shrink-0">
                 <div className={ruledField}>
                   <label className={labelClass}>Title</label>
                   <input
@@ -294,8 +296,8 @@ export default function UploadForm({
                     placeholder="e.g. Week 4 — Sampling Methods"
                   />
                 </div>
-                <div className="flex gap-3.5">
-                  <div className={`${ruledField} flex-1`}>
+                <div className={`flex gap-3.5 ${ruledField}`}>
+                  <div className="flex-1 border-0 pb-0 mb-0">
                     <label className={labelClass}>Type</label>
                     <CustomSelect
                       value={contentType}
@@ -307,7 +309,7 @@ export default function UploadForm({
                       ]}
                     />
                   </div>
-                  <div className={`${ruledField} flex-1`}>
+                  <div className="flex-1 border-0 pb-0 mb-0">
                     <label className={labelClass}>Week</label>
                     <CustomSelect
                       value={week}
@@ -316,44 +318,47 @@ export default function UploadForm({
                     />
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
-            <div className="mb-1">
-              <label className={labelClass}>File</label>
-              <label
-                htmlFor="resource-file"
-                className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
+            {/* File + submit pinned to the bottom of the growing form */}
+            <div className="mt-auto pt-1">
+              <div className="mb-1">
+                <label className={labelClass}>File</label>
+                <label
+                  htmlFor="resource-file"
+                  className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
+                >
+                  <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
+                    {file ? file.name : 'Attach file'}
+                  </span>
+                  <span className="block font-mono text-[9px] text-g600 tracking-wide">
+                    PDF · WORD · POWERPOINT · JPG · PNG
+                  </span>
+                </label>
+                <input
+                  id="resource-file"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  className="hidden"
+                />
+              </div>
+
+              {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-[3px] shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-[7px] hover:brightness-105 transition-all"
               >
-                <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
-                  {file ? file.name : 'Attach file'}
-                </span>
-                <span className="block font-mono text-[9px] text-g600 tracking-wide">
-                  PDF · WORD · POWERPOINT · JPG · PNG
-                </span>
-              </label>
-              <input
-                id="resource-file"
-                type="file"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="hidden"
-              />
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                {loading ? 'Uploading…' : 'Submit for Review'}
+              </button>
             </div>
-
-            {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-[3px] shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-[7px] hover:brightness-105 transition-all"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M9 12l2 2 4-4" />
-              </svg>
-              {loading ? 'Uploading…' : 'Submit for Review'}
-            </button>
           </form>
         )}
       </div>
