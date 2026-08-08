@@ -79,7 +79,7 @@ export async function renderOutlineToPptx(
   // ===== Title slide =====
   const titleSlide = pptx.addSlide();
   titleSlide.background = { color: theme.background };
-  titleSlide.addShape('rect', {
+  titleSlide.addShape(pptx.ShapeType.rect, {
     x: 0,
     y: 3.55,
     w: 1.4,
@@ -116,7 +116,7 @@ export async function renderOutlineToPptx(
 
     if (positionId === 'split') {
       // Image + Text: text block on one side, placeholder visual block on the other
-      s.addShape('rect', {
+      s.addShape(pptx.ShapeType.rect, {
         x: 8.3,
         y: 0,
         w: 5.03,
@@ -150,7 +150,7 @@ export async function renderOutlineToPptx(
       );
     } else if (positionId === 'titlelist') {
       // Title + List: title bar at top, numbered/bulleted list filling the rest
-      s.addShape('rect', {
+      s.addShape(pptx.ShapeType.rect, {
         x: 0,
         y: 0,
         w: 13.33,
@@ -211,7 +211,7 @@ export async function renderOutlineToPptx(
       );
     }
 
-    s.addShape('rect', {
+    s.addShape(pptx.ShapeType.rect, {
       x: 0,
       y: 7.32,
       w: 13.33,
