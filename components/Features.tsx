@@ -8,8 +8,14 @@ const CARDS = [
     title: 'Study Library',
     desc: 'Past papers and curated study materials — notes, slides, summaries — searchable by course, level, and week. Browse, download, or upload your own.',
     tag: 'Community-contributed & platform-curated · Moderated · Watermarked',
-    path: 'M4 4h16v16H4z M8 9h8M8 13h5',
+    path: 'M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z',
     badge: 'Core',
+  },
+  {
+    title: 'Contribute',
+    desc: 'Upload slides, past papers, or notes for other students — help build the library while earning leaderboard recognition.',
+    tag: 'Moderated on submission · Earns leaderboard points',
+    path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
   },
   {
     title: 'Exam Predictor',
@@ -21,13 +27,19 @@ const CARDS = [
     title: 'AI Study Companion',
     desc: 'Upload notes, ask anything — instant explanations, summaries, revision notes.',
     tag: 'Private to you · Saved to your Study Vault',
-    path: 'M8 12h8M8 16h5M4 4h16v16H4z',
+    path: 'M12 3a6 6 0 016 6c0 3.5-2.5 5-3 7H9c-.5-2-3-3.5-3-7a6 6 0 016-6zM9 21h6',
   },
   {
     title: 'AI Quiz Generator',
     desc: 'PDF → MCQs, true/false, and short-answer with answers & explanations.',
     tag: 'Generated from your own materials · Always private',
-    path: 'M9 12l2 2 4-4',
+    path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+  },
+  {
+    title: 'Presentation Kit',
+    desc: 'Turn a topic, a Vault item, or an uploaded document into a PowerPoint (PPTX) ready to present.',
+    tag: 'Generated from your own materials · Ready to download',
+    path: 'M3 4h18v13H3V4zM8 21h8M12 17v4M7 12l3-4 2.5 3L17 6',
   },
   {
     title: 'Find a Peer Tutor',
@@ -45,7 +57,7 @@ const CARDS = [
     title: 'Private Study Vault',
     desc: 'Encrypted personal space — AI quizzes, sessions, notes. Only you can see it.',
     tag: 'Zero visibility to others · Fully private',
-    path: 'M8 11V8a4 4 0 018 0v3',
+    path: 'M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4',
   },
   {
     title: 'Leaderboard & Badges',
