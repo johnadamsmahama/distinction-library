@@ -21,9 +21,9 @@ export default async function UploadPage() {
 
   return (
     <div
-      className="relative overflow-hidden min-h-screen px-4 pt-10 pb-14 -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8"
+      className="relative overflow-hidden flex flex-col px-4 pt-8 pb-5 -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8"
       style={{
-        minHeight: '100dvh',
+        height: 'calc(100dvh - 3.5rem)',
         backgroundImage: 'radial-gradient(120% 90% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
       }}
     >
@@ -53,8 +53,8 @@ export default async function UploadPage() {
         <circle cx="360" cy="460" r="1.2" fill="#E2BE5A" opacity="0.3" />
       </svg>
 
-      <div className="relative z-10 max-w-lg mx-auto">
-        <div className="flex items-center gap-2 mb-1.5">
+      <div className="relative z-10 w-full max-w-lg mx-auto flex flex-col flex-1 min-h-0">
+        <div className="flex items-center gap-2 mb-1.5 shrink-0">
           <span className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-gold-light">
             Community Contribution
           </span>
@@ -66,14 +66,16 @@ export default async function UploadPage() {
           </Link>
         </div>
 
-        <h1 className="font-display font-bold text-[23px] text-white mb-1.5">Contribute a resource</h1>
-        <p className="text-[12.5px] text-white/65 leading-snug mb-4">
+        <h1 className="font-display font-bold text-[23px] text-white mb-1.5 shrink-0">Contribute a resource</h1>
+        <p className="text-[12.5px] text-white/65 leading-snug mb-4 shrink-0">
           Submissions go to a moderator for review before appearing in the library.
         </p>
 
-        <UploadForm courses={courses} uploadSuspended={profile?.upload_suspended ?? false} />
+        <div className="flex-1 flex flex-col min-h-0">
+          <UploadForm courses={courses} uploadSuspended={profile?.upload_suspended ?? false} />
+        </div>
 
-        <div className="mt-2.5 text-center font-mono text-[9px] text-white/40">
+        <div className="mt-2.5 text-center font-mono text-[9px] text-white/40 shrink-0">
           — catalogued by the Distinction Library community —
         </div>
       </div>
