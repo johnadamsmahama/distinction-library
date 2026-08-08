@@ -21,7 +21,7 @@ export default async function UploadPage() {
 
   return (
     <div
-      className="relative overflow-hidden px-4 pt-6 pb-6 -mx-4 sm:-mx-6 lg:-mx-8"
+      className="relative overflow-hidden px-4 pt-8 pb-8 -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8"
       style={{
         backgroundImage: 'radial-gradient(120% 90% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
       }}
