@@ -363,9 +363,9 @@ export default function BuyDataPage() {
             disabled={!canSubmit || loading}
             style={{
               width: "100%",
-              background: canSubmit && !loading ? "#C9A843" : "rgba(201,168,67,0.25)",
-              color: canSubmit && !loading ? "#0f1f45" : "#5a6f9a",
-              border: "none",
+              background: canSubmit && !loading ? "#C9A843" : "rgba(201,168,67,0.12)",
+              color: canSubmit && !loading ? "#0f1f45" : "#C9A843",
+              border: canSubmit && !loading ? "none" : "1.5px solid rgba(201,168,67,0.4)",
               borderRadius: 14,
               padding: "clamp(10px, 1.6vh, 14px)",
               fontSize: 14,
