@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+type CourseOption = { id: string; code: string; name: string };
+
 type PendingPaper = {
   id: string;
   year: number;
@@ -10,10 +12,11 @@ type PendingPaper = {
   file_url: string;
   created_at: string;
   uploaded_by: string;
+  course_id: string;
   detected_type: string | null;
   type_mismatch: boolean;
   classification_notes: string | null;
-  courses: { code: string; name: string };
+  courses: { id: string; code: string; name: string };
   profiles: { id: string; student_id: string; full_name: string | null };
 };
 
@@ -26,10 +29,11 @@ type PendingMaterial = {
   file_url: string;
   created_at: string;
   uploaded_by: string | null;
+  course_id: string;
   detected_type: string | null;
   type_mismatch: boolean;
   classification_notes: string | null;
-  courses: { code: string; name: string };
+  courses: { id: string; code: string; name: string };
   profiles: { id: string; student_id: string; full_name: string | null } | null;
 };
 
@@ -42,13 +46,22 @@ const TYPE_LABELS: Record<string, string> = {
 
 type Decision = 'rejected' | 'needs_revision';
 
+type PaperEditValues = { courseId: string; year: number; examType: string };
+type MaterialEditValues = { courseId: string; title: string; weekNumber: number; contentType: string };
+
+const selectClass =
+  'w-full border border-g100 rounded-lg px-2.5 py-2 font-body text-sm text-g800 outline-none focus:border-gold bg-white';
+const editLabelClass = 'font-condensed font-bold text-[10px] uppercase text-g600 block mb-1';
+
 export default function ModerationQueue({
   initialPapers,
   initialMaterials,
+  courses,
   staffId,
 }: {
   initialPapers: PendingPaper[];
   initialMaterials: PendingMaterial[];
+  courses: CourseOption[];
   staffId: string;
 }) {
   const [tab, setTab] = useState<'papers' | 'materials'>('papers');
@@ -62,15 +75,62 @@ export default function ModerationQueue({
   const [reason, setReason] = useState('');
   const [issueStrike, setIssueStrike] = useState(false);
 
+  // Edit-before-approve: auto-open for anything the AI flagged as a
+  // possible mismatch, and toggleable by hand for everything else.
+  const [openEditIds, setOpenEditIds] = useState<Set<string>>(
+    () =>
+      new Set(
+        [...initialPapers, ...initialMaterials].filter((i) => i.type_mismatch).map((i) => i.id)
+      )
+  );
+  const [paperEditValues, setPaperEditValues] = useState<Record<string, PaperEditValues>>({});
+  const [materialEditValues, setMaterialEditValues] = useState<Record<string, MaterialEditValues>>({});
+
   const supabase = createClient();
+
+  const toggleEdit = (id: string) => {
+    setOpenEditIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const getPaperEdit = (p: PendingPaper): PaperEditValues =>
+    paperEditValues[p.id] ?? { courseId: p.course_id, year: p.year, examType: p.exam_type };
+
+  const setPaperEdit = (id: string, next: Partial<PaperEditValues>, base: PaperEditValues) => {
+    setPaperEditValues((prev) => ({ ...prev, [id]: { ...base, ...next } }));
+  };
+
+  const getMaterialEdit = (m: PendingMaterial): MaterialEditValues =>
+    materialEditValues[m.id] ?? {
+      courseId: m.course_id,
+      title: m.suggested_title || m.title,
+      weekNumber: m.week_number ?? 1,
+      contentType: m.content_type,
+    };
+
+  const setMaterialEdit = (id: string, next: Partial<MaterialEditValues>, base: MaterialEditValues) => {
+    setMaterialEditValues((prev) => ({ ...prev, [id]: { ...base, ...next } }));
+  };
 
   const notify = async (userId: string, message: string, type: string) => {
     await supabase.from('notifications').insert({ user_id: userId, message, type });
   };
 
-  const approvePaper = async (paper: PendingPaper) => {
+  const approvePaper = async (paper: PendingPaper, overrides?: PaperEditValues) => {
     setBusyId(paper.id);
-    const res = await fetch(`/api/moderation/approve-paper/${paper.id}`, { method: 'POST' });
+    const res = await fetch(`/api/moderation/approve-paper/${paper.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        overrides
+          ? { courseId: overrides.courseId, year: overrides.year, examType: overrides.examType }
+          : {}
+      ),
+    });
     const result = await res.json();
     setBusyId(null);
 
@@ -82,18 +142,20 @@ export default function ModerationQueue({
     setPapers((prev) => prev.filter((p) => p.id !== paper.id));
   };
 
-  const approveMaterial = async (material: PendingMaterial) => {
+  const approveMaterial = async (material: PendingMaterial, overrides?: MaterialEditValues) => {
     setBusyId(material.id);
 
-    // Use the AI's typo-corrected title if one exists, otherwise the
-    // original — either way, save it in CAPS the moment it's approved.
-    const finalTitle = (material.suggested_title || material.title).toUpperCase();
+    const finalTitle = (overrides?.title || material.suggested_title || material.title).toUpperCase();
+    const courseId = overrides?.courseId ?? material.course_id;
 
     const { error } = await supabase
       .from('study_materials')
       .update({
         status: 'approved',
         title: finalTitle,
+        course_id: courseId,
+        week_number: overrides?.weekNumber ?? material.week_number,
+        content_type: overrides?.contentType ?? material.content_type,
         reviewed_by: staffId,
         reviewed_at: new Date().toISOString(),
       })
@@ -106,9 +168,10 @@ export default function ModerationQueue({
     }
 
     if (material.uploaded_by) {
+      const courseCode = courses.find((c) => c.id === courseId)?.code ?? material.courses.code;
       await notify(
         material.uploaded_by,
-        `Your study material "${finalTitle}" for ${material.courses.code} was approved.`,
+        `Your study material "${finalTitle}" for ${courseCode} was approved.`,
         'upload_approved'
       );
     }
@@ -199,137 +262,175 @@ export default function ModerationQueue({
           <EmptyState label="No papers pending review." />
         ) : (
           <div className="space-y-3">
-            {papers.map((p) => (
-              <div key={p.id} className="bg-white border border-g100 rounded-xl p-4">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-condensed font-bold text-sm text-navy">
-                      {p.courses.code} — {p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'} {p.year}
+            {papers.map((p) => {
+              const isEditing = openEditIds.has(p.id);
+              const edit = getPaperEdit(p);
+              return (
+                <div key={p.id} className="bg-white border border-g100 rounded-xl p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-condensed font-bold text-sm text-navy">
+                        {p.courses.code} — {p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'} {p.year}
+                      </div>
+                      <div className="font-body text-xs text-g600 mt-0.5">
+                        Submitted by {p.profiles?.full_name ?? p.profiles?.student_id ?? 'unknown'}
+                      </div>
+                      <ClassificationBadge
+                        detectedType={p.detected_type}
+                        mismatch={p.type_mismatch}
+                        notes={p.classification_notes}
+                        uploadedAs="Past Paper"
+                      />
                     </div>
-                    <div className="font-body text-xs text-g600 mt-0.5">
-                      Submitted by {p.profiles?.full_name ?? p.profiles?.student_id ?? 'unknown'}
+                    <div className="flex flex-wrap gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => setPreviewId(previewId === p.id ? null : p.id)}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                      >
+                        {previewId === p.id ? 'Hide' : 'Preview'}
+                      </button>
+                      <button
+                        onClick={() => toggleEdit(p.id)}
+                        className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border transition-colors ${
+                          isEditing ? 'border-navy text-navy bg-navy/5' : 'border-g100 text-g600 hover:border-navy hover:text-navy'
+                        }`}
+                      >
+                        {isEditing ? 'Hide edit' : 'Edit'}
+                      </button>
+                      <button
+                        disabled={busyId === p.id}
+                        onClick={() => approvePaper(p, isEditing ? edit : undefined)}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+                      >
+                        {busyId === p.id ? 'Working…' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={() => setPanel(panel?.id === p.id && panel.decision === 'needs_revision' ? null : { id: p.id, decision: 'needs_revision' })}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                      >
+                        Request Changes
+                      </button>
+                      <button
+                        onClick={() => setPanel(panel?.id === p.id && panel.decision === 'rejected' ? null : { id: p.id, decision: 'rejected' })}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
+                      >
+                        Reject
+                      </button>
                     </div>
-                    <ClassificationBadge
-                      detectedType={p.detected_type}
-                      mismatch={p.type_mismatch}
-                      notes={p.classification_notes}
-                      uploadedAs="Past Paper"
+                  </div>
+                  {isEditing && (
+                    <PaperEditPanel
+                      courses={courses}
+                      values={edit}
+                      onChange={(next) => setPaperEdit(p.id, next, edit)}
                     />
-                  </div>
-                  <div className="flex flex-wrap gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => setPreviewId(previewId === p.id ? null : p.id)}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
-                    >
-                      {previewId === p.id ? 'Hide' : 'Preview'}
-                    </button>
-                    <button
-                      disabled={busyId === p.id}
-                      onClick={() => approvePaper(p)}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
-                    >
-                      {busyId === p.id ? 'Working…' : 'Approve'}
-                    </button>
-                    <button
-                      onClick={() => setPanel(panel?.id === p.id && panel.decision === 'needs_revision' ? null : { id: p.id, decision: 'needs_revision' })}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
-                    >
-                      Request Changes
-                    </button>
-                    <button
-                      onClick={() => setPanel(panel?.id === p.id && panel.decision === 'rejected' ? null : { id: p.id, decision: 'rejected' })}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
-                    >
-                      Reject
-                    </button>
-                  </div>
+                  )}
+                  {previewId === p.id && <FilePreview kind="paper" fileUrl={p.file_url} />}
+                  {panel?.id === p.id && (
+                    <DecisionPanel
+                      decision={panel.decision}
+                      reason={reason}
+                      setReason={setReason}
+                      issueStrike={issueStrike}
+                      setIssueStrike={setIssueStrike}
+                      onConfirm={() => submitDecision('paper', p, panel.decision)}
+                      onCancel={() => setPanel(null)}
+                    />
+                  )}
                 </div>
-                {previewId === p.id && <FilePreview kind="paper" fileUrl={p.file_url} />}
-                {panel?.id === p.id && (
-                  <DecisionPanel
-                    decision={panel.decision}
-                    reason={reason}
-                    setReason={setReason}
-                    issueStrike={issueStrike}
-                    setIssueStrike={setIssueStrike}
-                    onConfirm={() => submitDecision('paper', p, panel.decision)}
-                    onCancel={() => setPanel(null)}
-                  />
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )
       ) : materials.length === 0 ? (
         <EmptyState label="No materials pending review." />
       ) : (
         <div className="space-y-3">
-          {materials.map((m) => (
-            <div key={m.id} className="bg-white border border-g100 rounded-xl p-4">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="font-condensed font-bold text-sm text-navy">
-                    {m.courses.code} — {m.title}
-                  </div>
-                  {m.suggested_title && m.suggested_title !== m.title && (
-                    <div className="font-body text-xs text-gold mt-0.5">
-                      AI suggests: &ldquo;{m.suggested_title}&rdquo; — this corrected version will be
-                      saved (in CAPS) if approved.
+          {materials.map((m) => {
+            const isEditing = openEditIds.has(m.id);
+            const edit = getMaterialEdit(m);
+            return (
+              <div key={m.id} className="bg-white border border-g100 rounded-xl p-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-condensed font-bold text-sm text-navy">
+                      {m.courses.code} — {m.title}
                     </div>
-                  )}
-                  <div className="font-body text-xs text-g600 mt-0.5">
-                    {m.week_number ? `Week ${m.week_number} · ` : ''}
-                    Submitted by {m.profiles?.full_name ?? m.profiles?.student_id ?? 'unknown'}
+                    {m.suggested_title && m.suggested_title !== m.title && (
+                      <div className="font-body text-xs text-gold mt-0.5">
+                        AI suggests: &ldquo;{m.suggested_title}&rdquo; — this corrected version will be
+                        saved (in CAPS) if approved.
+                      </div>
+                    )}
+                    <div className="font-body text-xs text-g600 mt-0.5">
+                      {m.week_number ? `Week ${m.week_number} · ` : ''}
+                      Submitted by {m.profiles?.full_name ?? m.profiles?.student_id ?? 'unknown'}
+                    </div>
+                    <ClassificationBadge
+                      detectedType={m.detected_type}
+                      mismatch={m.type_mismatch}
+                      notes={m.classification_notes}
+                      uploadedAs="Study Material"
+                    />
                   </div>
-                  <ClassificationBadge
-                    detectedType={m.detected_type}
-                    mismatch={m.type_mismatch}
-                    notes={m.classification_notes}
-                    uploadedAs="Study Material"
+                  <div className="flex flex-wrap gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => setPreviewId(previewId === m.id ? null : m.id)}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                    >
+                      {previewId === m.id ? 'Hide' : 'Preview'}
+                    </button>
+                    <button
+                      onClick={() => toggleEdit(m.id)}
+                      className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border transition-colors ${
+                        isEditing ? 'border-navy text-navy bg-navy/5' : 'border-g100 text-g600 hover:border-navy hover:text-navy'
+                      }`}
+                    >
+                      {isEditing ? 'Hide edit' : 'Edit'}
+                    </button>
+                    <button
+                      disabled={busyId === m.id}
+                      onClick={() => approveMaterial(m, isEditing ? edit : undefined)}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+                    >
+                      {busyId === m.id ? 'Working…' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={() => setPanel(panel?.id === m.id && panel.decision === 'needs_revision' ? null : { id: m.id, decision: 'needs_revision' })}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                    >
+                      Request Changes
+                    </button>
+                    <button
+                      onClick={() => setPanel(panel?.id === m.id && panel.decision === 'rejected' ? null : { id: m.id, decision: 'rejected' })}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+                {isEditing && (
+                  <MaterialEditPanel
+                    courses={courses}
+                    values={edit}
+                    onChange={(next) => setMaterialEdit(m.id, next, edit)}
                   />
-                </div>
-                <div className="flex flex-wrap gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => setPreviewId(previewId === m.id ? null : m.id)}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
-                  >
-                    {previewId === m.id ? 'Hide' : 'Preview'}
-                  </button>
-                  <button
-                    disabled={busyId === m.id}
-                    onClick={() => approveMaterial(m)}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
-                  >
-                    {busyId === m.id ? 'Working…' : 'Approve'}
-                  </button>
-                  <button
-                    onClick={() => setPanel(panel?.id === m.id && panel.decision === 'needs_revision' ? null : { id: m.id, decision: 'needs_revision' })}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
-                  >
-                    Request Changes
-                  </button>
-                  <button
-                    onClick={() => setPanel(panel?.id === m.id && panel.decision === 'rejected' ? null : { id: m.id, decision: 'rejected' })}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
-                  >
-                    Reject
-                  </button>
-                </div>
+                )}
+                {previewId === m.id && <FilePreview kind="material" fileUrl={m.file_url} />}
+                {panel?.id === m.id && (
+                  <DecisionPanel
+                    decision={panel.decision}
+                    reason={reason}
+                    setReason={setReason}
+                    issueStrike={issueStrike}
+                    setIssueStrike={setIssueStrike}
+                    onConfirm={() => submitDecision('material', m, panel.decision)}
+                    onCancel={() => setPanel(null)}
+                  />
+                )}
               </div>
-              {previewId === m.id && <FilePreview kind="material" fileUrl={m.file_url} />}
-              {panel?.id === m.id && (
-                <DecisionPanel
-                  decision={panel.decision}
-                  reason={reason}
-                  setReason={setReason}
-                  issueStrike={issueStrike}
-                  setIssueStrike={setIssueStrike}
-                  onConfirm={() => submitDecision('material', m, panel.decision)}
-                  onCancel={() => setPanel(null)}
-                />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -365,7 +466,7 @@ function ClassificationBadge({
         </span>
         <span className="font-body text-[11px] text-red-700 break-words">
           AI thinks this looks like <strong>{label}</strong>, but it was uploaded as {uploadedAs}.
-          {notes ? ` ${notes}` : ''}
+          {notes ? ` ${notes}` : ''} Edit panel opened below — re-file before approving.
         </span>
       </div>
     );
@@ -376,6 +477,107 @@ function ClassificationBadge({
       <span className="font-condensed font-bold text-[10px] uppercase text-g600">
         AI detected: {label}
       </span>
+    </div>
+  );
+}
+
+function PaperEditPanel({
+  courses,
+  values,
+  onChange,
+}: {
+  courses: CourseOption[];
+  values: PaperEditValues;
+  onChange: (next: Partial<PaperEditValues>) => void;
+}) {
+  return (
+    <div className="mt-3 pt-3 border-t border-g100 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div>
+        <label className={editLabelClass}>Course</label>
+        <select value={values.courseId} onChange={(e) => onChange({ courseId: e.target.value })} className={selectClass}>
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.code} — {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className={editLabelClass}>Exam Type</label>
+        <select value={values.examType} onChange={(e) => onChange({ examType: e.target.value })} className={selectClass}>
+          <option value="mid_semester">Mid-Semester</option>
+          <option value="end_of_semester">End of Semester</option>
+        </select>
+      </div>
+      <div>
+        <label className={editLabelClass}>Year</label>
+        <input
+          type="number"
+          value={values.year}
+          onChange={(e) => onChange({ year: Number(e.target.value) })}
+          className={selectClass}
+          min={2000}
+          max={2100}
+        />
+      </div>
+    </div>
+  );
+}
+
+function MaterialEditPanel({
+  courses,
+  values,
+  onChange,
+}: {
+  courses: CourseOption[];
+  values: MaterialEditValues;
+  onChange: (next: Partial<MaterialEditValues>) => void;
+}) {
+  return (
+    <div className="mt-3 pt-3 border-t border-g100 space-y-3">
+      <div>
+        <label className={editLabelClass}>Title</label>
+        <input
+          type="text"
+          value={values.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          className={selectClass}
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label className={editLabelClass}>Course</label>
+          <select value={values.courseId} onChange={(e) => onChange({ courseId: e.target.value })} className={selectClass}>
+            {courses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.code} — {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className={editLabelClass}>Type</label>
+          <select value={values.contentType} onChange={(e) => onChange({ contentType: e.target.value })} className={selectClass}>
+            <option value="lecture_slides">Lecture Slides</option>
+            <option value="study_notes">Study Notes</option>
+            <option value="study_guide">Study Guide</option>
+          </select>
+        </div>
+        <div>
+          <label className={editLabelClass}>Week</label>
+          <select
+            value={values.weekNumber}
+            onChange={(e) => onChange({ weekNumber: Number(e.target.value) })}
+            className={selectClass}
+          >
+            {Array.from({ length: 14 }, (_, i) => i + 1).map((w) => (
+              <option key={w} value={w}>
+                Week {w}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </div>
   );
 }
@@ -435,8 +637,6 @@ function FilePreview({ kind, fileUrl }: { kind: 'paper' | 'material'; fileUrl: s
   const isOffice = OFFICE_EXTS.includes(ext);
   const isNative = NATIVE_PREVIEW_EXTS.includes(ext);
 
-  // Office Online viewer needs a URL it can fetch itself — works fine with
-  // a short-lived signed URL as long as the viewer loads within the TTL.
   const displaySrc =
     previewUrl && isOffice
       ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewUrl)}`
