@@ -56,18 +56,18 @@ export default function BuyDataPage() {
     return (
       <>
         <style jsx global>{`
-          html, body { background: #0f1f45 !important; margin: 0; padding: 0; overflow: hidden; height: 100%; }
+          html, body { background: #0f1f45 !important; margin: 0; padding: 0; min-height: 100%; }
         `}</style>
         <div
           style={{
             fontFamily: "'Segoe UI', sans-serif",
             background: "#0f1f45",
-            height: "100dvh",
+            minHeight: "100dvh",
             width: "100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "0 24px",
+            padding: "24px",
             boxSizing: "border-box",
           }}
         >
@@ -108,20 +108,19 @@ export default function BuyDataPage() {
   return (
     <>
       <style jsx global>{`
-        html, body { background: #0f1f45 !important; margin: 0; padding: 0; overflow: hidden; height: 100%; }
+        html, body { background: #0f1f45 !important; margin: 0; padding: 0; min-height: 100%; }
       `}</style>
       <div
         style={{
           fontFamily: "'Segoe UI', sans-serif",
           background: "#0f1f45",
-          height: "100dvh",
+          minHeight: "100dvh",
           width: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "clamp(8px, 2vh, 20px) 20px",
+          padding: "clamp(16px, 4vh, 40px) 20px",
           boxSizing: "border-box",
-          overflow: "hidden",
         }}
       >
         <div style={{ maxWidth: 420, width: "100%", margin: "0 auto" }}>
