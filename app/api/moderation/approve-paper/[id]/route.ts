@@ -9,6 +9,11 @@ import { getCurrentProfile, isStaffRole } from '@/lib/auth-helpers';
 // bucket, stamps a watermark on every page (PDFs only — other formats are
 // copied through unstamped, see note below), uploads the result to the
 // public 'past-papers-final' bucket, and flips the row to approved.
+//
+// Optional JSON body: { courseId, year, examType } — lets a moderator
+// re-file the paper to a different course/year/exam type (e.g. after an AI
+// mismatch flag) before it's watermarked and published. Any field omitted
+// falls back to whatever the student originally submitted.
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const supabase = createClient();
   const { user, profile } = await getCurrentProfile(supabase);
@@ -17,6 +22,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (!isStaffRole(profile?.role)) {
     return NextResponse.json({ error: 'Staff only.' }, { status: 403 });
   }
+
+  const body = await request.json().catch(() => ({}));
+  const overrideCourseId: string | undefined = body.courseId;
+  const overrideYear: number | undefined = body.year;
+  const overrideExamType: 'mid_semester' | 'end_of_semester' | undefined = body.examType;
 
   const { data: paper, error: fetchErr } = await supabase
     .from('past_papers')
@@ -32,6 +42,18 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 
   const admin = createAdminClient();
+
+  const courseId = overrideCourseId ?? paper.course_id;
+  const year = overrideYear ?? paper.year;
+  const examType = overrideExamType ?? paper.exam_type;
+
+  // Look up the correct course code for the watermark footer/notification
+  // when the moderator re-filed this to a different course.
+  let courseCode = (paper.courses as any)?.code ?? '';
+  if (overrideCourseId && overrideCourseId !== paper.course_id) {
+    const { data: newCourse } = await admin.from('courses').select('code').eq('id', overrideCourseId).single();
+    courseCode = newCourse?.code ?? courseCode;
+  }
 
   // 1. Download the raw file from the private staging bucket.
   const { data: rawFile, error: downloadErr } = await admin.storage
@@ -52,7 +74,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
       const pdfDoc = await PDFDocument.load(bytes);
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const stamp = 'Distinction Library — J.A. Mahama Initiative';
-      const courseCode = (paper.courses as any)?.code ?? '';
 
       for (const page of pdfDoc.getPages()) {
         const { width, height } = page.getSize();
@@ -91,7 +112,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   // stamping Word/PowerPoint files needs a different library and is a
   // reasonable follow-up rather than blocking this stage.
 
-  const finalPath = `${paper.course_id}/${paper.year}/${paper.id}.${outputExt}`;
+  const finalPath = `${courseId}/${year}/${paper.id}.${outputExt}`;
 
   const { error: uploadErr } = await admin.storage
     .from('past-papers-final')
@@ -109,6 +130,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const { error: updateErr } = await admin
     .from('past_papers')
     .update({
+      course_id: courseId,
+      year,
+      exam_type: examType,
       watermarked_url: publicUrlData.publicUrl,
       status: 'approved',
       reviewed_by: user.id,
@@ -130,7 +154,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (uploaderRow?.uploaded_by) {
     await admin.from('notifications').insert({
       user_id: uploaderRow.uploaded_by,
-      message: `Your past paper for ${(paper.courses as any)?.code ?? 'your course'} was approved and published.`,
+      message: `Your past paper for ${courseCode || 'your course'} was approved and published.`,
       type: 'upload_approved',
     });
   }
