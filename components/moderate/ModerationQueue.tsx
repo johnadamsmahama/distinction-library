@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 type PendingPaper = {
@@ -244,7 +244,7 @@ export default function ModerationQueue({
                     </button>
                   </div>
                 </div>
-                {previewId === p.id && <FilePreview fileUrl={p.file_url} />}
+                {previewId === p.id && <FilePreview kind="paper" fileUrl={p.file_url} />}
                 {panel?.id === p.id && (
                   <DecisionPanel
                     decision={panel.decision}
@@ -316,7 +316,7 @@ export default function ModerationQueue({
                   </button>
                 </div>
               </div>
-              {previewId === m.id && <FilePreview fileUrl={m.file_url} />}
+              {previewId === m.id && <FilePreview kind="material" fileUrl={m.file_url} />}
               {panel?.id === m.id && (
                 <DecisionPanel
                   decision={panel.decision}
@@ -380,22 +380,66 @@ function ClassificationBadge({
   );
 }
 
-function FilePreview({ fileUrl }: { fileUrl: string }) {
+// Papers store a raw internal storage path in file_url (private bucket).
+// Materials already store a full public URL. Papers need a short-lived
+// signed URL fetched on demand; materials can render straight away.
+function FilePreview({ kind, fileUrl }: { kind: 'paper' | 'material'; fileUrl: string }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(kind === 'material' ? fileUrl : null);
+  const [loading, setLoading] = useState(kind === 'paper');
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (kind !== 'paper') return;
+    let cancelled = false;
+    setLoading(true);
+    setPreviewError(null);
+
+    fetch('/api/moderation/preview-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bucket: 'past-papers', path: fileUrl }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.url) setPreviewUrl(data.url);
+        else setPreviewError(data.error ?? 'Could not load preview.');
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewError('Could not load preview.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [kind, fileUrl]);
+
   return (
     <div className="mt-3 pt-3 border-t border-g100">
-      <iframe
-        src={fileUrl}
-        className="w-full h-[60vh] max-h-[420px] rounded-lg border border-g100"
-        title="Document preview"
-      />
-      <a
-        href={fileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-condensed font-bold text-xs uppercase text-gold hover:underline mt-2 inline-block"
-      >
-        Open in new tab →
-      </a>
+      {loading ? (
+        <p className="font-body text-xs text-g600 py-6 text-center">Loading preview…</p>
+      ) : previewError ? (
+        <p className="font-body text-xs text-red-500 py-6 text-center">{previewError}</p>
+      ) : previewUrl ? (
+        <>
+          <iframe
+            src={previewUrl}
+            className="w-full h-[60vh] max-h-[420px] rounded-lg border border-g100"
+            title="Document preview"
+          />
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-condensed font-bold text-xs uppercase text-gold hover:underline mt-2 inline-block"
+          >
+            Open in new tab →
+          </a>
+        </>
+      ) : null}
     </div>
   );
 }
