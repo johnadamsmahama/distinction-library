@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import ModerationLogList from '@/components/admin/ModerationLogList';
 
 // Spec Section 8.2: "Full audit trail of moderation decisions is visible to
 // Admins inside the main Admin Console." The underlying data (reviewed_by,
@@ -6,6 +7,12 @@ import { createClient } from '@/lib/supabase/server';
 // Queue on every approve/reject — this page is the first place any of it is
 // actually displayed. Also includes "needs_revision" (Request Changes),
 // the third moderation action alongside approve/reject.
+//
+// Row rendering (including the Delete button) lives in ModerationLogList,
+// a client component — this page stays a server component purely for the
+// data fetch. Delete is here rather than in the Moderation Queue because
+// this is the only view that shows already-approved items, including ones
+// that are already live and published.
 
 type Row = {
   id: string;
@@ -17,18 +24,6 @@ type Row = {
   courses: { code: string } | null;
   uploader: { full_name: string | null; student_id: string } | null;
   reviewer: { full_name: string | null } | null;
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  approved: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-600',
-  needs_revision: 'bg-amber-100 text-amber-700',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  approved: 'approved',
-  rejected: 'rejected',
-  needs_revision: 'changes requested',
 };
 
 export default async function ModerationLogPage() {
@@ -86,43 +81,7 @@ export default async function ModerationLogPage() {
         Every approve / reject / request-changes decision made in the Moderation Queue, most recent first.
       </p>
 
-      {rows.length === 0 ? (
-        <p className="font-body text-sm text-g600 text-center py-16">No moderation decisions recorded yet.</p>
-      ) : (
-        <div className="space-y-2">
-          {rows.map((r) => (
-            <div key={`${r.kind}-${r.id}`} className="bg-white border border-g100 rounded-lg px-4 py-3">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-g100 text-navy">
-                      {r.kind}
-                    </span>
-                    <span
-                      className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
-                        STATUS_STYLES[r.status] ?? 'bg-g100 text-g600'
-                      }`}
-                    >
-                      {STATUS_LABELS[r.status] ?? r.status}
-                    </span>
-                  </div>
-                  <div className="font-condensed font-semibold text-sm text-g800">{r.label}</div>
-                  <div className="font-body text-xs text-g600 mt-0.5">
-                    Uploaded by {r.uploader?.full_name ?? r.uploader?.student_id ?? 'unknown'} · Reviewed by{' '}
-                    {r.reviewer?.full_name ?? 'unknown'}
-                  </div>
-                  {(r.status === 'rejected' || r.status === 'needs_revision') && r.rejection_reason && (
-                    <div className="font-body text-xs text-red-600 mt-1">Reason: {r.rejection_reason}</div>
-                  )}
-                </div>
-                <div className="font-condensed text-[11px] text-g600 flex-shrink-0">
-                  {r.reviewed_at ? new Date(r.reviewed_at).toLocaleString() : ''}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <ModerationLogList rows={rows} />
     </div>
   );
 }
