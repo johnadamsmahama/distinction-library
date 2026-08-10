@@ -10,18 +10,26 @@ export default async function ModeratePage() {
   if (!user) redirect('/login');
   if (!isStaffRole(profile?.role)) redirect('/dashboard');
 
-  const [{ data: papers }, { data: materials }] = await Promise.all([
+  const [{ data: papers }, { data: materials }, { data: courses }] = await Promise.all([
     supabase
       .from('past_papers')
-      .select('id, year, exam_type, file_url, created_at, uploaded_by, detected_type, type_mismatch, classification_notes, courses(code, name), profiles!uploaded_by(id, student_id, full_name)')
+      .select(
+        'id, year, exam_type, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
+      )
       .eq('status', 'pending')
       .order('created_at', { ascending: true }),
 
     supabase
       .from('study_materials')
-      .select('id, title, suggested_title, content_type, week_number, file_url, created_at, uploaded_by, detected_type, type_mismatch, classification_notes, courses(code, name), profiles!uploaded_by(id, student_id, full_name)')
+      .select(
+        'id, title, suggested_title, content_type, week_number, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
+      )
       .eq('status', 'pending')
       .order('created_at', { ascending: true }),
+
+    // Full course list so a moderator can re-file a mismatched upload to
+    // the correct course before approving it.
+    supabase.from('courses').select('id, code, name').order('code', { ascending: true }),
   ]);
 
   return (
@@ -33,6 +41,7 @@ export default async function ModeratePage() {
       <ModerationQueue
         initialPapers={(papers as any) ?? []}
         initialMaterials={(materials as any) ?? []}
+        courses={(courses as any) ?? []}
         staffId={user.id}
       />
     </div>
