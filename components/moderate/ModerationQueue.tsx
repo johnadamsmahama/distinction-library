@@ -75,6 +75,12 @@ export default function ModerationQueue({
   const [reason, setReason] = useState('');
   const [issueStrike, setIssueStrike] = useState(false);
 
+  // Delete is separate from the Reject/Request-Changes panel above — it's a
+  // permanent removal (row + storage file), not a status update, so it gets
+  // its own confirm step and doesn't touch the strike/reason state above.
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; kind: 'paper' | 'material' } | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+
   // Edit-before-approve: auto-open for anything the AI flagged as a
   // possible mismatch, and toggleable by hand for everything else.
   const [openEditIds, setOpenEditIds] = useState<Set<string>>(
@@ -236,6 +242,35 @@ export default function ModerationQueue({
     setIssueStrike(false);
   };
 
+  // Permanently removes an item — row + storage file(s) — via the delete
+  // API route, which also handles the auth check and picks the right
+  // bucket(s) depending on paper status. Unlike submitDecision, there's no
+  // DB update to roll back to; this is the "it shouldn't exist" button for
+  // duplicates and other cleanup.
+  const deleteItem = async (kind: 'paper' | 'material', id: string) => {
+    setBusyId(id);
+    const res = await fetch(`/api/moderation/delete-item/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: kind, reason: deleteReason || undefined }),
+    });
+    const result = await res.json().catch(() => ({}));
+    setBusyId(null);
+
+    if (!res.ok) {
+      alert(result.error ?? 'Delete failed.');
+      return;
+    }
+
+    if (kind === 'paper') {
+      setPapers((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      setMaterials((prev) => prev.filter((m) => m.id !== id));
+    }
+    setDeleteTarget(null);
+    setDeleteReason('');
+  };
+
   return (
     <div>
       <div className="flex gap-2 mb-6">
@@ -316,6 +351,12 @@ export default function ModerationQueue({
                       >
                         Reject
                       </button>
+                      <button
+                        onClick={() => setDeleteTarget(deleteTarget?.id === p.id ? null : { id: p.id, kind: 'paper' })}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                   {isEditing && (
@@ -335,6 +376,18 @@ export default function ModerationQueue({
                       setIssueStrike={setIssueStrike}
                       onConfirm={() => submitDecision('paper', p, panel.decision)}
                       onCancel={() => setPanel(null)}
+                    />
+                  )}
+                  {deleteTarget?.id === p.id && (
+                    <DeleteConfirmPanel
+                      busy={busyId === p.id}
+                      reason={deleteReason}
+                      setReason={setDeleteReason}
+                      onConfirm={() => deleteItem('paper', p.id)}
+                      onCancel={() => {
+                        setDeleteTarget(null);
+                        setDeleteReason('');
+                      }}
                     />
                   )}
                 </div>
@@ -407,6 +460,12 @@ export default function ModerationQueue({
                     >
                       Reject
                     </button>
+                    <button
+                      onClick={() => setDeleteTarget(deleteTarget?.id === m.id ? null : { id: m.id, kind: 'material' })}
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
                 {isEditing && (
@@ -426,6 +485,18 @@ export default function ModerationQueue({
                     setIssueStrike={setIssueStrike}
                     onConfirm={() => submitDecision('material', m, panel.decision)}
                     onCancel={() => setPanel(null)}
+                  />
+                )}
+                {deleteTarget?.id === m.id && (
+                  <DeleteConfirmPanel
+                    busy={busyId === m.id}
+                    reason={deleteReason}
+                    setReason={setDeleteReason}
+                    onConfirm={() => deleteItem('material', m.id)}
+                    onCancel={() => {
+                      setDeleteTarget(null);
+                      setDeleteReason('');
+                    }}
                   />
                 )}
               </div>
@@ -717,6 +788,54 @@ function DecisionPanel({
           }`}
         >
           {isReject ? 'Confirm rejection' : 'Send back for changes'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Permanent-removal confirmation. Deliberately separate from DecisionPanel:
+// deleting takes the item and its file out of the system entirely (no
+// status to revert to), so it gets its own explicit warning copy and a
+// distinct destructive-red confirm button rather than reusing Reject's UI.
+function DeleteConfirmPanel({
+  busy,
+  reason,
+  setReason,
+  onConfirm,
+  onCancel,
+}: {
+  busy: boolean;
+  reason: string;
+  setReason: (v: string) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="mt-3 pt-3 border-t border-red-200">
+      <p className="font-condensed font-bold text-xs uppercase text-red-600 mb-2">
+        This permanently deletes the item and its file. This cannot be undone.
+      </p>
+      <textarea
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Reason (optional, sent to the uploader)…"
+        rows={2}
+        className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
+      />
+      <div className="flex gap-2">
+        <button
+          disabled={busy}
+          onClick={onConfirm}
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
+        >
+          {busy ? 'Deleting…' : 'Confirm delete'}
         </button>
         <button
           onClick={onCancel}
