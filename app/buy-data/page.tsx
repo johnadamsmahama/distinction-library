@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const NETWORKS = [
-  { key: "MTN", label: "MTN", img: "/mtn.svg", color: "#FFCB00", bg: "#fff8e1", checkColor: "#1a1a1a" },
-  { key: "Telecel", label: "Telecel", img: "/telecel.png", color: "#E30613", bg: "#fff1f1", checkColor: "#fff" },
-  { key: "AT", label: "AirtelTigo", img: "/airteltigo.jpg", color: "#1d3a8a", bg: "#f0f3ff", checkColor: "#fff" },
+  { key: "MTN", label: "MTN", img: "/mtn.svg.jpeg", color: "#FFCB00", bg: "#fff8e1", checkColor: "#1a1a1a" },
+  { key: "Telecel", label: "Telecel", img: "/telecel.png.jpeg", color: "#E30613", bg: "#fff1f1", checkColor: "#fff" },
+  { key: "AT", label: "AirtelTigo", img: "/airteltigo.jpg.jpeg", color: "#1d3a8a", bg: "#f0f3ff", checkColor: "#fff" },
 ];
 
 export default function BuyDataPage() {
