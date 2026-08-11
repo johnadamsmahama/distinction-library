@@ -40,7 +40,7 @@ export default function SignupPage() {
     const supabase = createClient();
     const email = studentIdToEmail(studentId);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -53,6 +53,15 @@ export default function SignupPage() {
 
     if (error) {
       setFormError(error.message);
+      return;
+    }
+
+    // Supabase doesn't return an `error` for a duplicate email — it returns
+    // a "successful" response with an empty identities array instead, to
+    // avoid leaking which emails are already registered. We treat that as
+    // "already exists" ourselves.
+    if (data?.user?.identities && data.user.identities.length === 0) {
+      setFormError('Account already exists — log in instead.');
       return;
     }
 
