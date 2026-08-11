@@ -118,6 +118,23 @@ export default function SignupPage() {
           </span>
         </div>
 
+        <div className="mt-4 bg-gold/10 border border-gold/30 rounded-lg px-3.5 py-3">
+          <p className="font-body text-xs text-g600 leading-relaxed">
+            <span className="font-condensed font-bold uppercase tracking-wide text-navy">
+              Nothing after a few minutes?
+            </span>{' '}
+            Double check your 8-digit student ID above — if it's mistyped,
+            the email has nowhere to go. You can{' '}
+            <button
+              onClick={() => setSubmitted(false)}
+              className="underline underline-offset-4 font-semibold"
+            >
+              go back and re-enter it
+            </button>
+            .
+          </p>
+        </div>
+
         <div className="border-t border-g100 mt-5 pt-4">
           <button
             onClick={handleResend}
