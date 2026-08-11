@@ -17,6 +17,10 @@ module.exports = {
         g100: '#EEF1F8',
         g600: '#5A6478',
         g800: '#1E2A3A',
+        g500: '#8890A3',
+        mint: '#8FBFAE',
+        'mint-light': '#C9E4D8',
+        'mint-deep': '#4F8271',
       },
       fontFamily: {
         display: ['"Playfair Display"', 'serif'],
