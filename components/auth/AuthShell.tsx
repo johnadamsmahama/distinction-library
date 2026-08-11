@@ -22,24 +22,32 @@ export default function AuthShell({
         }}
       />
       <div className="relative z-[2] w-full max-w-[420px]">
-        <div className="flex items-center gap-[9px] justify-center mb-9">
-          <div className="w-[30px] h-[30px] bg-gold rounded-[7px] flex items-center justify-center font-display font-black text-[15px] text-navy">
-            D
+        <div className="bg-white border border-navy-deep shadow-2xl">
+          {/* Header bar — logo now lives inside the card */}
+          <div className="bg-gradient-to-br from-navy to-navy-deep px-6 py-4 flex items-center gap-[9px]">
+            <div className="w-[26px] h-[26px] bg-gold rounded-[6px] flex items-center justify-center font-display font-black text-[14px] text-navy-deep flex-shrink-0">
+              D
+            </div>
+            <div className="font-display text-[14px]">
+              <span className="text-white">Distinction</span>{' '}
+              <span className="text-gold-light">Library</span>
+            </div>
           </div>
-          <div className="font-condensed font-bold text-[17px]">
-            <span className="text-white">Distinction</span>{' '}
-            <span className="text-gold">Library</span>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-2xl">
-          <div className="eyebrow mb-2">{eyebrow}</div>
-          <h1 className="font-display font-bold text-2xl text-navy mb-2">{title}</h1>
-          {subtitle && (
-            <p className="font-body text-sm text-g600 mb-4 leading-relaxed">{subtitle}</p>
-          )}
-          {!subtitle && <div className="mb-4" />}
-          {children}
+          {/* Content */}
+          <div className="relative p-6">
+            {/* thin gold corner brackets */}
+            <div className="absolute top-[22px] left-5 w-[14px] h-[14px] border-t-[1.5px] border-l-[1.5px] border-gold/60 pointer-events-none" />
+            <div className="absolute bottom-0 right-5 w-[14px] h-[14px] border-b-[1.5px] border-r-[1.5px] border-gold/60 pointer-events-none" />
+
+            <div className="eyebrow mb-2">{eyebrow}</div>
+            <h1 className="font-display font-bold text-2xl text-navy mb-2">{title}</h1>
+            {subtitle && (
+              <p className="font-body text-sm text-g600 mb-4 leading-relaxed">{subtitle}</p>
+            )}
+            {!subtitle && <div className="mb-4" />}
+            {children}
+          </div>
         </div>
 
         {footer && (
