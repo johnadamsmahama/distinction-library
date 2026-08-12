@@ -64,7 +64,7 @@ type Action = {
 const ACTIONS: Action[] = [
   {
     href: '/papers/upload',
-    label: 'Contribute',
+    label: 'Upload Resources',
     desc: 'Upload slides, past papers, or notes for other students.',
     path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
     background: 'radial-gradient(140% 140% at 15% 0%, #24478a, #12295c 65%)',
@@ -94,7 +94,7 @@ const ACTIONS: Action[] = [
   },
   {
     href: '/predictor',
-    label: 'Check Exam Predictions',
+    label: 'Exam Predictor',
     desc: 'See AI-ranked likely topics for your course',
     path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
     background: 'radial-gradient(140% 140% at 85% 0%, #C9A02C, #0D2B5E 65%)',
@@ -109,7 +109,7 @@ const ACTIONS: Action[] = [
   },
   {
     href: '/vault/companion',
-    label: 'Ask the AI Companion',
+    label: 'Study Companion',
     desc: 'Explain a topic or summarise notes',
     path: 'M12 3a6 6 0 016 6c0 3.5-2.5 5-3 7H9c-.5-2-3-3.5-3-7a6 6 0 016-6zM9 21h6',
     background: 'linear-gradient(135deg,#2B2F3D 0%,#33384A 45%,#5C4A22 100%)',
@@ -124,7 +124,7 @@ const ACTIONS: Action[] = [
   },
   {
     href: '/vault/quiz-generator',
-    label: 'Generate a Quiz',
+    label: 'Quiz Generator',
     desc: 'Turn notes into practice questions',
     path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
     background: 'radial-gradient(140% 140% at 15% 0%, #2A5FCC, #081B47 65%)',
@@ -154,7 +154,7 @@ const ACTIONS: Action[] = [
   },
   {
     href: '/tutors',
-    label: 'Find a Peer Tutor',
+    label: 'Peer Tutors',
     desc: 'Get one-on-one help from a fellow student',
     path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
     background: 'radial-gradient(130% 140% at 15% 0%, #E8C875, #C9A02C 70%)',
@@ -304,7 +304,7 @@ export function QuickActions({
           </div>
 
           <div className="relative z-10">
-            <div className="font-display font-semibold text-[16px] text-navy-deep">Your Study Vault</div>
+            <div className="font-display font-semibold text-[16px] text-navy-deep">Private Study Vault</div>
             <div className="font-body text-xs mt-1 leading-snug text-navy-deep/70">{vaultDesc}</div>
           </div>
         </Link>
