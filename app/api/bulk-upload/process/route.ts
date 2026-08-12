@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
+import crypto from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { classifyUpload } from '@/lib/course-matcher';
 import { AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
@@ -14,6 +15,10 @@ import mammoth from 'mammoth';
 const BATCH_SIZE = 3;
 
 type JobResult = { filename: string; status: string; note: string };
+
+function hashBuffer(buffer: Buffer): string {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -81,6 +86,24 @@ export async function POST(req: NextRequest) {
 
     try {
       const buffer = Buffer.from(await entry.async('arraybuffer'));
+      const fileHash = hashBuffer(buffer);
+
+      // Exact-duplicate check by content hash, done before anything else —
+      // if this exact file already exists (in either table), skip it
+      // immediately without spending an AI classification call on it.
+      const [existingPaper, existingMaterial] = await Promise.all([
+        admin.from('past_papers').select('id, course_id').eq('file_hash', fileHash).limit(1).maybeSingle(),
+        admin.from('study_materials').select('id, course_id').eq('file_hash', fileHash).limit(1).maybeSingle(),
+      ]);
+
+      if (existingPaper.data || existingMaterial.data) {
+        newResults.push({
+          filename: fileName,
+          status: 'skipped_duplicate',
+          note: 'Identical file already exists in the library (matched by content, not filename).',
+        });
+        continue;
+      }
 
       let extractedText: string | null = null;
       let imageBase64: string | undefined;
@@ -174,6 +197,7 @@ export async function POST(req: NextRequest) {
           year,
           exam_type: examType,
           file_url: path,
+          file_hash: fileHash,
           uploaded_by: job.uploaded_by,
           ai_review_status: classification.confidence >= AUTO_APPROVE_THRESHOLD ? 'auto_approved' : 'needs_review',
           ai_confidence: classification.confidence,
@@ -225,6 +249,7 @@ export async function POST(req: NextRequest) {
           content_type: contentType,
           week_number: weekNumber,
           file_url: publicUrlData.publicUrl,
+          file_hash: fileHash,
           uploaded_by: job.uploaded_by,
           status: autoApprove ? 'approved' : 'pending',
           reviewed_at: autoApprove ? new Date().toISOString() : null,
