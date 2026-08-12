@@ -6,6 +6,8 @@ export type ClassificationResult = {
   kind: 'past_paper' | 'study_material' | 'unknown';
   courseCode: string | null;
   confidence: number; // 0-1, how sure about BOTH kind and course together
+  ambiguous: boolean; // true if a second course was a real contender
+  alternateCourseCode: string | null; // the second-best guess, if ambiguous
   year: number | null;
   examType: 'mid_semester' | 'end_of_semester' | null;
   title: string | null;
@@ -25,6 +27,8 @@ Respond with ONLY a JSON object, no other text, no markdown fences:
   "kind": "past_paper" | "study_material" | "unknown",
   "courseCode": "<one of the provided course codes>" | null,
   "confidence": <number 0.0-1.0>,
+  "ambiguous": <boolean>,
+  "alternateCourseCode": "<one of the provided course codes>" | null,
   "year": <number> | null,
   "examType": "mid_semester" | "end_of_semester" | null,
   "title": "<short descriptive title>" | null,
@@ -43,7 +47,16 @@ Guidance:
 - confidence reflects how sure you are about BOTH the course match AND the kind
   together — if you're confident it's a past paper but unsure which course, that's still
   low confidence.
-- Be conservative. It is much better to say low confidence / null / unknown than to
+- IMPORTANT — ambiguous course matching: some courses share the same or very similar
+  names but have different codes (for example, the same course offered to different
+  programme tracks). If, after picking your best courseCode, there is a SECOND course in
+  the provided list that is also a real, plausible match for this file — not just any
+  other course, but one a reasonable person could also have picked — set "ambiguous" to
+  true and put that second course's code in "alternateCourseCode". If your best guess is
+  clearly the only reasonable match, set "ambiguous" to false and leave
+  "alternateCourseCode" null. Do not treat every uncertainty as ambiguous — only flag it
+  when a specific, real second candidate exists among the provided courses.
+- Be conservative. It is much better to say low confidence / ambiguous / unknown than to
   wrongly assign a file to the wrong course.
 - For past_paper: guess year and examType from filename/content if possible (e.g.
   "BACS102_endsem_2023.pdf" implies end_of_semester, 2023). Leave null if you can't tell.
@@ -112,6 +125,8 @@ ${textExcerpt}
       kind: parsed.kind,
       courseCode: parsed.courseCode ?? null,
       confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0)),
+      ambiguous: Boolean(parsed.ambiguous),
+      alternateCourseCode: parsed.alternateCourseCode ?? null,
       year: parsed.year ?? null,
       examType: parsed.examType ?? null,
       title: parsed.title ?? null,
@@ -130,6 +145,8 @@ function blankResult(notes: string): ClassificationResult {
     kind: 'unknown',
     courseCode: null,
     confidence: 0,
+    ambiguous: false,
+    alternateCourseCode: null,
     year: null,
     examType: null,
     title: null,
