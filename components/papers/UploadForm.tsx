@@ -15,6 +15,17 @@ const ruledField = 'pb-1.5 mb-2.5 border-b border-dashed border-[#C9BFA0]';
 const inputClass =
   'w-full bg-transparent border-none outline-none font-body text-[13.5px] text-g800 placeholder:text-g600/50 px-0 py-0';
 
+// Computes a SHA-256 hash of a File's contents in the browser, using the
+// built-in Web Crypto API — no extra library needed. Used to catch exact
+// duplicate uploads (same file content) before they hit the database.
+async function hashFile(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function CatalogShell({
   tabLabel,
   tabColor,
@@ -114,6 +125,21 @@ export default function UploadForm({
       return;
     }
 
+    const fileHash = await hashFile(file);
+
+    // Exact-duplicate check by content hash, across both tables — catches
+    // the same file being resubmitted even under a different title/filename.
+    const [existingPaperByHash, existingMaterialByHash] = await Promise.all([
+      supabase.from('past_papers').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
+      supabase.from('study_materials').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
+    ]);
+
+    if (existingPaperByHash.data || existingMaterialByHash.data) {
+      setLoading(false);
+      setError('This exact file has already been uploaded to the library.');
+      return;
+    }
+
     if (tab === 'paper') {
       const { data: existing } = await supabase
         .from('past_papers')
@@ -155,7 +181,7 @@ export default function UploadForm({
 
       const { data: inserted, error: insertErr } = await supabase
         .from('past_papers')
-        .insert({ course_id: courseId, year: Number(year), exam_type: examType, file_url: path, uploaded_by: user.id })
+        .insert({ course_id: courseId, year: Number(year), exam_type: examType, file_url: path, file_hash: fileHash, uploaded_by: user.id })
         .select('id')
         .single();
 
@@ -184,6 +210,7 @@ export default function UploadForm({
           content_type: contentType,
           week_number: Number(week),
           file_url: publicUrlData.publicUrl,
+          file_hash: fileHash,
           uploaded_by: user.id,
         })
         .select('id')
