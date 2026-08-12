@@ -60,8 +60,13 @@ export async function POST(req: NextRequest) {
     await admin.from('bulk_upload_jobs').update({ total_files: totalFiles }).eq('id', jobId);
   }
 
-  // Load the full course list once for the classifier.
-  const { data: courses } = await admin.from('courses').select('id, code, name');
+  // Load the active course list once for the classifier. Level 200/300/400
+  // and Diploma courses are hidden while only level 100 is on campus —
+  // is_active=false keeps them out of matching without deleting the data.
+  const { data: courses } = await admin
+    .from('courses')
+    .select('id, code, name')
+    .eq('is_active', true);
   const courseList = courses ?? [];
 
   const startIndex = job.cursor;
