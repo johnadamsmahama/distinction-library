@@ -3,7 +3,7 @@ import Reveal from './Reveal';
 const STEPS = [
   {
     title: 'Sign in with your official UPSA student email',
-    desc: 'Your official student email is your key — no registration needed.',
+    desc: 'Your official student email is your key - just confirm and you\'re in.',
     path: 'M4 4h16v16H4z M4 7l8 6 8-6',
   },
   {
