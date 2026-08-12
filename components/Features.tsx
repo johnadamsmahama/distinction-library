@@ -67,6 +67,16 @@ const CARDS = [
   },
 ];
 
+// Four rotating tints for the ledger cards — cream, mint, dusty blue, blush.
+// Kept as hex (not the navy/gold theme tokens) since these are deliberately
+// soft, secondary backdrops behind the gold rule + navy type.
+const TINTS = [
+  { bg: '#FBF3E1', border: '#EBDDB8', hoverShadow: 'rgba(159,122,31,.14)' }, // cream
+  { bg: '#E9F2EA', border: '#C9DECB', hoverShadow: 'rgba(45,110,70,.12)' },  // mint
+  { bg: '#E9EFF6', border: '#C7D5E6', hoverShadow: 'rgba(30,70,140,.12)' },  // dusty blue
+  { bg: '#F6EBEA', border: '#E3C9C6', hoverShadow: 'rgba(150,60,55,.10)' }, // blush
+];
+
 export default function Features() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
@@ -109,36 +119,57 @@ export default function Features() {
             ref={trackRef}
             className="flex gap-5 overflow-hidden cursor-grab active:cursor-grabbing"
           >
-            {CARDS.map((c) => (
-              <div
-                key={c.title}
-                className="relative flex-none w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] bg-white border border-[#E2E6EF] rounded-[14px] p-7 group hover:border-gold hover:-translate-y-[3px] transition-all overflow-hidden"
-              >
-                <span className="absolute left-0 right-0 bottom-0 h-[3px] bg-gold scale-x-0 origin-left group-hover:scale-x-100 transition-transform" />
-                {c.badge && (
-                  <span className="absolute top-5 right-5 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-gold text-navy px-[9px] py-[4px] rounded-full">
-                    {c.badge}
-                  </span>
-                )}
-                <div className="w-[46px] h-[46px] bg-navy rounded-[11px] flex items-center justify-center mb-[18px]">
-                  <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] stroke-gold fill-none" strokeWidth={1.8}>
-                    <path d={c.path} />
-                  </svg>
+            {CARDS.map((c, i) => {
+              const tint = TINTS[i % TINTS.length];
+              return (
+                <div
+                  key={c.title}
+                  className="group relative flex-none w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] min-h-[300px] rounded-sm p-6 pb-5 flex flex-col border border-l-[3px] border-l-gold hover:border-l-navy transition-all duration-300 hover:-translate-y-1"
+                  style={{
+                    background: tint.bg,
+                    borderColor: tint.border,
+                    boxShadow: '0 1px 0 rgba(0,0,0,.02)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = `0 16px 30px ${tint.hoverShadow}`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 0 rgba(0,0,0,.02)';
+                  }}
+                >
+                  {c.badge && (
+                    <span className="absolute top-[22px] right-5 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] text-gold border border-gold px-[9px] py-[3px] rounded-sm">
+                      {c.badge}
+                    </span>
+                  )}
+
+                  <div className="font-display font-bold italic text-[13px] text-gold mb-4 tracking-wide">
+                    No. {String(i + 1).padStart(2, '0')}
+                  </div>
+
+                  <div className="w-[38px] h-[38px] flex items-center justify-center mb-4">
+                    <svg viewBox="0 0 24 24" className="w-[26px] h-[26px] stroke-navy fill-none" strokeWidth={1.4}>
+                      <path d={c.path} />
+                    </svg>
+                  </div>
+
+                  <h3 className="font-display font-bold text-[19px] text-navy mb-[10px]">{c.title}</h3>
+                  <p className="font-body text-[13.5px] leading-[1.65] text-g600 mb-4 flex-1">{c.desc}</p>
+
+                  <div className="flex items-center gap-[6px] border-t pt-3 font-condensed font-semibold text-[11px] uppercase tracking-wider text-navy" style={{ borderColor: tint.border }}>
+                    <span className="text-gold">—</span>
+                    {c.tag}
+                  </div>
                 </div>
-                <h3 className="font-display font-bold text-[17px] text-navy mb-[10px]">{c.title}</h3>
-                <p className="font-body text-[13.5px] leading-[1.6] text-g600 mb-4">{c.desc}</p>
-                <div className="border-t border-g100 pt-3 font-condensed font-bold text-[10px] uppercase tracking-wider text-gold">
-                  {c.tag}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex items-center justify-center gap-[18px] mt-8">
             <button
               aria-label="Previous"
               onClick={() => goTo(page - 1)}
-              className="w-[38px] h-[38px] rounded-full border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
+              className="w-[38px] h-[38px] rounded-sm border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
             >
               ‹
             </button>
@@ -157,7 +188,7 @@ export default function Features() {
             <button
               aria-label="Next"
               onClick={() => goTo(page + 1)}
-              className="w-[38px] h-[38px] rounded-full border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
+              className="w-[38px] h-[38px] rounded-sm border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
             >
               ›
             </button>
