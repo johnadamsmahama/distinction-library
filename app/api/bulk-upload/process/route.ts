@@ -146,7 +146,15 @@ export async function POST(req: NextRequest) {
       });
 
       const course = courseList.find((c) => c.code === classification.courseCode);
+      const alternateCourse = classification.alternateCourseCode
+        ? courseList.find((c) => c.code === classification.alternateCourseCode)
+        : null;
 
+      // A file is sent to manual review if: kind/course is genuinely
+      // unclear (low confidence), OR the AI flagged a real second
+      // candidate course (ambiguous) — a high confidence score alone isn't
+      // enough to trust if there's a plausible alternate match sitting
+      // right next to it.
       if (
         classification.kind === 'unknown' ||
         !course ||
@@ -158,6 +166,16 @@ export async function POST(req: NextRequest) {
           note:
             classification.notes ||
             'Could not confidently identify the course or document type — upload this one manually.',
+        });
+        continue;
+      }
+
+      if (classification.ambiguous) {
+        const altLabel = alternateCourse ? `${alternateCourse.code} — ${alternateCourse.name}` : 'another course';
+        newResults.push({
+          filename: fileName,
+          status: 'needs_manual_review',
+          note: `Could be ${course.code} or ${altLabel} — please confirm which one this belongs to.`,
         });
         continue;
       }
