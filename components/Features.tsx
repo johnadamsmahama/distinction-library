@@ -5,14 +5,14 @@ import Reveal from './Reveal';
 
 const CARDS = [
   {
-    title: 'Study Library',
+    title: 'Library',
     desc: 'Past papers and curated study materials — notes, slides, summaries — searchable by course, level, and week. Browse, download, or upload your own.',
     tag: 'Community-contributed & platform-curated · Moderated · Watermarked',
     path: 'M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z',
     badge: 'Core',
   },
   {
-    title: 'Contribute',
+    title: 'Upload Resources',
     desc: 'Upload slides, past papers, or notes for other students — help build the library while earning leaderboard recognition.',
     tag: 'Moderated on submission · Earns leaderboard points',
     path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
@@ -24,13 +24,13 @@ const CARDS = [
     path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
   },
   {
-    title: 'AI Study Companion',
+    title: 'Study Companion',
     desc: 'Upload notes, ask anything — instant explanations, summaries, revision notes.',
     tag: 'Private to you · Saved to your Study Vault',
     path: 'M12 3a6 6 0 016 6c0 3.5-2.5 5-3 7H9c-.5-2-3-3.5-3-7a6 6 0 016-6zM9 21h6',
   },
   {
-    title: 'AI Quiz Generator',
+    title: 'Quiz Generator',
     desc: 'PDF → MCQs, true/false, and short-answer with answers & explanations.',
     tag: 'Generated from your own materials · Always private',
     path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
@@ -42,7 +42,7 @@ const CARDS = [
     path: 'M3 4h18v13H3V4zM8 21h8M12 17v4M7 12l3-4 2.5 3L17 6',
   },
   {
-    title: 'Find a Peer Tutor',
+    title: 'Peer Tutors',
     desc: 'Get one-on-one help from a fellow student — book revision sessions with peer tutors and Distinction Programme facilitators.',
     tag: 'Distinction Mentors · Book a session',
     path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
