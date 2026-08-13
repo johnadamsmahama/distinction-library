@@ -47,8 +47,12 @@ export default async function AutoPublishReviewPage() {
         confidence first, so anything worth a second look surfaces at the top.
       </p>
 
+      {/* Supabase's generated type treats the joined `courses` relation as
+          possibly-an-array even though it's always a single row here — a
+          types-only mismatch, not a real data issue. Cast at the boundary
+          rather than fighting the generated types. */}
       <AutoPublishReview
-        initialItems={items ?? []}
+        initialItems={(items ?? []) as any}
         courses={courses ?? []}
         totalCount={totalCount}
         initialReviewedCount={reviewedCount}
