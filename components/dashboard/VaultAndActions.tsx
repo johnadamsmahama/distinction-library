@@ -138,7 +138,7 @@ const ACTIONS: Action[] = [
     grain: true,
   },
   {
-    href: '/vault/presentation-kit',
+    href: '/ai-tools/presentation-kit',
     label: 'Presentation Kit',
     desc: 'Turn a topic, a Vault item, or a document into a PowerPoint (PPTX) ready to present.',
     path: 'M3 4h18v13H3V4zM8 21h8M12 17v4M7 12l3-4 2.5 3L17 6',
