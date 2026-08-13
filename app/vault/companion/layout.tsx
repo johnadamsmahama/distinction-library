@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Constellation from '@/components/ai-tools/Constellation';
 
 export default function CompanionLayout({ children }: { children: React.ReactNode }) {
@@ -10,7 +11,12 @@ export default function CompanionLayout({ children }: { children: React.ReactNod
         }}
       />
       <Constellation />
-      <div className="relative z-10 px-6 py-6">{children}</div>
+      <div className="relative z-10 px-6 py-6">
+        <Link href="/ai-tools" className="font-condensed font-bold text-xs uppercase text-gold hover:underline">
+          ← AI Tools
+        </Link>
+        <div className="mt-4">{children}</div>
+      </div>
     </div>
   );
 }
