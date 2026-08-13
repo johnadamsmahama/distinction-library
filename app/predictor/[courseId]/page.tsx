@@ -30,11 +30,14 @@ export default async function PredictorPage({ params }: PageProps) {
 
   const { data: course } = await supabase
     .from("courses")
-    .select("code, name, department, level")
+    .select("code, name, department, level, is_active")
     .eq("id", courseId)
     .single();
 
-  if (!course) {
+  // Treat a hidden course (level 200+ while only level 100 is on campus)
+  // the same as a genuinely missing one — otherwise an old bookmark or
+  // direct link would bypass the landing page's course list entirely.
+  if (!course || !course.is_active) {
     notFound();
   }
 
