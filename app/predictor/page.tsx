@@ -18,6 +18,9 @@ export default async function PredictorLandingPage() {
   const { data: courses } = await supabase
     .from("courses")
     .select("id, code, name, department, level")
+    // Only level 100 is on campus right now — level 200/300/400 and
+    // Diploma are hidden via is_active until they resume, not deleted.
+    .eq("is_active", true)
     .order("code", { ascending: true });
 
   return (
