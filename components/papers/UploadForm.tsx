@@ -272,6 +272,7 @@ export default function UploadForm({
                 onChange={setCourseId}
                 placeholder="Select a course…"
                 options={courses.map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+                searchable
               />
             </div>
 
