@@ -231,7 +231,10 @@ export async function POST(req: NextRequest) {
           note: `Matched to ${course.code} — in your moderation queue for final approval.`,
         });
       } else {
-        const title = classification.title || fileName.replace(/\.[^.]+$/, '');
+        // Uppercased here so titles saved through bulk upload (including
+        // auto-approved ones that skip human moderation entirely) match the
+        // same ALL CAPS convention enforced on the manual-approval path.
+        const title = (classification.title || fileName.replace(/\.[^.]+$/, '')).toUpperCase();
         const weekNumber = classification.weekNumber ?? 1;
         const contentType = classification.contentType ?? 'study_notes';
 
