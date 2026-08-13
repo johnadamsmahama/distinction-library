@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const TOOLS = [
   {
-    href: '/vault/companion',
+    href: '/ai-tools/companion',
     title: 'Study Companion',
     desc: 'Ask questions about your own course material and get step-by-step explanations.',
   },
