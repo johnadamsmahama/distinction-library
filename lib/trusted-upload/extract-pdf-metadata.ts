@@ -1,6 +1,10 @@
 // lib/trusted-upload/extract-pdf-metadata.ts
 
-import pdfParse from 'pdf-parse';
+// @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath.
+// Matches the exact import used in app/api/bulk-upload/process/route.ts —
+// the top-level 'pdf-parse' entry point has a known issue loading a debug
+// test file on import in some serverless environments; this subpath avoids it.
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 
 export type ExamType = 'mid_semester' | 'end_of_semester';
 
