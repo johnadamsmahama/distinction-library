@@ -108,7 +108,7 @@ const ACTIONS: Action[] = [
     grain: true,
   },
   {
-    href: '/vault/companion',
+    href: '/ai-tools/companion',
     label: 'Study Companion',
     desc: 'Explain a topic or summarise notes',
     path: 'M12 3a6 6 0 016 6c0 3.5-2.5 5-3 7H9c-.5-2-3-3.5-3-7a6 6 0 016-6zM9 21h6',
