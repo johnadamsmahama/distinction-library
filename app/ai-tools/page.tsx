@@ -8,7 +8,7 @@ const TOOLS = [
     desc: 'Ask questions about your own course material and get step-by-step explanations.',
   },
   {
-    href: '/vault/quiz-generator',
+    href: '/ai-tools/quiz-generator',
     title: 'Quiz Generator',
     desc: 'Turn your notes or a past paper into a practice quiz in seconds.',
   },
