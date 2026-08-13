@@ -4,12 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 const TOOLS = [
   {
     href: '/vault/companion',
-    title: 'AI Study Companion',
+    title: 'Study Companion',
     desc: 'Ask questions about your own course material and get step-by-step explanations.',
   },
   {
     href: '/vault/quiz-generator',
-    title: 'AI Quiz Generator',
+    title: 'Quiz Generator',
     desc: 'Turn your notes or a past paper into a practice quiz in seconds.',
   },
   {
