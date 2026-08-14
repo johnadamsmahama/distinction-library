@@ -69,12 +69,14 @@ export default function RecentActivity({
         <div>
           {feed.map((item, i) => {
             const chip = chipParts(item.data.created_at);
-            const title =
+            const courseName = item.data.courses?.name ?? item.data.courses?.code ?? '';
+            const rawTitle =
               item.kind === 'paper'
-                ? `${item.data.courses?.code} — ${
+                ? `${courseName} — ${
                     item.data.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'
                   } ${item.data.year}`
-                : `${item.data.courses?.code} — ${item.data.title}`;
+                : `${courseName} — ${item.data.title}`;
+            const title = rawTitle.toUpperCase();
             const tag = item.kind === 'paper' ? 'Past Paper' : 'Study Material';
 
             return (
