@@ -37,7 +37,7 @@ export default async function SuccessCentrePage() {
         </Link>
 
         <Link
-          href="/success-centre/opportunity-hub"
+          href="/essentials/opportunity-hub"
           className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
         >
           <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
@@ -50,7 +50,7 @@ export default async function SuccessCentrePage() {
         </Link>
 
         <Link
-          href="/success-centre/achievements"
+          href="/essentials/achievements"
           className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
         >
           <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
@@ -63,7 +63,7 @@ export default async function SuccessCentrePage() {
         </Link>
 
         <Link
-          href="/success-centre/career"
+          href="/essentials/career"
           className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
         >
           <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center text-gold mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
@@ -80,7 +80,7 @@ export default async function SuccessCentrePage() {
         </Link>
 
         <Link
-          href="/success-centre/events"
+          href="/essentials/events"
           className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
         >
           <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
