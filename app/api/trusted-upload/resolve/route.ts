@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     newCourseId,
     newCourseCode,
     year,
+    yearUnknown,
     examType,
     weekNumber,
   }: {
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
     newCourseId?: string;
     newCourseCode?: string;
     year?: number;
+    yearUnknown?: boolean; // true when the admin explicitly marked the year as unknown ("----")
     examType?: 'mid_semester' | 'end_of_semester';
     weekNumber?: number;
   } = body;
@@ -131,13 +133,17 @@ export async function POST(req: NextRequest) {
         });
       } else if (action === 'provide_metadata') {
         if (config.uploadType === 'past_paper') {
-          if (!year || !examType) {
-            return NextResponse.json({ error: 'year and examType are required for this file' }, { status: 400 });
+          if (!examType) {
+            return NextResponse.json({ error: 'examType is required for this file' }, { status: 400 });
+          }
+          if (!yearUnknown && !year) {
+            return NextResponse.json({ error: 'year is required unless marked unknown' }, { status: 400 });
           }
           newResult = await processPastPaperEntry({
             admin, buffer, fileHash, fileName: filename,
             uploadedBy: job.uploaded_by, courseId: config.courseId, courseCode: config.courseCode, pathSalt,
-            overrideYear: year, overrideExamType: examType,
+            overrideYear: yearUnknown ? null : year,
+            overrideExamType: examType,
           });
         } else {
           if (!weekNumber) {
