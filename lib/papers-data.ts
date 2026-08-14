@@ -6,12 +6,13 @@ export type CourseOption = {
   name: string;
   department: string;
   level: string;
+  is_active: boolean;
 };
 
 export async function getCourseOptions(supabase: SupabaseClient): Promise<CourseOption[]> {
   const { data } = await supabase
     .from('courses')
-    .select('id, code, name, department, level')
+    .select('id, code, name, department, level, is_active')
     .order('code', { ascending: true });
   return data ?? [];
 }
