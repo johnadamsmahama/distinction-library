@@ -5,33 +5,213 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import CustomSelect from '@/components/ui/CustomSelect';
 import type { CourseOption } from '@/lib/papers-data';
-
-type UploadType = 'past_paper' | 'study_material';
-
-type JobResult = {
-  filename: string;
-  status: 'approved' | 'skipped_duplicate' | 'needs_metadata' | 'needs_course_review' | 'error';
-  note: string;
-  extractedCode?: string;
-};
+import type { JobResult, UploadType } from '@/lib/trusted-upload/types';
+import { searchCoursesForReassignment } from '@/lib/trusted-upload/resolve-mismatch';
 
 const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-g600 mb-1 block';
 
 function statusColor(status: JobResult['status']): string {
   if (status === 'approved') return 'text-green-600';
-  if (status === 'skipped_duplicate') return 'text-g600';
+  if (status === 'skipped_duplicate' || status === 'skipped_manual') return 'text-g600';
   if (status === 'needs_metadata' || status === 'needs_course_review') return 'text-orange-500';
   if (status === 'error') return 'text-red-500';
   return 'text-g600';
 }
 
-/**
- * Note: courses passed in should include inactive ones (is_active = false),
- * per the decision to let backlog uploads target level 200-400 courses
- * ahead of those levels going live. The caller (the page this is rendered
- * on) is responsible for fetching courses without an is_active filter —
- * unlike every other course picker on the site.
- */
+async function callResolve(payload: Record<string, unknown>): Promise<JobResult> {
+  const res = await fetch('/api/trusted-upload/resolve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? 'Resolve failed');
+  return data.result as JobResult;
+}
+
+function ResolveRow({
+  jobId,
+  result,
+  uploadType,
+  onResolved,
+}: {
+  jobId: string;
+  result: JobResult;
+  uploadType: UploadType;
+  onResolved: (r: JobResult) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [mode, setMode] = useState<'idle' | 'reassign' | 'metadata'>('idle');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<CourseOption[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  const [year, setYear] = useState('');
+  const [examType, setExamType] = useState<'mid_semester' | 'end_of_semester'>('end_of_semester');
+  const [weekNumber, setWeekNumber] = useState('');
+
+  const run = async (payload: Record<string, unknown>) => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await callResolve({ jobId, filename: result.filename, ...payload });
+      onResolved(r);
+    } catch (e: any) {
+      setErr(e.message ?? 'Failed to resolve.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doSearch = async (q: string) => {
+    setSearchQuery(q);
+    if (q.trim().length < 2) { setSearchResults([]); return; }
+    setSearching(true);
+    const supabase = createClient();
+    try {
+      const found = await searchCoursesForReassignment(supabase, q);
+      setSearchResults(found as CourseOption[]);
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <div className="border border-g100 rounded-[4px] p-2 bg-off-white">
+      <div className="font-mono font-bold text-[10px] text-navy break-all">{result.filename}</div>
+      <div className={`font-body text-[11px] mt-0.5 ${statusColor(result.status)}`}>{result.note}</div>
+
+      {busy && <div className="font-body text-[11px] text-g600 mt-1.5">Working…</div>}
+      {err && <div className="font-body text-[11px] text-red-500 mt-1.5">{err}</div>}
+
+      {!busy && result.status === 'needs_course_review' && mode === 'idle' && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <button
+            onClick={() => run({ action: 'confirm_alias', extractedCode: result.extractedCode })}
+            className="font-condensed font-bold text-[10px] uppercase text-white bg-navy px-2.5 py-1.5 rounded-[3px]"
+          >
+            Confirm as alias
+          </button>
+          <button
+            onClick={() => setMode('reassign')}
+            className="font-condensed font-bold text-[10px] uppercase text-navy border border-navy px-2.5 py-1.5 rounded-[3px]"
+          >
+            Reassign course
+          </button>
+          <button
+            onClick={() => run({ action: 'skip' })}
+            className="font-condensed font-bold text-[10px] uppercase text-g600 border border-g100 px-2.5 py-1.5 rounded-[3px]"
+          >
+            Skip
+          </button>
+        </div>
+      )}
+
+      {!busy && result.status === 'needs_course_review' && mode === 'reassign' && (
+        <div className="mt-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => doSearch(e.target.value)}
+            placeholder="Search course code or name…"
+            className="w-full text-[12px] border border-g100 rounded-[3px] px-2 py-1.5 mb-1.5"
+          />
+          {searching && <div className="font-body text-[11px] text-g600">Searching…</div>}
+          <div className="space-y-1 max-h-[140px] overflow-y-auto">
+            {searchResults.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => run({ action: 'reassign', newCourseId: c.id, newCourseCode: c.code })}
+                className="w-full text-left text-[11.5px] px-2 py-1.5 rounded-[3px] hover:bg-gold-light/10 border border-g100"
+              >
+                {c.code} — {c.name}{c.is_active === false ? ' (inactive)' : ''}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setMode('idle')}
+            className="font-condensed font-bold text-[10px] uppercase text-g600 mt-1.5"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {!busy && result.status === 'needs_metadata' && mode === 'idle' && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <button
+            onClick={() => setMode('metadata')}
+            className="font-condensed font-bold text-[10px] uppercase text-white bg-navy px-2.5 py-1.5 rounded-[3px]"
+          >
+            Fill in details
+          </button>
+          <button
+            onClick={() => run({ action: 'skip' })}
+            className="font-condensed font-bold text-[10px] uppercase text-g600 border border-g100 px-2.5 py-1.5 rounded-[3px]"
+          >
+            Skip
+          </button>
+        </div>
+      )}
+
+      {!busy && result.status === 'needs_metadata' && mode === 'metadata' && (
+        <div className="mt-2">
+          {uploadType === 'past_paper' ? (
+            <div className="flex gap-2 mb-2">
+              <input
+                type="number"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                placeholder="Year"
+                className="w-24 text-[12px] border border-g100 rounded-[3px] px-2 py-1.5"
+              />
+              <select
+                value={examType}
+                onChange={(e) => setExamType(e.target.value as any)}
+                className="text-[12px] border border-g100 rounded-[3px] px-2 py-1.5"
+              >
+                <option value="mid_semester">Mid Semester</option>
+                <option value="end_of_semester">End of Semester</option>
+              </select>
+            </div>
+          ) : (
+            <input
+              type="number"
+              value={weekNumber}
+              onChange={(e) => setWeekNumber(e.target.value)}
+              placeholder="Week number"
+              className="w-32 text-[12px] border border-g100 rounded-[3px] px-2 py-1.5 mb-2"
+            />
+          )}
+          <div className="flex gap-1.5">
+            <button
+              onClick={() =>
+                uploadType === 'past_paper'
+                  ? run({ action: 'provide_metadata', year: Number(year), examType })
+                  : run({ action: 'provide_metadata', weekNumber: Number(weekNumber) })
+              }
+              disabled={uploadType === 'past_paper' ? !year : !weekNumber}
+              className="font-condensed font-bold text-[10px] uppercase text-white bg-navy px-2.5 py-1.5 rounded-[3px] disabled:opacity-50"
+            >
+              Save &amp; Publish
+            </button>
+            <button
+              onClick={() => setMode('idle')}
+              className="font-condensed font-bold text-[10px] uppercase text-g600"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TrustedUploadPanel({ courses }: { courses: CourseOption[] }) {
   const [courseId, setCourseId] = useState('');
   const [uploadType, setUploadType] = useState<UploadType>('past_paper');
@@ -84,9 +264,6 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
     const selectedCourse = courses.find((c) => c.id === courseId);
     if (!selectedCourse) { setUploading(false); setError('Selected course not found.'); return; }
 
-    // Uploads straight to the admin-only 'trusted-uploads' bucket — RLS
-    // rejects this outright if the current user isn't an admin, so this
-    // fails safely before any job row is even created.
     const path = `${user.id}/${Date.now()}-${zipFile.name}`;
     const { error: uploadErr } = await supabase.storage.from('trusted-uploads').upload(path, zipFile);
     if (uploadErr) { setUploading(false); setError(uploadErr.message); return; }
@@ -97,11 +274,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
         uploaded_by: user.id,
         zip_path: path,
         job_type: 'trusted',
-        trusted_upload_config: {
-          courseId,
-          courseCode: selectedCourse.code,
-          uploadType,
-        },
+        trusted_upload_config: { courseId, courseCode: selectedCourse.code, uploadType },
       })
       .select('id')
       .single();
@@ -120,6 +293,10 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
   const reset = () => {
     setJobId(null); setJobStatus(null); setTotalFiles(null);
     setCursor(0); setResults([]); setZipFile(null);
+  };
+
+  const handleResolved = (updated: JobResult) => {
+    setResults((prev) => prev.map((r) => (r.filename === updated.filename ? updated : r)));
   };
 
   if (jobId) {
@@ -144,20 +321,21 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
 
         {needsAttention > 0 && (
           <div className="bg-orange-50 border border-orange-200 rounded-[4px] px-3 py-2 mb-3 text-[11.5px] text-orange-700">
-            {needsAttention} file{needsAttention === 1 ? '' : 's'} need attention (below) — the rest of the batch
-            processed normally.
-            {/* Resolution UI (confirm alias / reassign course / skip) is a
-                separate follow-up piece — not yet wired to this panel. */}
+            {needsAttention} file{needsAttention === 1 ? '' : 's'} need attention — resolve them below, the
+            rest of the batch already processed normally.
           </div>
         )}
 
         {results.length > 0 && (
-          <div className="space-y-1.5 max-h-[320px] overflow-y-auto">
-            {results.map((r, i) => (
-              <div key={i} className="border border-g100 rounded-[4px] p-2 bg-off-white">
-                <div className="font-mono font-bold text-[10px] text-navy break-all">{r.filename}</div>
-                <div className={`font-body text-[11px] mt-0.5 ${statusColor(r.status)}`}>{r.note}</div>
-              </div>
+          <div className="space-y-1.5 max-h-[420px] overflow-y-auto">
+            {results.map((r) => (
+              <ResolveRow
+                key={r.filename}
+                jobId={jobId}
+                result={r}
+                uploadType={uploadType}
+                onResolved={handleResolved}
+              />
             ))}
           </div>
         )}
