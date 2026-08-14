@@ -49,6 +49,7 @@ function ResolveRow({
   const [searching, setSearching] = useState(false);
 
   const [year, setYear] = useState('');
+  const [yearUnknown, setYearUnknown] = useState(false);
   const [examType, setExamType] = useState<'mid_semester' | 'end_of_semester'>('end_of_semester');
   const [weekNumber, setWeekNumber] = useState('');
 
@@ -78,6 +79,14 @@ function ResolveRow({
     } finally {
       setSearching(false);
     }
+  };
+
+  const toggleYearUnknown = () => {
+    setYearUnknown((prev) => {
+      const next = !prev;
+      if (next) setYear('');
+      return next;
+    });
   };
 
   return (
@@ -161,14 +170,25 @@ function ResolveRow({
       {!busy && result.status === 'needs_metadata' && mode === 'metadata' && (
         <div className="mt-2">
           {uploadType === 'past_paper' ? (
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-2 mb-2 items-center">
               <input
                 type="number"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
                 placeholder="Year"
-                className="w-24 text-[12px] border border-g100 rounded-[3px] px-2 py-1.5"
+                disabled={yearUnknown}
+                className="w-24 text-[12px] border border-g100 rounded-[3px] px-2 py-1.5 disabled:opacity-40 disabled:bg-g100/30"
               />
+              <button
+                type="button"
+                onClick={toggleYearUnknown}
+                title="Mark year as unknown"
+                className={`font-mono font-bold text-[11px] px-2.5 py-1.5 rounded-[3px] border-[1.3px] transition-colors ${
+                  yearUnknown ? 'bg-navy border-navy text-white' : 'bg-transparent border-g100 text-g600'
+                }`}
+              >
+                ----
+              </button>
               <select
                 value={examType}
                 onChange={(e) => setExamType(e.target.value as any)}
@@ -191,10 +211,14 @@ function ResolveRow({
             <button
               onClick={() =>
                 uploadType === 'past_paper'
-                  ? run({ action: 'provide_metadata', year: Number(year), examType })
+                  ? run(
+                      yearUnknown
+                        ? { action: 'provide_metadata', yearUnknown: true, examType }
+                        : { action: 'provide_metadata', year: Number(year), examType }
+                    )
                   : run({ action: 'provide_metadata', weekNumber: Number(weekNumber) })
               }
-              disabled={uploadType === 'past_paper' ? !year : !weekNumber}
+              disabled={uploadType === 'past_paper' ? (!yearUnknown && !year) : !weekNumber}
               className="font-condensed font-bold text-[10px] uppercase text-white bg-navy px-2.5 py-1.5 rounded-[3px] disabled:opacity-50"
             >
               Save &amp; Publish
