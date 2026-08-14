@@ -1,0 +1,181 @@
+// lib/trusted-upload/process-entry.ts
+
+import crypto from 'crypto';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { extractPastPaperMetadata, ExamType } from './extract-pdf-metadata';
+import { parsePastPaperFilename, parseStudyMaterialFilename } from './parse-filename';
+import { verifyCourseCode } from './verify-course-code';
+import { watermarkPdf } from '../pdf-watermark';
+import { JobResult } from './types';
+
+interface ProcessPastPaperParams {
+  admin: SupabaseClient;
+  buffer: Buffer;
+  fileHash: string;
+  fileName: string;
+  uploadedBy: string;
+  courseId: string;
+  courseCode: string;
+  pathSalt: string; // unique-ish token for the storage path, e.g. `${Date.now()}-${index}`
+  overrideYear?: number;
+  overrideExamType?: ExamType;
+}
+
+/**
+ * Processes one past paper file end to end: extraction → merge with
+ * filename fallback → course-code verification → watermark → upload →
+ * insert as approved. Returns a JobResult describing the outcome — never
+ * throws for expected "needs attention" cases, only for genuine failures
+ * (storage/DB errors), which the caller should catch.
+ *
+ * Course verification always runs against whatever courseId/courseCode is
+ * passed in — whether that's the batch's original selection, a reassigned
+ * course, or the original selection re-checked after a new alias was just
+ * saved. This means the same function correctly handles the first pass AND
+ * every resolution path, without needing a "skip verification" flag.
+ */
+export async function processPastPaperEntry(
+  params: ProcessPastPaperParams
+): Promise<JobResult> {
+  const { admin, buffer, fileHash, fileName, uploadedBy, courseId, courseCode, pathSalt } = params;
+  const isPdf = fileName.toLowerCase().endsWith('.pdf');
+
+  const filenameParsed = parsePastPaperFilename(fileName).parsed;
+  const extracted = isPdf ? await extractPastPaperMetadata(buffer) : null;
+
+  const year = params.overrideYear ?? extracted?.year ?? filenameParsed.year;
+  const examType = params.overrideExamType ?? extracted?.examType ?? filenameParsed.examType;
+
+  if (year === null || examType === null) {
+    return {
+      filename: fileName,
+      status: 'needs_metadata',
+      note: isPdf
+        ? 'Could not confidently determine year and/or exam type from the file or filename.'
+        : 'Non-PDF past paper — content extraction unavailable, and filename did not resolve year/exam type.',
+    };
+  }
+
+  const verification = await verifyCourseCode(admin, extracted?.courseCode ?? null, {
+    id: courseId,
+    code: courseCode,
+  });
+
+  if (verification.status === 'mismatch') {
+    return {
+      filename: fileName,
+      status: 'needs_course_review',
+      note: `Cover page shows course code "${verification.extractedCode}", which doesn't match the selected course (${courseCode}) and isn't a known alias.`,
+      extractedCode: verification.extractedCode,
+    };
+  }
+
+  const isResit = extracted?.isResit ?? false;
+  const paperId = crypto.randomUUID();
+
+  const rawPath = `${uploadedBy}/${courseId}/${pathSalt}.pdf`;
+  const { error: rawUploadErr } = await admin.storage
+    .from('past-papers')
+    .upload(rawPath, buffer, { contentType: isPdf ? 'application/pdf' : undefined });
+  if (rawUploadErr) throw new Error(rawUploadErr.message);
+
+  const watermark = isPdf
+    ? await watermarkPdf(new Uint8Array(buffer), courseCode)
+    : { bytes: new Uint8Array(buffer), extension: 'pdf', watermarked: false };
+
+  const finalPath = `${courseId}/${year}/${paperId}.${watermark.extension}`;
+  const { error: finalUploadErr } = await admin.storage
+    .from('past-papers-final')
+    .upload(finalPath, watermark.bytes, { contentType: 'application/pdf', upsert: true });
+  if (finalUploadErr) throw new Error(finalUploadErr.message);
+
+  const { data: publicUrlData } = admin.storage.from('past-papers-final').getPublicUrl(finalPath);
+
+  const { error: insertErr } = await admin.from('past_papers').insert({
+    id: paperId,
+    course_id: courseId,
+    year,
+    exam_type: examType,
+    is_resit: isResit,
+    file_url: rawPath,
+    watermarked_url: publicUrlData.publicUrl,
+    file_hash: fileHash,
+    uploaded_by: uploadedBy,
+    status: 'approved',
+    reviewed_by: uploadedBy,
+    reviewed_at: new Date().toISOString(),
+  });
+  if (insertErr) throw new Error(insertErr.message);
+
+  return {
+    filename: fileName,
+    status: 'approved',
+    note: `Published under ${courseCode}${
+      verification.status === 'match_via_alias' ? ` (matched via known alias ${verification.aliasCode})` : ''
+    } — ${examType.replace('_', ' ')}, ${year}${isResit ? ', resit' : ''}.${
+      !watermark.watermarked ? ' Note: watermarking failed, published unstamped.' : ''
+    }`,
+  };
+}
+
+interface ProcessStudyMaterialParams {
+  admin: SupabaseClient;
+  buffer: Buffer;
+  fileHash: string;
+  fileName: string;
+  uploadedBy: string;
+  courseId: string;
+  courseCode: string;
+  pathSalt: string;
+  overrideWeekNumber?: number;
+}
+
+/**
+ * Study materials skip course-code verification entirely — no content
+ * extraction is built for them (no formal cover page to trust), so there's
+ * no independent signal to cross-check against the selected course.
+ */
+export async function processStudyMaterialEntry(
+  params: ProcessStudyMaterialParams
+): Promise<JobResult> {
+  const { admin, buffer, fileHash, fileName, uploadedBy, courseId, courseCode, pathSalt } = params;
+
+  const weekNumber = params.overrideWeekNumber ?? parseStudyMaterialFilename(fileName).parsed.weekNumber;
+
+  if (weekNumber === null) {
+    return {
+      filename: fileName,
+      status: 'needs_metadata',
+      note: 'Could not determine a week number from the filename.',
+    };
+  }
+
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+  const contentType = ext === 'pptx' ? 'lecture_slides' : 'study_notes';
+  const title = fileName.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim().toUpperCase();
+
+  const path = `${uploadedBy}/${courseId}/${pathSalt}.${ext}`;
+  const { error: uploadErr } = await admin.storage.from('study-materials').upload(path, buffer);
+  if (uploadErr) throw new Error(uploadErr.message);
+
+  const { data: publicUrlData } = admin.storage.from('study-materials').getPublicUrl(path);
+
+  const { error: insertErr } = await admin.from('study_materials').insert({
+    course_id: courseId,
+    title,
+    content_type: contentType,
+    week_number: weekNumber,
+    file_url: publicUrlData.publicUrl,
+    file_hash: fileHash,
+    uploaded_by: uploadedBy,
+    status: 'approved',
+    reviewed_at: new Date().toISOString(),
+  });
+  if (insertErr) throw new Error(insertErr.message);
+
+  return {
+    filename: fileName,
+    status: 'approved',
+    note: `Published under ${courseCode}, week ${weekNumber}.`,
+  };
+}
