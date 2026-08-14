@@ -15,6 +15,7 @@ const TABS = [
   { href: '/admin/support', label: 'Support Tickets' },
   { href: '/admin/moderation-log', label: 'Moderation Log' },
   { href: '/admin/broadcast', label: 'Broadcast' },
+  { href: '/moderate/trusted-upload', label: 'Trusted Upload' },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
