@@ -17,7 +17,7 @@ interface ProcessPastPaperParams {
   courseId: string;
   courseCode: string;
   pathSalt: string; // unique-ish token for the storage path, e.g. `${Date.now()}-${index}`
-  overrideYear?: number;
+  overrideYear?: number | null; // null = admin explicitly marked the year unknown
   overrideExamType?: ExamType;
 }
 
@@ -33,6 +33,12 @@ interface ProcessPastPaperParams {
  * course, or the original selection re-checked after a new alias was just
  * saved. This means the same function correctly handles the first pass AND
  * every resolution path, without needing a "skip verification" flag.
+ *
+ * Year handling: `overrideYear` is only treated as "the admin decided this"
+ * when it's explicitly present in the call (including explicitly `null` for
+ * "unknown"). If it's omitted entirely, we fall back to automatic
+ * extraction/filename parsing, same as before — an omitted year on first
+ * pass still triggers needs_metadata rather than silently becoming unknown.
  */
 export async function processPastPaperEntry(
   params: ProcessPastPaperParams
@@ -43,10 +49,16 @@ export async function processPastPaperEntry(
   const filenameParsed = parsePastPaperFilename(fileName).parsed;
   const extracted = isPdf ? await extractPastPaperMetadata(buffer) : null;
 
-  const year = params.overrideYear ?? extracted?.year ?? filenameParsed.year;
+  const yearOverrideProvided = params.overrideYear !== undefined;
+  const year: number | null = yearOverrideProvided
+    ? (params.overrideYear as number | null)
+    : (extracted?.year ?? filenameParsed.year);
   const examType = params.overrideExamType ?? extracted?.examType ?? filenameParsed.examType;
 
-  if (year === null || examType === null) {
+  // Only bail out to needs_metadata for year if nobody has explicitly
+  // resolved it yet. Once an admin has explicitly set it to null ("unknown"),
+  // that's a final decision, not a gap.
+  if ((year === null && !yearOverrideProvided) || examType === null) {
     return {
       filename: fileName,
       status: 'needs_metadata',
@@ -83,7 +95,11 @@ export async function processPastPaperEntry(
     ? await watermarkPdf(new Uint8Array(buffer), courseCode)
     : { bytes: new Uint8Array(buffer), extension: 'pdf', watermarked: false };
 
-  const finalPath = `${courseId}/${year}/${paperId}.${watermark.extension}`;
+  // Storage paths still need a real folder name even when the year is
+  // unknown in the database — "unknown" is just a filing label here, not
+  // stored in past_papers.year.
+  const yearFolder = year ?? 'unknown';
+  const finalPath = `${courseId}/${yearFolder}/${paperId}.${watermark.extension}`;
   const { error: finalUploadErr } = await admin.storage
     .from('past-papers-final')
     .upload(finalPath, watermark.bytes, { contentType: 'application/pdf', upsert: true });
@@ -94,7 +110,7 @@ export async function processPastPaperEntry(
   const { error: insertErr } = await admin.from('past_papers').insert({
     id: paperId,
     course_id: courseId,
-    year,
+    year, // null is allowed now — means "unknown"
     exam_type: examType,
     is_resit: isResit,
     file_url: rawPath,
@@ -112,7 +128,7 @@ export async function processPastPaperEntry(
     status: 'approved',
     note: `Published under ${courseCode}${
       verification.status === 'match_via_alias' ? ` (matched via known alias ${verification.aliasCode})` : ''
-    } — ${examType.replace('_', ' ')}, ${year}${isResit ? ', resit' : ''}.${
+    } — ${examType.replace('_', ' ')}, ${year ?? 'year unknown'}${isResit ? ', resit' : ''}.${
       !watermark.watermarked ? ' Note: watermarking failed, published unstamped.' : ''
     }`,
   };
