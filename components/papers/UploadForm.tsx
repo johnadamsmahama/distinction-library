@@ -62,6 +62,7 @@ export default function UploadForm({
   const [tab, setTab] = useState<Tab>('paper');
   const [courseId, setCourseId] = useState('');
   const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [yearUnknown, setYearUnknown] = useState(false);
   const [examType, setExamType] = useState<'mid_semester' | 'end_of_semester'>('end_of_semester');
   const [title, setTitle] = useState('');
   const [contentType, setContentType] = useState<'lecture_slides' | 'study_notes' | 'study_guide'>('lecture_slides');
@@ -70,6 +71,15 @@ export default function UploadForm({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+
+  const toggleYearUnknown = () => {
+    setYearUnknown((prev) => {
+      const next = !prev;
+      if (next) setYear('');
+      else setYear(new Date().getFullYear().toString());
+      return next;
+    });
+  };
 
   if (uploadSuspended) {
     return (
@@ -112,6 +122,7 @@ export default function UploadForm({
     if (!courseId) return setError('Select a course.');
     if (!file) return setError('Choose a file to upload.');
     if (tab === 'material' && !title.trim()) return setError('Give the material a title.');
+    if (tab === 'paper' && !yearUnknown && !year) return setError('Enter a year, or mark it unknown.');
 
     setLoading(true);
     const supabase = createClient();
@@ -141,19 +152,25 @@ export default function UploadForm({
     }
 
     if (tab === 'paper') {
-      const { data: existing } = await supabase
-        .from('past_papers')
-        .select('id')
-        .eq('course_id', courseId)
-        .eq('year', Number(year))
-        .eq('exam_type', examType)
-        .in('status', ['pending', 'approved'])
-        .limit(1);
+      // Unknown-year papers skip the same-course/year/exam-type duplicate
+      // check — with no year to compare, that check can't meaningfully
+      // apply, and the content-hash check above already caught exact
+      // re-uploads.
+      if (!yearUnknown) {
+        const { data: existing } = await supabase
+          .from('past_papers')
+          .select('id')
+          .eq('course_id', courseId)
+          .eq('year', Number(year))
+          .eq('exam_type', examType)
+          .in('status', ['pending', 'approved'])
+          .limit(1);
 
-      if (existing && existing.length > 0) {
-        setLoading(false);
-        setError('This past paper (same course, year, and exam type) has already been submitted.');
-        return;
+        if (existing && existing.length > 0) {
+          setLoading(false);
+          setError('This past paper (same course, year, and exam type) has already been submitted.');
+          return;
+        }
       }
     } else {
       const { data: existing } = await supabase
@@ -181,7 +198,14 @@ export default function UploadForm({
 
       const { data: inserted, error: insertErr } = await supabase
         .from('past_papers')
-        .insert({ course_id: courseId, year: Number(year), exam_type: examType, file_url: path, file_hash: fileHash, uploaded_by: user.id })
+        .insert({
+          course_id: courseId,
+          year: yearUnknown ? null : Number(year),
+          exam_type: examType,
+          file_url: path,
+          file_hash: fileHash,
+          uploaded_by: user.id,
+        })
         .select('id')
         .single();
 
@@ -234,7 +258,9 @@ export default function UploadForm({
     <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C" className="flex flex-col flex-1 min-h-0">
       {/* Card header row */}
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
-        <span className="font-mono text-[10px] text-g600 tracking-wide">UPSA / {year}</span>
+        <span className="font-mono text-[10px] text-g600 tracking-wide">
+          UPSA / {tab === 'paper' && yearUnknown ? '----' : year}
+        </span>
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
 
@@ -292,14 +318,27 @@ export default function UploadForm({
                 </div>
                 <div className="flex-1">
                   <label className={labelClass}>Year</label>
-                  <input
-                    type="number"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    className={inputClass}
-                    min={2000}
-                    max={2100}
-                  />
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
+                      disabled={yearUnknown}
+                      className={`${inputClass} disabled:opacity-40`}
+                      min={2000}
+                      max={2100}
+                    />
+                    <button
+                      type="button"
+                      onClick={toggleYearUnknown}
+                      title="Mark year as unknown"
+                      className={`shrink-0 font-mono font-bold text-[10px] leading-none px-2 py-1 rounded-[2px] border-[1.3px] transition-colors ${
+                        yearUnknown ? 'bg-navy border-navy text-white' : 'bg-transparent border-[#C9BFA0] text-g600'
+                      }`}
+                    >
+                      ----
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
