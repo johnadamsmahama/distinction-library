@@ -168,7 +168,7 @@ const ACTIONS: Action[] = [
     grain: true,
   },
   {
-    href: '/success-centre',
+    href: '/essentials',
     label: 'Essentials',
     desc: 'Mentors, jobs & opportunities, achievements',
     path: 'M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z',
