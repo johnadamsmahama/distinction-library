@@ -17,6 +17,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
   const [users, setUsers] = useState(initialUsers);
   const [search, setSearch] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const changeRole = async (id: string, role: string) => {
     setBusyId(id);
@@ -28,6 +29,37 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
       return;
     }
     setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role: role as UserRow['role'] } : u)));
+  };
+
+  const deleteAccount = async (u: UserRow) => {
+    const confirmed = window.confirm(
+      `This will permanently delete ${u.full_name ?? u.student_id}'s account and login.\n\n` +
+        `Their uploads and reviews will stay live but be re-labeled as "Deleted User." Their bookmarks, notifications, and other personal data will be removed.\n\n` +
+        `They will be able to sign up again later with the same email.\n\n` +
+        `This cannot be undone. Continue?`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(u.id);
+    try {
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: u.id }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        alert(result.error ?? 'Failed to delete user account.');
+        return;
+      }
+
+      setUsers((prev) => prev.filter((row) => row.id !== u.id));
+    } catch (err: any) {
+      alert(err.message ?? 'Failed to delete user account.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const term = search.trim().toLowerCase();
@@ -52,7 +84,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
         <table className="w-full text-left">
           <thead className="bg-off-white">
             <tr>
-              {['Student', 'Department', 'Uploads', 'Strikes', 'Role'].map((h) => (
+              {['Student', 'Department', 'Uploads', 'Strikes', 'Role', 'Actions'].map((h) => (
                 <th key={h} className="font-condensed font-bold text-[10px] uppercase tracking-wide text-g600 px-4 py-3">
                   {h}
                 </th>
@@ -80,6 +112,15 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
                     <option value="moderator">Moderator</option>
                     <option value="admin">Admin</option>
                   </select>
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => deleteAccount(u)}
+                    disabled={deletingId === u.id}
+                    className="font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                  >
+                    {deletingId === u.id ? 'Deleting…' : 'Delete'}
+                  </button>
                 </td>
               </tr>
             ))}
