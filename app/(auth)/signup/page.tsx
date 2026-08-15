@@ -7,11 +7,36 @@ import { studentIdError, studentIdToEmail } from '@/lib/validation';
 import AuthShell from '@/components/auth/AuthShell';
 import StudentIdInput from '@/components/auth/StudentIdInput';
 
+function EyeToggle({ shown, onClick }: { shown: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-g500 hover:text-g800 transition-colors"
+      aria-label={shown ? 'Hide password' : 'Show password'}
+      tabIndex={-1}
+    >
+      {shown ? (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.4 5.5A9.6 9.6 0 0112 5c5 0 9 4 10.5 7-.6 1.1-1.4 2.3-2.5 3.3M6.2 6.2C4 7.8 2.5 9.9 1.5 12c1.5 3 5.5 7 10.5 7 1.4 0 2.7-.3 3.9-.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 export default function SignupPage() {
   const [studentId, setStudentId] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [idErr, setIdErr] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -196,32 +221,38 @@ export default function SignupPage() {
           <label htmlFor="password" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
-            placeholder="At least 8 characters"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 pr-11 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+            />
+            <EyeToggle shown={showPassword} onClick={() => setShowPassword((v) => !v)} />
+          </div>
         </div>
 
         <div>
           <label htmlFor="confirmPassword" className="block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1">
             Confirm password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-2 pr-11 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+              autoComplete="new-password"
+            />
+            <EyeToggle shown={showConfirmPassword} onClick={() => setShowConfirmPassword((v) => !v)} />
+          </div>
         </div>
 
         {formError && <p className="font-body text-sm text-red-500">{formError}</p>}
