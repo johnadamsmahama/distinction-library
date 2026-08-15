@@ -125,7 +125,7 @@ function ResultCard({
   itemId: string;
 }) {
   return (
-    
+    <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -256,7 +256,7 @@ function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
         </div>
       </div>
 
-      
+      <a
         href="/papers/upload"
         className="font-mono font-bold uppercase tracking-wide rounded-[3px] px-4 py-2 text-[10px] transition-all hover:brightness-110"
         style={{
@@ -380,7 +380,7 @@ export default function RepositoryBrowser({
               Past Questions &<br />Study Materials
             </h1>
           </div>
-          
+          <a
             href="/papers/upload"
             className="font-mono font-bold uppercase tracking-wide rounded-full border border-gold/35 text-gold hover:bg-gold/10 transition-colors flex-shrink-0 mt-1"
             style={{ fontSize: 8.5, padding: '5px 11px' }}
