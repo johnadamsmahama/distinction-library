@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
 
@@ -282,6 +282,7 @@ export default function RepositoryBrowser({
 }) {
   const [tab, setTab] = useState<Tab>('papers');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [courseId, setCourseId] = useState(initialCourseId ?? '');
   const [level, setLevel] = useState('');
   const [department, setDepartment] = useState('');
@@ -305,11 +306,20 @@ export default function RepositoryBrowser({
     if (courseId && !filteredCourses.some((c) => c.id === courseId)) setCourseId('');
   }, [filteredCourses]);
 
+  // Debounce the free-text search so we don't fire a query on every
+  // keystroke — wait 300ms after the user stops typing.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   useEffect(() => {
     const supabase = createClient();
     let cancelled = false;
     async function fetchResults() {
       setLoading(true);
+      const term = debouncedSearch;
+
       if (tab === 'papers') {
         let query = supabase
           .from('past_papers')
@@ -322,6 +332,13 @@ export default function RepositoryBrowser({
         if (department) query = query.eq('courses.department', department);
         if (year) query = query.eq('year', Number(year));
         if (examType) query = query.eq('exam_type', examType);
+        // Search course code/name directly in the query, rather than
+        // filtering client-side after the fact — otherwise papers
+        // outside the most recent 100 approved rows are never seen,
+        // no matter how well they match the search term.
+        if (term) {
+          query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
+        }
         const { data } = await query;
         if (!cancelled) setPapers((data as unknown as PaperResult[]) ?? []);
       } else {
@@ -336,6 +353,9 @@ export default function RepositoryBrowser({
         if (department) query = query.eq('courses.department', department);
         if (week) query = query.eq('week_number', Number(week));
         if (contentType) query = query.eq('content_type', contentType);
+        if (term) {
+          query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
+        }
         const { data } = await query;
         if (!cancelled) setMaterials((data as unknown as MaterialResult[]) ?? []);
       }
@@ -343,15 +363,10 @@ export default function RepositoryBrowser({
     }
     fetchResults();
     return () => { cancelled = true; };
-  }, [tab, courseId, level, department, year, examType, week, contentType]);
+  }, [tab, courseId, level, department, year, examType, week, contentType, debouncedSearch]);
 
-  const term = search.trim().toLowerCase();
-  const visiblePapers = papers.filter(
-    (p) => !term || p.courses.code.toLowerCase().includes(term) || p.courses.name.toLowerCase().includes(term)
-  );
-  const visibleMaterials = materials.filter(
-    (m) => !term || m.courses.code.toLowerCase().includes(term) || m.courses.name.toLowerCase().includes(term) || m.title.toLowerCase().includes(term)
-  );
+  const visiblePapers = papers;
+  const visibleMaterials = materials;
   const resultCount = tab === 'papers' ? visiblePapers.length : visibleMaterials.length;
 
   return (
