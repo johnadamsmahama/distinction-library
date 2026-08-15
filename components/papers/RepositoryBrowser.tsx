@@ -41,6 +41,20 @@ const YEARS = Array.from({ length: 8 }, (_, i) => String(new Date().getFullYear(
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E\")";
 
+// Fire-and-forget: tells the backend "a download happened" without
+// blocking or delaying the actual file from opening. We deliberately
+// don't await this in the click handler.
+function trackDownload(type: Tab, id: string) {
+  fetch('/api/track-download', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, id }),
+  }).catch(() => {
+    // Silently ignore — a failed tracking ping should never interrupt
+    // or error out the user's actual download.
+  });
+}
+
 /* ── Pill select chip ── */
 function FilterPill({
   value,
@@ -97,6 +111,8 @@ function ResultCard({
   downloads,
   href,
   accent,
+  itemType,
+  itemId,
 }: {
   code: string;
   name: string;
@@ -105,12 +121,15 @@ function ResultCard({
   downloads: number;
   href: string;
   accent: string;
+  itemType: Tab;
+  itemId: string;
 }) {
   return (
-    <a
+    
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackDownload(itemType, itemId)}
       className="flex overflow-hidden rounded-[3px] relative group transition-transform hover:-translate-y-[1px]"
       style={{
         background: '#FBF6E8',
@@ -237,7 +256,7 @@ function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
         </div>
       </div>
 
-      <a
+      
         href="/papers/upload"
         className="font-mono font-bold uppercase tracking-wide rounded-[3px] px-4 py-2 text-[10px] transition-all hover:brightness-110"
         style={{
@@ -361,7 +380,7 @@ export default function RepositoryBrowser({
               Past Questions &<br />Study Materials
             </h1>
           </div>
-          <a
+          
             href="/papers/upload"
             className="font-mono font-bold uppercase tracking-wide rounded-full border border-gold/35 text-gold hover:bg-gold/10 transition-colors flex-shrink-0 mt-1"
             style={{ fontSize: 8.5, padding: '5px 11px' }}
@@ -557,6 +576,8 @@ export default function RepositoryBrowser({
                   downloads={p.download_count}
                   href={p.watermarked_url ?? p.file_url}
                   accent={accent}
+                  itemType="papers"
+                  itemId={p.id}
                 />
               ))}
             </div>
@@ -575,6 +596,8 @@ export default function RepositoryBrowser({
                 downloads={m.download_count}
                 href={m.file_url}
                 accent={accent}
+                itemType="materials"
+                itemId={m.id}
               />
             ))}
           </div>
