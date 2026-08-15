@@ -34,11 +34,17 @@ interface ProcessPastPaperParams {
  * saved. This means the same function correctly handles the first pass AND
  * every resolution path, without needing a "skip verification" flag.
  *
- * Year handling: `overrideYear` is only treated as "the admin decided this"
- * when it's explicitly present in the call (including explicitly `null` for
- * "unknown"). If it's omitted entirely, we fall back to automatic
- * extraction/filename parsing, same as before — an omitted year on first
- * pass still triggers needs_metadata rather than silently becoming unknown.
+ * Year handling: Trusted Upload files are already manually sorted and
+ * confirmed by course, so an unresolved year should never block
+ * publishing. If extraction and filename parsing both come up empty, the
+ * paper still publishes with year: null ("unknown") rather than stopping
+ * for needs_metadata — the admin can still see this in the result note and
+ * correct it later if they want. An explicit overrideYear from the manual
+ * "Fill in Details" flow always wins, including explicit null.
+ *
+ * Exam type handling: same philosophy — an unresolved exam type now
+ * defaults to 'end_of_semester' instead of blocking the batch. An explicit
+ * overrideExamType always wins.
  */
 export async function processPastPaperEntry(
   params: ProcessPastPaperParams
@@ -52,21 +58,9 @@ export async function processPastPaperEntry(
   const yearOverrideProvided = params.overrideYear !== undefined;
   const year: number | null = yearOverrideProvided
     ? (params.overrideYear as number | null)
-    : (extracted?.year ?? filenameParsed.year);
-  const examType = params.overrideExamType ?? extracted?.examType ?? filenameParsed.examType;
-
-  // Only bail out to needs_metadata for year if nobody has explicitly
-  // resolved it yet. Once an admin has explicitly set it to null ("unknown"),
-  // that's a final decision, not a gap.
-  if ((year === null && !yearOverrideProvided) || examType === null) {
-    return {
-      filename: fileName,
-      status: 'needs_metadata',
-      note: isPdf
-        ? 'Could not confidently determine year and/or exam type from the file or filename.'
-        : 'Non-PDF past paper — content extraction unavailable, and filename did not resolve year/exam type.',
-    };
-  }
+    : (extracted?.year ?? filenameParsed.year); // null here just means "unknown" — no longer a blocker
+  const examType: ExamType =
+    params.overrideExamType ?? extracted?.examType ?? filenameParsed.examType ?? 'end_of_semester';
 
   const verification = await verifyCourseCode(admin, extracted?.courseCode ?? null, {
     id: courseId,
