@@ -155,7 +155,10 @@ export async function POST(req: NextRequest) {
     .eq('id', jobId);
 
   if (!isDone) {
-    fetch(`${req.nextUrl.origin}/api/trusted-upload/process`, {
+    // Awaited on purpose: without this, Vercel can freeze the function the
+    // instant this handler returns, before the outbound fetch has actually
+    // been sent — which silently breaks the batch chain partway through.
+    await fetch(`${req.nextUrl.origin}/api/trusted-upload/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jobId }),
