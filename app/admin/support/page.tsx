@@ -5,7 +5,7 @@ export default async function AdminSupportPage() {
   const supabase = createClient();
   const { data: tickets } = await supabase
     .from('support_tickets')
-    .select('id, name, student_email, subject, message, resolved, created_at')
+    .select('id, user_id, name, student_email, subject, message, resolved, created_at')
     .order('created_at', { ascending: false });
 
   return <SupportManager tickets={(tickets as any) ?? []} />;
