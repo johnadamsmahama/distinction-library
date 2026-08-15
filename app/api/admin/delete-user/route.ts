@@ -11,7 +11,7 @@ const supabaseAdmin = createServiceClient(
 );
 
 const PLACEHOLDER_STUDENT_ID = 'DELETED-USER';
-const PLACEHOLDER_EMAIL = 'deleted-user@distinctionlibrary.internal';
+const PLACEHOLDER_EMAIL = '00000000@upsamail.edu.gh';
 
 // Finds the standing "Deleted User" placeholder account, creating it
 // the very first time this route is ever used. Every future deleted
