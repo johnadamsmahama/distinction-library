@@ -103,12 +103,21 @@ function EventRow({ event }: { event: DLEvent }) {
 
       <div className="min-w-0 flex-1 bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="w-9 h-9 rounded-[9px] bg-navy flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#E4C878]" fill="none" strokeWidth={1.8}>
-              <rect x="3" y="5" width="18" height="16" rx="2" />
-              <path d="M16 3v4M8 3v4M3 10h18" />
-            </svg>
-          </div>
+          {event.cover_image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={event.cover_image_url}
+              alt=""
+              className="w-9 h-9 rounded-[9px] object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-[9px] bg-navy flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#E4C878]" fill="none" strokeWidth={1.8}>
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4M8 3v4M3 10h18" />
+              </svg>
+            </div>
+          )}
           <span
             className="inline-block rounded-full px-2.5 py-0.5 font-body text-[10.5px] font-bold"
             style={{ backgroundColor: `${color}22`, color }}
