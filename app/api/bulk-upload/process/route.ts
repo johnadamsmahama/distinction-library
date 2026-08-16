@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import crypto from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
+import { getCurrentProfile, isStaffRole } from '@/lib/auth-helpers';
 import { classifyUpload } from '@/lib/course-matcher';
 import { AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // @ts-ignore -- pdf-parse doesn't ship type declarations for this subpath
@@ -14,6 +16,18 @@ import mammoth from 'mammoth';
 // the next batch until the whole zip is processed.
 const BATCH_SIZE = 3;
 
+// AUTH NOTE: this route is called two ways, same pattern as
+// /api/trusted-upload/process —
+//   1) From the browser (UploadForm's BulkUploadPanel), authenticated via
+//      the user's Supabase session cookie. Any logged-in student can start
+//      their own bulk upload; we verify they own the job below.
+//   2) From itself, server-to-server, to process the next batch. That
+//      request has no cookies, so it authenticates instead with a shared
+//      secret header (x-internal-trigger-secret) set via the
+//      BULK_UPLOAD_INTERNAL_SECRET env var — the original request was
+//      already verified as the job owner when the job was first created.
+const INTERNAL_HEADER = 'x-internal-trigger-secret';
+
 type JobResult = { filename: string; status: string; note: string };
 
 function hashBuffer(buffer: Buffer): string {
@@ -21,6 +35,25 @@ function hashBuffer(buffer: Buffer): string {
 }
 
 export async function POST(req: NextRequest) {
+  const internalSecret = req.headers.get(INTERNAL_HEADER);
+  const isInternalCall =
+    !!process.env.BULK_UPLOAD_INTERNAL_SECRET &&
+    internalSecret === process.env.BULK_UPLOAD_INTERNAL_SECRET;
+
+  // Non-internal calls must be a logged-in user. We can't check ownership
+  // yet (job isn't loaded), so that happens right after the job is fetched.
+  let callerId: string | null = null;
+  let callerIsStaff = false;
+  if (!isInternalCall) {
+    const supabase = createClient();
+    const { user, profile } = await getCurrentProfile(supabase);
+    if (!user) {
+      return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
+    }
+    callerId = user.id;
+    callerIsStaff = isStaffRole(profile?.role);
+  }
+
   const body = await req.json().catch(() => ({}));
   const jobId: string | undefined = body.jobId;
   if (!jobId) {
@@ -37,6 +70,12 @@ export async function POST(req: NextRequest) {
 
   if (jobErr || !job) {
     return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+  }
+
+  // Only the job's owner, or staff, can process it — unless this is the
+  // trusted internal self-hop (already authorized above).
+  if (!isInternalCall && job.uploaded_by !== callerId && !callerIsStaff) {
+    return NextResponse.json({ error: 'Not authorized to process this job.' }, { status: 403 });
   }
 
   if (job.status === 'completed' || job.status === 'failed') {
@@ -313,11 +352,25 @@ export async function POST(req: NextRequest) {
     .eq('id', jobId);
 
   if (!isDone) {
+    if (!process.env.BULK_UPLOAD_INTERNAL_SECRET) {
+      // No secret configured — can't authenticate the next hop. Fail loudly
+      // instead of leaving the job stuck at "processing" forever.
+      console.error('BULK_UPLOAD_INTERNAL_SECRET is not set — cannot continue batch chain.');
+      await admin.from('bulk_upload_jobs').update({ status: 'failed' }).eq('id', jobId);
+      return NextResponse.json(
+        { error: 'Server misconfigured: BULK_UPLOAD_INTERNAL_SECRET missing.' },
+        { status: 500 }
+      );
+    }
+
     // Fire-and-forget: trigger the next batch without waiting for it,
     // so this invocation can return immediately.
     fetch(`${req.nextUrl.origin}/api/bulk-upload/process`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        [INTERNAL_HEADER]: process.env.BULK_UPLOAD_INTERNAL_SECRET,
+      },
       body: JSON.stringify({ jobId }),
     }).catch((e) => console.error('Failed to trigger next batch:', e));
   }
