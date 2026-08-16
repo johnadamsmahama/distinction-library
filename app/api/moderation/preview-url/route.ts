@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentProfile, isStaffRole } from '@/lib/auth-helpers';
 
 // Only these two buckets should ever be signed here.
 const ALLOWED_BUCKETS = ['past-papers', 'study-materials'] as const;
@@ -19,26 +20,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid bucket or path.' }, { status: 400 });
   }
 
-  // Confirm the caller is staff before generating a signed URL.
-  // NOTE: adjust the column names below (is_staff / is_admin) if your
-  // profiles table uses different ones — match whatever ModerationQueue's
-  // parent page.tsx already checks to gate access to this page.
+  // Confirm the caller is staff before generating a signed URL. Uses the
+  // same profiles.role check (getCurrentProfile/isStaffRole) as every other
+  // staff-gated route in the app — this used to check nonexistent
+  // is_staff/is_admin boolean columns and 403'd everyone, including staff.
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile } = await getCurrentProfile(supabase);
 
   if (!user) {
     return NextResponse.json({ error: 'Not signed in.' }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_staff, is_admin')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile?.is_staff && !profile?.is_admin) {
+  if (!isStaffRole(profile?.role)) {
     return NextResponse.json({ error: 'Staff access only.' }, { status: 403 });
   }
 
