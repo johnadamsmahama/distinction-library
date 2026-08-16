@@ -45,6 +45,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
     }
 
+    // Every source (topic, vault, file) burns Anthropic API spend, so this
+    // must be logged-in for all three — not just the vault path, which used
+    // to be the only branch that checked.
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Not signed in.' }, { status: 401 });
+    }
+
     let sourceContent = '';
     let sourceLabel = '';
 
@@ -57,15 +69,6 @@ export async function POST(req: NextRequest) {
     } else if (source === 'vault') {
       if (!body.vaultItemId) {
         return NextResponse.json({ error: 'No Vault item selected.' }, { status: 400 });
-      }
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        return NextResponse.json({ error: 'Not signed in.' }, { status: 401 });
       }
 
       const { data: vaultItem, error: vaultError } = await supabase
