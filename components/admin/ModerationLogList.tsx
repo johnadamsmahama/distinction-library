@@ -37,6 +37,39 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
   const [deleteReason, setDeleteReason] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  // --- search bar state ---
+  const [courseInput, setCourseInput] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const runSearch = async () => {
+    setIsSearching(true);
+    setHasSearched(true);
+
+    const params = new URLSearchParams();
+    if (courseInput.trim()) params.set('course', courseInput.trim());
+    params.set('status', statusFilter);
+
+    const res = await fetch(`/api/admin/moderation-log/search?${params.toString()}`);
+    const result = await res.json().catch(() => ({}));
+    setIsSearching(false);
+
+    if (!res.ok) {
+      alert(result.error ?? 'Search failed.');
+      return;
+    }
+
+    setRows(result.rows ?? []);
+  };
+
+  const clearSearch = () => {
+    setCourseInput('');
+    setStatusFilter('all');
+    setHasSearched(false);
+    setRows(initialRows);
+  };
+
   const deleteItem = async (row: Row) => {
     setBusyId(row.id);
     const res = await fetch(`/api/moderation/delete-item/${row.id}`, {
@@ -60,88 +93,131 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
     setDeleteReason('');
   };
 
-  if (rows.length === 0) {
-    return <p className="font-body text-sm text-g600 text-center py-16">No moderation decisions recorded yet.</p>;
-  }
-
   return (
-    <div className="space-y-2">
-      {rows.map((r) => {
-        const isDeleteOpen = deleteTarget?.id === r.id && deleteTarget.kind === r.kind;
-        return (
-          <div key={`${r.kind}-${r.id}`} className="bg-white border border-g100 rounded-lg px-4 py-3">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-g100 text-navy">
-                    {r.kind}
-                  </span>
-                  <span
-                    className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
-                      STATUS_STYLES[r.status] ?? 'bg-g100 text-g600'
-                    }`}
-                  >
-                    {STATUS_LABELS[r.status] ?? r.status}
-                  </span>
+    <div>
+      {/* Search bar */}
+      <div className="bg-white border border-g100 rounded-lg p-4 mb-4 flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          value={courseInput}
+          onChange={(e) => setCourseInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && runSearch()}
+          placeholder="Search by course (e.g. BGEC102)…"
+          className="flex-1 px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
+        >
+          <option value="all">All statuses</option>
+          <option value="approved">Approved (live)</option>
+          <option value="rejected">Rejected</option>
+          <option value="needs_revision">Changes requested</option>
+        </select>
+        <div className="flex gap-2">
+          <button
+            onClick={runSearch}
+            disabled={isSearching}
+            className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg text-white bg-navy hover:bg-navy-deep transition-colors disabled:opacity-60 whitespace-nowrap"
+          >
+            {isSearching ? 'Searching…' : 'Search'}
+          </button>
+          {hasSearched && (
+            <button
+              onClick={clearSearch}
+              className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg border border-g100 text-g600 whitespace-nowrap"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="font-body text-sm text-g600 text-center py-16">
+          {hasSearched ? 'No matching results.' : 'No moderation decisions recorded yet.'}
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((r) => {
+            const isDeleteOpen = deleteTarget?.id === r.id && deleteTarget.kind === r.kind;
+            return (
+              <div key={`${r.kind}-${r.id}`} className="bg-white border border-g100 rounded-lg px-4 py-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-g100 text-navy">
+                        {r.kind}
+                      </span>
+                      <span
+                        className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
+                          STATUS_STYLES[r.status] ?? 'bg-g100 text-g600'
+                        }`}
+                      >
+                        {STATUS_LABELS[r.status] ?? r.status}
+                      </span>
+                    </div>
+                    <div className="font-condensed font-semibold text-sm text-g800">{r.label}</div>
+                    <div className="font-body text-xs text-g600 mt-0.5">
+                      Uploaded by {r.uploader?.full_name ?? r.uploader?.student_id ?? 'unknown'} · Reviewed by{' '}
+                      {r.reviewer?.full_name ?? 'unknown'}
+                    </div>
+                    {(r.status === 'rejected' || r.status === 'needs_revision') && r.rejection_reason && (
+                      <div className="font-body text-xs text-red-600 mt-1">Reason: {r.rejection_reason}</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="font-condensed text-[11px] text-g600">
+                      {r.reviewed_at ? new Date(r.reviewed_at).toLocaleString() : ''}
+                    </div>
+                    <button
+                      onClick={() => setDeleteTarget(isDeleteOpen ? null : { id: r.id, kind: r.kind })}
+                      className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="font-condensed font-semibold text-sm text-g800">{r.label}</div>
-                <div className="font-body text-xs text-g600 mt-0.5">
-                  Uploaded by {r.uploader?.full_name ?? r.uploader?.student_id ?? 'unknown'} · Reviewed by{' '}
-                  {r.reviewer?.full_name ?? 'unknown'}
-                </div>
-                {(r.status === 'rejected' || r.status === 'needs_revision') && r.rejection_reason && (
-                  <div className="font-body text-xs text-red-600 mt-1">Reason: {r.rejection_reason}</div>
+
+                {isDeleteOpen && (
+                  <div className="mt-3 pt-3 border-t border-red-200">
+                    <p className="font-condensed font-bold text-xs uppercase text-red-600 mb-2">
+                      This permanently deletes the item and its file
+                      {r.status === 'approved' ? ' — including the live published copy' : ''}. This cannot be undone.
+                    </p>
+                    <textarea
+                      value={deleteReason}
+                      onChange={(e) => setDeleteReason(e.target.value)}
+                      placeholder="Reason (optional, sent to the uploader)…"
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        disabled={busyId === r.id}
+                        onClick={() => deleteItem(r)}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
+                      >
+                        {busyId === r.id ? 'Deleting…' : 'Confirm delete'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeleteTarget(null);
+                          setDeleteReason('');
+                        }}
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <div className="font-condensed text-[11px] text-g600">
-                  {r.reviewed_at ? new Date(r.reviewed_at).toLocaleString() : ''}
-                </div>
-                <button
-                  onClick={() => setDeleteTarget(isDeleteOpen ? null : { id: r.id, kind: r.kind })}
-                  className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-
-            {isDeleteOpen && (
-              <div className="mt-3 pt-3 border-t border-red-200">
-                <p className="font-condensed font-bold text-xs uppercase text-red-600 mb-2">
-                  This permanently deletes the item and its file
-                  {r.status === 'approved' ? ' — including the live published copy' : ''}. This cannot be undone.
-                </p>
-                <textarea
-                  value={deleteReason}
-                  onChange={(e) => setDeleteReason(e.target.value)}
-                  placeholder="Reason (optional, sent to the uploader)…"
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
-                />
-                <div className="flex gap-2">
-                  <button
-                    disabled={busyId === r.id}
-                    onClick={() => deleteItem(r)}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
-                  >
-                    {busyId === r.id ? 'Deleting…' : 'Confirm delete'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDeleteTarget(null);
-                      setDeleteReason('');
-                    }}
-                    className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
