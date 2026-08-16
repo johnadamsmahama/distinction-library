@@ -12,6 +12,7 @@ export interface EventItem {
   end_time: string | null;
   location: string | null;
   status: 'draft' | 'published';
+  cover_image_url: string | null;
   created_at: string;
 }
 
@@ -38,7 +39,7 @@ export const EVENT_TYPE_COLORS: Record<EventType, string> = {
 export async function getAllEvents(supabase: SupabaseClient): Promise<EventItem[]> {
   const { data, error } = await supabase
     .from('events')
-    .select('id, title, description, event_type, start_time, end_time, location, status, created_at')
+    .select('id, title, description, event_type, start_time, end_time, location, status, cover_image_url, created_at')
     .order('start_time', { ascending: true });
 
   if (error) {
@@ -53,7 +54,7 @@ export async function getPublishedEvents(): Promise<EventItem[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('events')
-    .select('id, title, description, event_type, start_time, end_time, location, status, created_at')
+    .select('id, title, description, event_type, start_time, end_time, location, status, cover_image_url, created_at')
     .eq('status', 'published')
     .order('start_time', { ascending: true });
 
