@@ -3,6 +3,7 @@
 import crypto from 'crypto';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { extractPastPaperMetadata, ExamType } from './extract-pdf-metadata';
+import { extractStudyMaterialMetadata } from './extract-material-metadata';
 import { parsePastPaperFilename, parseStudyMaterialFilename } from './parse-filename';
 import { verifyCourseCode } from './verify-course-code';
 import { watermarkPdf } from '../pdf-watermark';
@@ -141,26 +142,57 @@ interface ProcessStudyMaterialParams {
 }
 
 /**
- * Study materials skip course-code verification entirely — no content
- * extraction is built for them (no formal cover page to trust), so there's
- * no independent signal to cross-check against the selected course.
+ * Study materials skip course-code verification entirely — no formal
+ * cover page to trust in the same way past papers have, so there's no
+ * independent signal to cross-check against the selected course. Be
+ * deliberate about the course selected in the upload form — a wrong
+ * selection here publishes silently under the wrong course.
+ *
+ * Week/unit number resolution, in priority order:
+ *   1. overrideWeekNumber — explicit value from the manual "Fill in
+ *      Details" resolve flow. Always wins.
+ *   2. Content extraction — reads the actual first slide (.pptx) or first
+ *      page (.pdf) text and looks for a week/unit/lecture/topic number.
+ *      This is the primary source, same philosophy as past-paper cover
+ *      page extraction: file content is more reliable than filenames.
+ *   3. Filename parsing — fallback when content extraction finds nothing
+ *      (unsupported file type, no matching text, extraction failure).
+ * If none of the three resolve a week number, the file needs manual
+ * metadata entry rather than blocking the whole batch.
  */
 export async function processStudyMaterialEntry(
   params: ProcessStudyMaterialParams
 ): Promise<JobResult> {
   const { admin, buffer, fileHash, fileName, uploadedBy, courseId, courseCode, pathSalt } = params;
 
-  const weekNumber = params.overrideWeekNumber ?? parseStudyMaterialFilename(fileName).parsed.weekNumber;
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+
+  let weekNumber: number | null = params.overrideWeekNumber ?? null;
+  let weekSource: 'override' | 'slide_content' | 'pdf_content' | 'filename' | null =
+    params.overrideWeekNumber !== undefined ? 'override' : null;
+
+  if (weekNumber === null) {
+    const contentResult = await extractStudyMaterialMetadata(buffer, ext);
+    if (contentResult.weekNumber !== null) {
+      weekNumber = contentResult.weekNumber;
+      weekSource = contentResult.weekSource;
+    } else {
+      const filenameWeek = parseStudyMaterialFilename(fileName).parsed.weekNumber;
+      if (filenameWeek !== null) {
+        weekNumber = filenameWeek;
+        weekSource = 'filename';
+      }
+    }
+  }
 
   if (weekNumber === null) {
     return {
       filename: fileName,
       status: 'needs_metadata',
-      note: 'Could not determine a week number from the filename.',
+      note: 'Could not determine a week number from the file content or filename.',
     };
   }
 
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
   const contentType = ext === 'pptx' ? 'lecture_slides' : 'study_notes';
   const title = fileName.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim().toUpperCase();
 
@@ -183,9 +215,18 @@ export async function processStudyMaterialEntry(
   });
   if (insertErr) throw new Error(insertErr.message);
 
+  const sourceNote =
+    weekSource === 'slide_content'
+      ? ' (detected from slide content)'
+      : weekSource === 'pdf_content'
+      ? ' (detected from document content)'
+      : weekSource === 'filename'
+      ? ' (detected from filename)'
+      : '';
+
   return {
     filename: fileName,
     status: 'approved',
-    note: `Published under ${courseCode}, week ${weekNumber}.`,
+    note: `Published under ${courseCode}, week ${weekNumber}${sourceNote}.`,
   };
 }
