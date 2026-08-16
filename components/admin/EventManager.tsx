@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { EventItem } from '@/lib/events-data';
 import CustomSelect from '@/components/ui/CustomSelect';
@@ -13,6 +13,14 @@ const EVENT_TYPES = [
   { value: 'other', label: 'Other' },
 ];
 
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const IMAGE_ACCEPT = '.jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif';
+
+function extensionFor(file: File) {
+  const fromName = file.name.includes('.') ? file.name.split('.').pop() : null;
+  return (fromName || file.type.split('/').pop() || 'bin').toLowerCase();
+}
+
 const EMPTY_FORM = {
   id: null as string | null,
   title: '',
@@ -22,6 +30,7 @@ const EMPTY_FORM = {
   endTime: '',
   location: '',
   status: 'draft' as EventItem['status'],
+  existingCoverUrl: null as string | null,
 };
 
 export default function EventManager({ events: initialEvents }: { events: EventItem[] }) {
@@ -30,11 +39,19 @@ export default function EventManager({ events: initialEvents }: { events: EventI
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Cover image: newly picked file (if any) + local preview
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
   const isEditing = form.id !== null;
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
     setError(null);
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    if (coverInputRef.current) coverInputRef.current.value = '';
   };
 
   const startEdit = (e: EventItem) => {
@@ -47,9 +64,37 @@ export default function EventManager({ events: initialEvents }: { events: EventI
       endTime: e.end_time ? toLocalInputValue(e.end_time) : '',
       location: e.location ?? '',
       status: e.status,
+      existingCoverUrl: e.cover_image_url,
     });
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    if (coverInputRef.current) coverInputRef.current.value = '';
     setError(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setError(null);
+    if (!file) {
+      setCoverFile(null);
+      setCoverPreviewUrl(null);
+      return;
+    }
+    if (!IMAGE_MIME_TYPES.includes(file.type)) {
+      setError('Cover image must be JPEG, PNG, WebP, or GIF.');
+      e.target.value = '';
+      return;
+    }
+    setCoverFile(file);
+    setCoverPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const removeCoverImage = () => {
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    setForm((f) => ({ ...f, existingCoverUrl: null }));
+    if (coverInputRef.current) coverInputRef.current.value = '';
   };
 
   const handleSubmit = async (ev: React.FormEvent) => {
@@ -72,6 +117,21 @@ export default function EventManager({ events: initialEvents }: { events: EventI
       return;
     }
 
+    // Resolve the cover image URL: a newly picked file wins, otherwise fall
+    // back to whatever existingCoverUrl currently holds (null if removed).
+    let coverImageUrl = form.existingCoverUrl;
+    if (coverFile) {
+      const path = `${crypto.randomUUID()}.${extensionFor(coverFile)}`;
+      const { error: uploadErr } = await supabase.storage.from('event-images').upload(path, coverFile);
+      if (uploadErr) {
+        setSaving(false);
+        setError(uploadErr.message);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('event-images').getPublicUrl(path);
+      coverImageUrl = urlData.publicUrl;
+    }
+
     const payload = {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -80,6 +140,7 @@ export default function EventManager({ events: initialEvents }: { events: EventI
       end_time: form.endTime ? new Date(form.endTime).toISOString() : null,
       location: form.location.trim() || null,
       status: form.status,
+      cover_image_url: coverImageUrl,
     };
 
     if (isEditing) {
@@ -100,7 +161,7 @@ export default function EventManager({ events: initialEvents }: { events: EventI
 
     const { data: refreshed } = await supabase
       .from('events')
-      .select('id, title, description, event_type, start_time, end_time, location, status, created_at')
+      .select('id, title, description, event_type, start_time, end_time, location, status, cover_image_url, created_at')
       .order('start_time', { ascending: true });
 
     setSaving(false);
@@ -129,6 +190,8 @@ export default function EventManager({ events: initialEvents }: { events: EventI
     }
     setEvents((prev) => prev.filter((e) => e.id !== id));
   };
+
+  const displayedCoverUrl = coverPreviewUrl ?? form.existingCoverUrl;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -162,6 +225,32 @@ export default function EventManager({ events: initialEvents }: { events: EventI
             className={`${inputClass} min-h-[90px] resize-y`}
             placeholder="What should students expect from this event?"
           />
+        </div>
+
+        <div>
+          <label className={labelClass}>Cover image (optional)</label>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept={IMAGE_ACCEPT}
+            onChange={handleCoverChange}
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+          />
+          <p className="font-body text-xs text-g600 mt-1">JPEG, PNG, WebP, or GIF.</p>
+          {displayedCoverUrl && (
+            <div className="relative mt-2 w-fit">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={displayedCoverUrl} alt="" className="w-full max-w-[240px] h-28 object-cover rounded-lg" />
+              <button
+                type="button"
+                onClick={removeCoverImage}
+                aria-label="Remove cover image"
+                className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-g100 text-g600 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
