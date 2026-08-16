@@ -66,11 +66,16 @@ function extractExamType(filename: string): ExamType | null {
 }
 
 /**
- * Looks for a week number: "WEEK3", "WK3", "W3", "WEEK_3", "WEEK 3", etc.
- * Returns null if nothing matches or the number is out of a sane range (1-20).
+ * Looks for a week number: "WEEK3", "WK3", "W3", "WEEK_3", "WEEK 3", and
+ * lecturer-specific synonyms some courses use instead of "week" —
+ * "UNIT3", "LECTURE3", "LEC3", "TOPIC3". Returns null if nothing matches
+ * or the number is out of a sane range (1-20).
+ *
+ * Kept in sync manually with WEEK_RE in extract-material-metadata.ts —
+ * that one runs on extracted file content, this one runs on the filename.
  */
 function extractWeekNumber(filename: string): number | null {
-  const match = filename.match(/\b(?:week|wk|w)[\s_-]?(\d{1,2})\b/i);
+  const match = filename.match(/\b(?:week|wk|w|unit|lecture|lec|topic)[\s_-]?(\d{1,2})\b/i);
   if (!match) return null;
   const week = parseInt(match[1], 10);
   return week >= 1 && week <= 20 ? week : null;
