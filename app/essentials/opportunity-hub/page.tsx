@@ -10,7 +10,7 @@ export default async function OpportunityHubPage() {
   const { data: opportunities } = await supabase
     .from('opportunities')
     .select(
-      'id, title, organization, category, deadline, location, remote_or_onsite, verified, featured, application_link'
+      'id, title, organization, category, deadline, location, remote_or_onsite, verified, featured, application_link, cover_image_url'
     )
     .eq('status', 'published')
     .order('featured', { ascending: false })
