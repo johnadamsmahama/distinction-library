@@ -21,6 +21,7 @@ export type Opportunity = {
   verified: boolean;
   featured: boolean;
   application_link: string | null;
+  cover_image_url: string | null;
 };
 
 // Same labels as the original CATEGORY_LABELS, extended with an accent color per category
@@ -150,46 +151,56 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                     href={o.application_link ?? '#'}
                     target={o.application_link ? '_blank' : undefined}
                     rel="noopener noreferrer"
-                    className="block bg-navy border border-white/6 rounded-xl p-4 hover:border-gold transition-colors border-l-4"
+                    className="flex items-start gap-3 bg-navy border border-white/6 rounded-xl p-4 hover:border-gold transition-colors border-l-4"
                     style={{ borderLeftColor: cat.color }}
                   >
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                      <h2 className="font-display font-bold text-[15px] text-white">{o.title}</h2>
-                      {o.featured && (
-                        <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded">
-                          Featured
+                    {o.cover_image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={o.cover_image_url}
+                        alt=""
+                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <h2 className="font-display font-bold text-[15px] text-white">{o.title}</h2>
+                        {o.featured && (
+                          <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="font-condensed text-xs text-white/45 mb-2.5 flex items-center gap-1 flex-wrap">
+                        <span>{o.organization}</span>
+                        <span>·</span>
+                        <span
+                          className="font-bold uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded"
+                          style={{ color: cat.color, backgroundColor: `${cat.color}22` }}
+                        >
+                          {cat.label}
                         </span>
-                      )}
-                    </div>
+                        {o.verified && <span className="text-gold">✓ Verified</span>}
+                      </p>
 
-                    <p className="font-condensed text-xs text-white/45 mb-2.5 flex items-center gap-1 flex-wrap">
-                      <span>{o.organization}</span>
-                      <span>·</span>
-                      <span
-                        className="font-bold uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded"
-                        style={{ color: cat.color, backgroundColor: `${cat.color}22` }}
-                      >
-                        {cat.label}
-                      </span>
-                      {o.verified && <span className="text-gold">✓ Verified</span>}
-                    </p>
-
-                    <div className="flex items-center gap-2 flex-wrap font-condensed text-[11px] text-white/50">
-                      {o.deadline && (
-                        <>
-                          <span>Deadline: {new Date(o.deadline).toLocaleDateString()}</span>
-                          {dl && (
-                            <span
-                              className="font-bold px-1.5 py-0.5 rounded"
-                              style={{ color: dl.color, backgroundColor: dl.bg }}
-                            >
-                              {dl.label}
-                            </span>
-                          )}
-                        </>
-                      )}
-                      {o.location && <span>{o.location}</span>}
-                      {o.remote_or_onsite && <span className="capitalize">{o.remote_or_onsite}</span>}
+                      <div className="flex items-center gap-2 flex-wrap font-condensed text-[11px] text-white/50">
+                        {o.deadline && (
+                          <>
+                            <span>Deadline: {new Date(o.deadline).toLocaleDateString()}</span>
+                            {dl && (
+                              <span
+                                className="font-bold px-1.5 py-0.5 rounded"
+                                style={{ color: dl.color, backgroundColor: dl.bg }}
+                              >
+                                {dl.label}
+                              </span>
+                            )}
+                          </>
+                        )}
+                        {o.location && <span>{o.location}</span>}
+                        {o.remote_or_onsite && <span className="capitalize">{o.remote_or_onsite}</span>}
+                      </div>
                     </div>
                   </a>
                 );
