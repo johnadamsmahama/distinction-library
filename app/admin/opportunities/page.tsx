@@ -10,7 +10,7 @@ export default async function AdminOpportunitiesPage() {
   const { data: opportunities } = await supabase
     .from('opportunities')
     .select(
-      'id, title, organization, category, description, eligibility, deadline, location, remote_or_onsite, application_link, status, verified, featured, source, created_at'
+      'id, title, organization, category, description, eligibility, deadline, location, remote_or_onsite, application_link, cover_image_url, status, verified, featured, source, created_at'
     )
     .order('created_at', { ascending: false });
 
