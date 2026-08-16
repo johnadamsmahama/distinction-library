@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
+import { getCurrentProfile, isStaffRole } from '@/lib/auth-helpers';
 import { reviewUpload, AUTO_APPROVE_THRESHOLD } from '@/lib/ai-moderation';
 // pdf-parse is already a dependency (used by the vault quiz generator).
 // Imported from its internal lib path, NOT the package root — importing
@@ -31,6 +33,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ error: 'kind must be past_paper or study_material' }, { status: 400 });
   }
 
+  // AUTH: this route is fire-and-forget triggered from the browser right
+  // after a student's own upload (see UploadForm.tsx), so it can't be
+  // staff-only — but it must not be callable by just anyone for any row.
+  // We confirm the caller is logged in here, then check row ownership (or
+  // staff) once the row is loaded below.
+  const supabase = createClient();
+  const { user, profile } = await getCurrentProfile(supabase);
+  if (!user) {
+    return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
+  }
+
   const admin = createAdminClient();
   const table = TABLE_BY_KIND[kind];
   const bucket = BUCKET_BY_KIND[kind];
@@ -46,6 +59,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     id: string;
     file_url: string;
     status: string;
+    uploaded_by: string;
     year?: number | null;
     exam_type?: 'mid_semester' | 'end_of_semester' | null;
     title?: string | null;
@@ -60,7 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (kind === 'past_paper') {
     const res = await admin
       .from('past_papers')
-      .select('id, file_url, year, exam_type, status, courses(code, name)')
+      .select('id, file_url, year, exam_type, status, uploaded_by, courses(code, name)')
       .eq('id', id)
       .single();
     row = res.data as RowShape | null;
@@ -68,7 +82,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } else {
     const res = await admin
       .from('study_materials')
-      .select('id, file_url, title, week_number, content_type, status, courses(code, name)')
+      .select('id, file_url, title, week_number, content_type, status, uploaded_by, courses(code, name)')
       .eq('id', id)
       .single();
     row = res.data as RowShape | null;
@@ -77,6 +91,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   if (rowErr || !row) {
     return NextResponse.json({ error: 'Upload not found' }, { status: 404 });
+  }
+
+  // Only the person who uploaded this item, or staff, can trigger its review.
+  if (row.uploaded_by !== user.id && !isStaffRole(profile?.role)) {
+    return NextResponse.json({ error: 'Not authorized to review this upload.' }, { status: 403 });
   }
 
   // Don't re-review something already moderated by a human or a previous run.
