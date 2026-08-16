@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 const CATEGORIES = [
@@ -32,6 +32,14 @@ const STATUS_STYLES: Record<string, string> = {
   expired: 'bg-g100 text-g600',
 };
 
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const IMAGE_ACCEPT = '.jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif';
+
+function extensionFor(file: File) {
+  const fromName = file.name.includes('.') ? file.name.split('.').pop() : null;
+  return (fromName || file.type.split('/').pop() || 'bin').toLowerCase();
+}
+
 type Opportunity = {
   id: string;
   title: string;
@@ -43,6 +51,7 @@ type Opportunity = {
   location: string | null;
   remote_or_onsite: string | null;
   application_link: string | null;
+  cover_image_url: string | null;
   status: string;
   verified: boolean;
   featured: boolean;
@@ -75,6 +84,27 @@ export default function OpportunitiesManager({
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending_review' | 'published' | 'rejected' | 'expired'>('all');
 
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setError(null);
+    if (!file) {
+      setCoverFile(null);
+      setCoverPreviewUrl(null);
+      return;
+    }
+    if (!IMAGE_MIME_TYPES.includes(file.type)) {
+      setError('Cover image must be JPEG, PNG, WebP, or GIF.');
+      e.target.value = '';
+      return;
+    }
+    setCoverFile(file);
+    setCoverPreviewUrl(URL.createObjectURL(file));
+  };
+
   const createOpportunity = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -85,6 +115,20 @@ export default function OpportunitiesManager({
 
     setLoading(true);
     const supabase = createClient();
+
+    let coverImageUrl: string | null = null;
+    if (coverFile) {
+      const path = `${crypto.randomUUID()}.${extensionFor(coverFile)}`;
+      const { error: uploadErr } = await supabase.storage.from('opportunity-images').upload(path, coverFile);
+      if (uploadErr) {
+        setLoading(false);
+        setError(uploadErr.message);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('opportunity-images').getPublicUrl(path);
+      coverImageUrl = urlData.publicUrl;
+    }
+
     const { data, error: insertErr } = await supabase
       .from('opportunities')
       .insert({
@@ -97,6 +141,7 @@ export default function OpportunitiesManager({
         location: form.location.trim() || null,
         remote_or_onsite: form.remote_or_onsite || null,
         application_link: form.application_link.trim() || null,
+        cover_image_url: coverImageUrl,
         source: 'admin_curated',
         status: 'published',
         approved_by: adminId,
@@ -112,6 +157,9 @@ export default function OpportunitiesManager({
     }
     setOpportunities((prev) => [data as Opportunity, ...prev]);
     setForm(emptyForm);
+    setCoverFile(null);
+    setCoverPreviewUrl(null);
+    if (coverInputRef.current) coverInputRef.current.value = '';
   };
 
   const updateOpportunity = async (id: string, patch: Record<string, any>) => {
@@ -173,6 +221,21 @@ export default function OpportunitiesManager({
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className={labelClass}>Cover image (optional)</label>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept={IMAGE_ACCEPT}
+            onChange={handleCoverChange}
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+          />
+          <p className="font-body text-xs text-g600 mt-1">JPEG, PNG, WebP, or GIF.</p>
+          {coverPreviewUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={coverPreviewUrl} alt="" className="w-full max-w-[200px] h-28 object-cover rounded-lg mt-2" />
+          )}
         </div>
         <div>
           <label className={labelClass}>Description (optional)</label>
@@ -262,30 +325,40 @@ export default function OpportunitiesManager({
           {visible.map((o) => (
             <div key={o.id} className="bg-white border border-g100 rounded-lg px-4 py-3">
               <div className="flex items-start justify-between gap-2 mb-1">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <span className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${STATUS_STYLES[o.status]}`}>
-                      {o.status.replace('_', ' ')}
-                    </span>
-                    {o.source === 'student_submitted' && (
-                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-navy/10 text-navy">
-                        Student submitted
+                <div className="flex items-start gap-3 min-w-0">
+                  {o.cover_image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={o.cover_image_url}
+                      alt=""
+                      className="w-11 h-11 rounded-lg object-cover flex-shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${STATUS_STYLES[o.status]}`}>
+                        {o.status.replace('_', ' ')}
                       </span>
-                    )}
-                    {o.featured && (
-                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-gold/15 text-[#7A5A0E]">
-                        Featured
-                      </span>
-                    )}
-                    {o.verified && (
-                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-green-100 text-green-700">
-                        Verified
-                      </span>
-                    )}
-                  </div>
-                  <div className="font-condensed font-semibold text-sm text-g800">{o.title}</div>
-                  <div className="font-body text-xs text-g600">
-                    {o.organization} · {CATEGORY_LABELS[o.category] ?? o.category}
+                      {o.source === 'student_submitted' && (
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-navy/10 text-navy">
+                          Student submitted
+                        </span>
+                      )}
+                      {o.featured && (
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-gold/15 text-[#7A5A0E]">
+                          Featured
+                        </span>
+                      )}
+                      {o.verified && (
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                          Verified
+                        </span>
+                      )}
+                    </div>
+                    <div className="font-condensed font-semibold text-sm text-g800">{o.title}</div>
+                    <div className="font-body text-xs text-g600">
+                      {o.organization} · {CATEGORY_LABELS[o.category] ?? o.category}
+                    </div>
                   </div>
                 </div>
               </div>
