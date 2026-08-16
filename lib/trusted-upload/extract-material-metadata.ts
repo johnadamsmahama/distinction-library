@@ -36,8 +36,13 @@ function findWeekNumber(text: string): number | null {
  * which is where PowerPoint stores visible on-slide text.
  */
 function extractTextFromSlideXml(xml: string): string {
-  const matches = [...xml.matchAll(/<a:t>([\s\S]*?)<\/a:t>/g)];
-  return matches.map((m) => m[1]).join(' ');
+  const re = /<a:t>([\s\S]*?)<\/a:t>/g;
+  const parts: string[] = [];
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(xml)) !== null) {
+    parts.push(match[1]);
+  }
+  return parts.join(' ');
 }
 
 /**
