@@ -30,6 +30,26 @@ const INTERNAL_HEADER = 'x-internal-trigger-secret';
 
 type JobResult = { filename: string; status: string; note: string };
 
+// Supabase storage-js defaults to 'text/plain;charset=UTF-8' when no
+// contentType is passed to .upload() — this went unnoticed while the
+// past-papers/study-materials buckets allowed any mime type, but now that
+// those buckets have real allowed_mime_types lists, every upload here would
+// get rejected outright without this. Same fix as trusted-upload's
+// process-entry.ts.
+const MIME_BY_EXT: Record<string, string> = {
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+};
+function mimeForExt(ext: string | undefined): string {
+  return MIME_BY_EXT[(ext ?? '').toLowerCase()] ?? 'application/octet-stream';
+}
+
 function hashBuffer(buffer: Buffer): string {
   return crypto.createHash('sha256').update(buffer).digest('hex');
 }
@@ -246,7 +266,9 @@ export async function POST(req: NextRequest) {
 
         const ext = fileName.split('.').pop();
         const path = `${job.uploaded_by}/${course.id}/${Date.now()}-${startIndex + i}.${ext}`;
-        const { error: uploadErr } = await admin.storage.from('past-papers').upload(path, buffer);
+        const { error: uploadErr } = await admin.storage
+          .from('past-papers')
+          .upload(path, buffer, { contentType: mimeForExt(ext) });
         if (uploadErr) throw new Error(uploadErr.message);
 
         await admin.from('past_papers').insert({
@@ -297,7 +319,9 @@ export async function POST(req: NextRequest) {
 
         const ext = fileName.split('.').pop();
         const path = `${job.uploaded_by}/${course.id}/${Date.now()}-${startIndex + i}.${ext}`;
-        const { error: uploadErr } = await admin.storage.from('study-materials').upload(path, buffer);
+        const { error: uploadErr } = await admin.storage
+          .from('study-materials')
+          .upload(path, buffer, { contentType: mimeForExt(ext) });
         if (uploadErr) throw new Error(uploadErr.message);
 
         const { data: publicUrlData } = admin.storage.from('study-materials').getPublicUrl(path);
