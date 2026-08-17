@@ -80,10 +80,27 @@ export async function processPastPaperEntry(
   const isResit = extracted?.isResit ?? false;
   const paperId = crypto.randomUUID();
 
-  const rawPath = `${uploadedBy}/${courseId}/${pathSalt}.pdf`;
+  // Supabase storage-js defaults to 'text/plain;charset=UTF-8' — or worse,
+  // the literal string "undefined" — when contentType is missing/undefined.
+  // Both get rejected outright now that past-papers has mime restrictions.
+  // Determine the real type from the extension rather than assuming every
+  // file here is a PDF — this path is meant for exam papers, but should
+  // fail cleanly with a real error rather than a header-format crash if a
+  // non-PDF ever ends up routed through it.
+  const rawExt = fileName.toLowerCase().split('.').pop() ?? 'pdf';
+  const RAW_MIME_BY_EXT: Record<string, string> = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  };
+  const rawMimeType = RAW_MIME_BY_EXT[rawExt] ?? 'application/octet-stream';
+
+  const rawPath = `${uploadedBy}/${courseId}/${pathSalt}.${rawExt}`;
   const { error: rawUploadErr } = await admin.storage
     .from('past-papers')
-    .upload(rawPath, buffer, { contentType: isPdf ? 'application/pdf' : undefined });
+    .upload(rawPath, buffer, { contentType: rawMimeType });
   if (rawUploadErr) throw new Error(rawUploadErr.message);
 
   const watermark = isPdf
