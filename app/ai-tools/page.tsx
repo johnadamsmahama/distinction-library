@@ -13,7 +13,7 @@ const TOOLS = [
     desc: 'Turn your notes or a past paper into a practice quiz in seconds.',
   },
   {
-    href: '/vault/presentation-kit',
+    href: '/ai-tools/presentation-kit',
     title: 'Presentation Kit',
     desc: 'Turn a topic, a Vault item, or an uploaded document into a PowerPoint (PPTX) ready to present.',
   },
