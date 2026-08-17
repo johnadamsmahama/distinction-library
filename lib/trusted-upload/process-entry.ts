@@ -193,11 +193,30 @@ export async function processStudyMaterialEntry(
     };
   }
 
-  const contentType = ext === 'pptx' ? 'lecture_slides' : 'study_notes';
+  const materialContentType = ext === 'pptx' ? 'lecture_slides' : 'study_notes';
   const title = fileName.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim().toUpperCase();
 
+  // Supabase storage-js defaults to 'text/plain;charset=UTF-8' when no
+  // contentType is passed to .upload() — this was silently wrong for every
+  // file here until the study-materials bucket got mime-type restrictions,
+  // at which point it started rejecting every upload outright. Map the
+  // extension to its real mime type instead of relying on the default.
+  const MIME_BY_EXT: Record<string, string> = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+  };
+  const mimeType = MIME_BY_EXT[ext] ?? 'application/octet-stream';
+
   const path = `${uploadedBy}/${courseId}/${pathSalt}.${ext}`;
-  const { error: uploadErr } = await admin.storage.from('study-materials').upload(path, buffer);
+  const { error: uploadErr } = await admin.storage
+    .from('study-materials')
+    .upload(path, buffer, { contentType: mimeType });
   if (uploadErr) throw new Error(uploadErr.message);
 
   const { data: publicUrlData } = admin.storage.from('study-materials').getPublicUrl(path);
@@ -205,7 +224,7 @@ export async function processStudyMaterialEntry(
   const { error: insertErr } = await admin.from('study_materials').insert({
     course_id: courseId,
     title,
-    content_type: contentType,
+    content_type: materialContentType,
     week_number: weekNumber,
     file_url: publicUrlData.publicUrl,
     file_hash: fileHash,
