@@ -15,7 +15,7 @@ const NAV_LINKS = [
   { href: '/papers', label: 'Library' },
   { href: '/ai-tools', label: 'AI Tools' },
   { href: '/predictor', label: 'Exam Predictor' },
-  { href: '/success-centre', label: 'Essentials' },
+  { href: '/essentials', label: 'Essentials' },
   { href: '/blog', label: 'Blog' },
   { href: '/dashboard/notifications', label: 'Notifications' },
   { href: '/dashboard/settings', label: 'Settings' },
