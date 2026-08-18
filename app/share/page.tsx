@@ -62,7 +62,7 @@ export default function SharePage() {
                     <tbody>
                       {/* Header */}
                       <tr>
-                        <td className="header-cell" bgcolor="#0D2B5E" align="center" style={{ padding: '28px 32px', textAlign: 'center' }}>
+                        <td className="header-cell" align="center" style={{ padding: '28px 32px', textAlign: 'center' }}>
                           <div className="logo">DISTINCTION LIBRARY</div>
                           <div className="tagline">Built for UPSA Students</div>
                         </td>
@@ -146,7 +146,7 @@ export default function SharePage() {
                             <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center">
                               <tbody>
                                 <tr>
-                                  <td className="cta-btn" bgcolor="#0D2B5E" style={{ borderRadius: 0 }}>
+                                  <td className="cta-btn" style={{ borderRadius: 0 }}>
                                     <a
                                       href="https://distinctionlibrary.com"
                                       target="_blank"
