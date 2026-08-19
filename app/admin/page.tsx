@@ -23,11 +23,11 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {stats.map((s) => (
-        <div key={s.label} className="bg-white border border-g100 rounded-xl p-5">
-          <div className="font-display font-bold text-2xl text-navy mb-1">{s.value}</div>
-          <div className="font-condensed text-[11px] uppercase tracking-wide text-g600">{s.label}</div>
+        <div key={s.label} className="bg-white rounded p-3 border-l-[3px] border-gold">
+          <div className="font-display font-bold text-2xl text-navy mb-0.5">{s.value}</div>
+          <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">{s.label}</div>
         </div>
       ))}
     </div>
