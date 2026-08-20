@@ -1,8 +1,37 @@
 import Link from 'next/link';
 
+const founderJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'J.A. Mahama',
+  alternateName: 'John Adams Mahama',
+  jobTitle: 'Founder, Distinction Library',
+  description:
+    'UPSA Communication Studies student and founder of Distinction Library and other student-led initiatives under the J.A. Mahama Leadership Compendium.',
+  affiliation: {
+    '@type': 'CollegeOrUniversity',
+    name: 'University of Professional Studies, Accra',
+  },
+  worksFor: {
+    '@type': 'Organization',
+    name: 'Distinction Library',
+    url: 'https://www.distinctionlibrary.com',
+  },
+  sameAs: [
+    'https://www.facebook.com/johnadamsmahamah',
+    'https://www.instagram.com/johnadamsmahama',
+    'https://www.linkedin.com/in/john-adams-mahama-32bb4b3b1',
+  ],
+};
+
 export default function AboutPage() {
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(founderJsonLd) }}
+      />
+
       <section className="bg-navy-deep px-7 py-20 text-center">
         <div className="max-w-hero mx-auto">
           <div className="eyebrow mb-4">J.A. Mahama Initiative</div>
@@ -15,10 +44,10 @@ export default function AboutPage() {
       <section className="px-7 py-16">
         <div className="max-w-[680px] mx-auto space-y-6 font-body text-[15px] leading-relaxed text-g800">
           <p>
-            Distinction Library is one part of a wider effort — the J.A. Mahama Comprehensive
-            Initiative Compendium — built around a simple idea: every UPSA student should have
-            equal access to the tools that make the difference between struggling through a
-            semester and actually understanding it.
+            Distinction Library is one part of a wider effort — the J.A. Mahama Leadership
+            Compendium — built around a simple idea: every UPSA student should have equal access
+            to the tools that make the difference between struggling through a semester and
+            actually understanding it.
           </p>
           <p>
             Past papers scattered across group chats. Notes only available if you knew the right
@@ -45,13 +74,19 @@ export default function AboutPage() {
             <div>
               <p className="font-display font-bold text-lg text-white mb-1">J.A. Mahama</p>
               <p className="font-condensed text-xs text-white/40 mb-4">
-                Level 100, Communication Studies (Regular Group 5), UPSA
+                Communication Studies (Regular Group 5), UPSA
+              </p>
+              <p className="font-body text-sm leading-relaxed text-white/60 mb-4">
+                Distinction Library is one of several flagship initiatives under the J.A. Mahama
+                Leadership Compendium — spanning student welfare, entrepreneurship, campus culture,
+                and academic support — built with the same navy-and-gold identity and the same
+                underlying belief: distinction shouldn't require luck.
               </p>
               <p className="font-body text-sm leading-relaxed text-white/60">
-                Distinction Library is one of several student-led initiatives under this portfolio
-                — spanning student welfare, entrepreneurship, campus culture, and academic support
-                — built with the same navy-and-gold identity and the same underlying belief:
-                distinction shouldn't require luck.
+                There is no verifiable connection between J.A. Mahama and President John Dramani
+                Mahama. The two share a surname and Gonja heritage rooted in the Savannah Region,
+                but nothing beyond that is confirmed. President Mahama is someone the founder
+                deeply admires for his leadership.
               </p>
             </div>
           </div>
