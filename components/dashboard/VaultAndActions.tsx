@@ -1,4 +1,4 @@
-import Link from 'next/link';
+  import Link from 'next/link';
 
 export function VaultSummary({
   summary,
@@ -90,6 +90,21 @@ const ACTIONS: Action[] = [
     iconBgClass: 'bg-navy-deep/20',
     iconColorClass: 'text-navy-deep',
     arrowColorClass: 'text-navy-deep',
+    grain: true,
+  },
+  {
+    href: '/papers',
+    label: 'Solved Past Papers',
+    desc: 'Get instant AI-written answers for any past paper',
+    path: 'M9 12l2 2 4-4M12 3a9 9 0 100 18 9 9 0 000-18z',
+    background: 'radial-gradient(140% 140% at 15% 0%, #0F2244, #061225 65%)',
+    aurora:
+      'radial-gradient(40% 45% at 85% 10%, rgba(226,190,90,.4), transparent 70%), radial-gradient(45% 50% at 15% 90%, rgba(78,156,124,.3), transparent 70%)',
+    textClass: 'text-white',
+    subClass: 'text-white/80',
+    iconBgClass: 'bg-white/[.14]',
+    iconColorClass: 'text-gold-light',
+    arrowColorClass: 'text-gold-light',
     grain: true,
   },
   {
@@ -271,7 +286,7 @@ export function QuickActions({
           </Link>
         ))}
 
-        {/* Study Vault — now the 8th tile in the same grid, using real summary data */}
+        {/* Study Vault — now the 9th tile in the same grid, using real summary data */}
         <Link
           href="/vault"
           className="group relative isolate overflow-hidden rounded-2xl p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(201,160,44,.25)] border border-[#E6D6A8]"
