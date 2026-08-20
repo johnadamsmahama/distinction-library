@@ -52,7 +52,7 @@ export default function SolvePaperView({
         const { data } = await supabase
           .from('predictor_questions')
           .select('id, canonical_text, question_type, solution')
-          .eq('past_paper_id', paperId)
+          .eq('source_paper_id', paperId)
           .order('created_at', { ascending: true });
 
         if (!cancelled && data) setQuestions(data as Question[]);
