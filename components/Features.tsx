@@ -19,8 +19,8 @@ const CARDS = [
   },
   {
     title: 'Exam Predictor',
-    desc: 'AI-ranked predictions of likely exam questions, built from past papers, course materials, and examiner patterns.',
-    tag: 'Beta · Course-specific rankings',
+    desc: 'AI-ranked predictions of likely exam questions, built from past papers, course materials, and examiner patterns — plus AI-written answers for any past paper, on demand.',
+    tag: 'Beta · Course-specific rankings · Solved Past Papers',
     path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
   },
   {
