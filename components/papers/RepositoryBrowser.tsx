@@ -125,16 +125,11 @@ function ResultCard({
   itemId: string;
 }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => trackDownload(itemType, itemId)}
+    <div
       className="flex overflow-hidden rounded-[3px] relative group transition-transform hover:-translate-y-[1px]"
       style={{
         background: '#FBF6E8',
         boxShadow: '0 4px 18px rgba(6,15,30,0.5)',
-        textDecoration: 'none',
       }}
     >
       {/* Watermark stamp */}
@@ -155,8 +150,15 @@ function ResultCard({
       {/* Left accent rail */}
       <div className="w-[3px] flex-shrink-0" style={{ background: accent }} />
 
-      {/* Content */}
-      <div className="px-3 py-2.5 flex-1 min-w-0">
+      {/* Download link — wraps content + downloads on click */}
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackDownload(itemType, itemId)}
+        className="px-3 py-2.5 flex-1 min-w-0"
+        style={{ textDecoration: 'none' }}
+      >
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <div className="min-w-0">
             <div
@@ -204,11 +206,35 @@ function ResultCard({
             {tag}
           </span>
         </div>
-      </div>
+      </a>
 
-      {/* Download arrow */}
-      <div className="flex items-center pr-3 flex-shrink-0">
-        <div
+      {/* Right-side actions: Solve (papers only) + Download arrow */}
+      <div className="flex items-center gap-1.5 pr-3 flex-shrink-0">
+        {itemType === 'papers' && (
+          <a
+            href={`/papers/${itemId}/solutions`}
+            className="flex items-center gap-1 rounded-full px-2 py-1 transition-all hover:brightness-110"
+            style={{
+              background: '#0F2244',
+              border: '1px solid rgba(226,190,90,0.4)',
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E2BE5A" strokeWidth="2.5">
+              <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
+            <span
+              className="font-mono font-bold uppercase tracking-wide"
+              style={{ fontSize: 7.5, color: '#E2BE5A' }}
+            >
+              Solve
+            </span>
+          </a>
+        )}
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackDownload(itemType, itemId)}
           className="w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
           style={{
             background: accent + '18',
@@ -218,9 +244,9 @@ function ResultCard({
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5">
             <path d="M12 5v14M5 12l7 7 7-7" />
           </svg>
-        </div>
+        </a>
       </div>
-    </a>
+    </div>
   );
 }
 
