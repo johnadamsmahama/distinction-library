@@ -20,7 +20,7 @@ export default async function SolutionsPage({
   const { data: questions } = await supabase
     .from('predictor_questions')
     .select('id, canonical_text, question_type, solution')
-    .eq('past_paper_id', params.paperId)
+    .eq('source_paper_id', params.paperId)
     .order('created_at', { ascending: true });
 
   if (!paper) {
