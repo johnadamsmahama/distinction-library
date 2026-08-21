@@ -282,7 +282,13 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
         aria-hidden
       >
         {questions.map((q, i) => (
-          <div key={q.id} ref={(el) => (measureRefs.current[i] = el)} className="mb-6">
+          <div
+            key={q.id}
+            ref={(el) => {
+              measureRefs.current[i] = el;
+            }}
+            className="mb-6"
+          >
             <ScriptBlock question={q} />
           </div>
         ))}
