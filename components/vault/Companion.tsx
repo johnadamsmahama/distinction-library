@@ -130,11 +130,11 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* work canvas — relative container; composer is pinned to a fixed offset from its top (row 35 / 700px) */}
+      {/* work canvas — capped at 30 grid boxes (600px); composer pinned at row 27 (540px) */}
       <div
         className="relative border border-gold/25 bg-black/15"
         style={{
-          minHeight: '760px',
+          height: '600px',
           backgroundImage:
             'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
           backgroundSize: '20px 20px',
@@ -145,7 +145,7 @@ export default function Companion() {
         )}
 
         {/* content zone — fills the space above the composer */}
-        <div className="absolute inset-0 p-5 flex flex-col" style={{ paddingBottom: '160px' }}>
+        <div className="absolute inset-0 p-5 flex flex-col" style={{ paddingBottom: '100px' }}>
           {mode === 'ask' && (
             <>
               {messages.length === 0 ? (
@@ -156,7 +156,7 @@ export default function Companion() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 overflow-y-auto">
+                <div className="space-y-3 overflow-y-auto flex-1">
                   {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
@@ -192,7 +192,7 @@ export default function Companion() {
                 value={notesContext}
                 onChange={(e) => setNotesContext(e.target.value)}
                 placeholder="paste your notes here, then ask a question below…"
-                className="flex-1 min-h-[110px] w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
+                className="flex-1 w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
               />
             </div>
           )}
@@ -202,7 +202,7 @@ export default function Companion() {
               {!attachedFile ? (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
+                  className="flex-1 flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
                 >
                   <div className="font-mono text-gold text-lg mb-2">↑</div>
                   <p className="font-mono text-[11px] text-white/50 mb-2">
@@ -236,7 +236,7 @@ export default function Companion() {
 
         {/* save session — sits just above the composer */}
         {messages.length > 0 && (
-          <div className="absolute left-5 right-5 flex justify-end" style={{ top: '660px' }}>
+          <div className="absolute left-5 right-5 flex justify-end" style={{ top: '500px' }}>
             <button
               onClick={saveSession}
               disabled={saved}
@@ -247,8 +247,8 @@ export default function Companion() {
           </div>
         )}
 
-        {/* composer — pinned at row 35 (700px from the top of the canvas) */}
-        <div className="absolute left-5 right-5" style={{ top: '700px' }}>
+        {/* composer — pinned at row 27 (540px), within the 30-box canvas */}
+        <div className="absolute left-5 right-5" style={{ top: '540px' }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
