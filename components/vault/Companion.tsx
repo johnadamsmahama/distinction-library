@@ -130,121 +130,125 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* work canvas — dominates the screen, extra bottom padding so content never hides behind the fixed composer */}
+      {/* work canvas — relative container; composer is pinned to a fixed offset from its top (row 35 / 700px) */}
       <div
-        className="min-h-[80vh] border border-gold/25 bg-black/15 p-5 pb-32 flex flex-col"
+        className="relative border border-gold/25 bg-black/15"
         style={{
+          minHeight: '760px',
           backgroundImage:
             'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
           backgroundSize: '20px 20px',
         }}
       >
         {fileError && (
-          <p className="font-mono text-xs text-red-400 mb-3">{fileError}</p>
+          <p className="absolute top-3 left-5 right-5 font-mono text-xs text-red-400">{fileError}</p>
         )}
 
-        {mode === 'ask' && (
-          <>
-            {messages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
-                <div className="font-mono text-gold text-base">&gt; _</div>
-                <p className="font-mono text-xs text-white/50 leading-relaxed max-w-[32ch]">
-                  type a concept, request a summary, or switch modes to ground your answer in your own material.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {messages.map((m, i) => (
-                  <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`max-w-[80%] px-4 py-2.5 font-mono text-xs leading-relaxed whitespace-pre-wrap border ${
-                        m.role === 'user'
-                          ? 'bg-gold/10 border-gold/30 text-white'
-                          : 'bg-white/5 border-white/10 text-white/80'
-                      }`}
-                    >
-                      {m.content}
+        {/* content zone — fills the space above the composer */}
+        <div className="absolute inset-0 p-5 flex flex-col" style={{ paddingBottom: '160px' }}>
+          {mode === 'ask' && (
+            <>
+              {messages.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
+                  <div className="font-mono text-gold text-base">&gt; _</div>
+                  <p className="font-mono text-xs text-white/50 leading-relaxed max-w-[32ch]">
+                    type a concept, request a summary, or switch modes to ground your answer in your own material.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 overflow-y-auto">
+                  {messages.map((m, i) => (
+                    <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[80%] px-4 py-2.5 font-mono text-xs leading-relaxed whitespace-pre-wrap border ${
+                          m.role === 'user'
+                            ? 'bg-gold/10 border-gold/30 text-white'
+                            : 'bg-white/5 border-white/10 text-white/80'
+                        }`}
+                      >
+                        {m.content}
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {loading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white/5 border border-white/10 px-4 py-2.5 font-mono text-xs text-white/50">
-                      thinking…
-                    </div>
-                  </div>
-                )}
-                <div ref={bottomRef} />
-              </div>
-            )}
-          </>
-        )}
-
-        {mode === 'notes' && (
-          <div className="flex-1 flex flex-col">
-            <div className="font-mono text-[10.5px] uppercase tracking-wide text-white/40 mb-2">
-              your notes
-            </div>
-            <textarea
-              value={notesContext}
-              onChange={(e) => setNotesContext(e.target.value)}
-              placeholder="paste your notes here, then ask a question below…"
-              className="flex-1 min-h-[110px] w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
-            />
-          </div>
-        )}
-
-        {mode === 'file' && (
-          <div className="flex-1 flex flex-col">
-            {!attachedFile ? (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
-              >
-                <div className="font-mono text-gold text-lg mb-2">↑</div>
-                <p className="font-mono text-[11px] text-white/50 mb-2">
-                  tap to attach a file, or drop it here
-                </p>
-                <div className="flex gap-1.5 flex-wrap justify-center">
-                  {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
-                    <span key={t} className="font-mono text-[9px] px-2 py-1 bg-black/30 border border-white/10 text-white/50">
-                      {t}
-                    </span>
                   ))}
+                  {loading && (
+                    <div className="flex justify-start">
+                      <div className="bg-white/5 border border-white/10 px-4 py-2.5 font-mono text-xs text-white/50">
+                        thinking…
+                      </div>
+                    </div>
+                  )}
+                  <div ref={bottomRef} />
                 </div>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2.5 bg-black/25 border border-white/10 px-3 py-3">
-                <div className="w-9 h-9 bg-gold/15 text-gold flex items-center justify-center font-mono text-[9px] flex-shrink-0">
-                  {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-mono text-xs text-white truncate">{attachedFile.name}</div>
-                  <div className="font-mono text-[10px] text-white/40">attached</div>
-                </div>
-                <button onClick={removeFile} className="text-white/40 hover:text-white text-sm px-1" aria-label="Remove file">
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </>
+          )}
 
-      {/* composer — fixed near the bottom of the viewport, always visible without scrolling */}
-      <div className="fixed left-0 right-0 bottom-[120px] px-4 z-20 flex justify-center pointer-events-none">
-        <div className="w-full max-w-2xl pointer-events-auto">
-          {messages.length > 0 && (
-            <div className="pb-2 flex justify-end">
-              <button
-                onClick={saveSession}
-                disabled={saved}
-                className="font-mono text-[10px] text-white/60 border border-white/15 bg-navy-deep px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
-              >
-                {saved ? 'saved ✓' : 'save session'}
-              </button>
+          {mode === 'notes' && (
+            <div className="flex-1 flex flex-col">
+              <div className="font-mono text-[10.5px] uppercase tracking-wide text-white/40 mb-2">
+                your notes
+              </div>
+              <textarea
+                value={notesContext}
+                onChange={(e) => setNotesContext(e.target.value)}
+                placeholder="paste your notes here, then ask a question below…"
+                className="flex-1 min-h-[110px] w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
+              />
             </div>
           )}
+
+          {mode === 'file' && (
+            <div className="flex-1 flex flex-col">
+              {!attachedFile ? (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
+                >
+                  <div className="font-mono text-gold text-lg mb-2">↑</div>
+                  <p className="font-mono text-[11px] text-white/50 mb-2">
+                    tap to attach a file, or drop it here
+                  </p>
+                  <div className="flex gap-1.5 flex-wrap justify-center">
+                    {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
+                      <span key={t} className="font-mono text-[9px] px-2 py-1 bg-black/30 border border-white/10 text-white/50">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2.5 bg-black/25 border border-white/10 px-3 py-3">
+                  <div className="w-9 h-9 bg-gold/15 text-gold flex items-center justify-center font-mono text-[9px] flex-shrink-0">
+                    {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono text-xs text-white truncate">{attachedFile.name}</div>
+                    <div className="font-mono text-[10px] text-white/40">attached</div>
+                  </div>
+                  <button onClick={removeFile} className="text-white/40 hover:text-white text-sm px-1" aria-label="Remove file">
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* save session — sits just above the composer */}
+        {messages.length > 0 && (
+          <div className="absolute left-5 right-5 flex justify-end" style={{ top: '660px' }}>
+            <button
+              onClick={saveSession}
+              disabled={saved}
+              className="font-mono text-[10px] text-white/60 border border-white/15 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+            >
+              {saved ? 'saved ✓' : 'save session'}
+            </button>
+          </div>
+        )}
+
+        {/* composer — pinned at row 35 (700px from the top of the canvas) */}
+        <div className="absolute left-5 right-5" style={{ top: '700px' }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -263,12 +267,12 @@ export default function Companion() {
                   ? 'ask a question about the attached file…'
                   : 'ask a question…'
               }
-              className="flex-1 px-4 py-2.5 bg-navy-deep border border-gold/30 font-mono text-xs text-white outline-none focus:border-gold placeholder:text-white/30 shadow-lg"
+              className="flex-1 px-4 py-2.5 bg-navy-deep border border-gold/30 font-mono text-xs text-white outline-none focus:border-gold placeholder:text-white/30"
             />
             <button
               type="submit"
               disabled={loading || (!input.trim() && !attachedFile)}
-              className="bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0 shadow-lg"
+              className="bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
             >
               Run
             </button>
