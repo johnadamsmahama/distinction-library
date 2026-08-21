@@ -104,7 +104,7 @@ export default function Companion() {
 
   return (
     <div
-      className="flex flex-col min-h-[60vh]"
+      className="flex flex-col min-h-[78vh]"
       style={{
         backgroundImage:
           'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
