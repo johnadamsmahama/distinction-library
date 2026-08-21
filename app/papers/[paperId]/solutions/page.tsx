@@ -17,12 +17,6 @@ export default async function SolutionsPage({
     .eq('id', params.paperId)
     .single();
 
-  const { data: questions } = await supabase
-    .from('predictor_questions')
-    .select('id, canonical_text, question_type, solution')
-    .eq('source_paper_id', params.paperId)
-    .order('created_at', { ascending: true });
-
   if (!paper) {
     return (
       <div
@@ -33,7 +27,7 @@ export default async function SolutionsPage({
         }}
         className="px-4 sm:px-6 lg:px-8 pt-10"
       >
-        <div className="text-white/60 font-body text-sm">Paper not found.</div>
+        <div className="text-off-white/60 font-body text-sm">Paper not found.</div>
       </div>
     );
   }
@@ -47,7 +41,6 @@ export default async function SolutionsPage({
       courseName={courses?.name ?? ''}
       examType={paper.exam_type}
       year={paper.year}
-      initialQuestions={questions ?? []}
     />
   );
 }
