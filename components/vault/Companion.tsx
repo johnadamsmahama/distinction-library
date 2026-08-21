@@ -96,61 +96,27 @@ export default function Companion() {
     if (res.ok) setSaved(true);
   };
 
-  const tabs: { id: Mode; label: string; hasContent: boolean; icon: React.ReactNode }[] = [
-    {
-      id: 'ask',
-      label: 'Ask',
-      hasContent: false,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="w-3.5 h-3.5">
-          <path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'notes',
-      label: 'Paste notes',
-      hasContent: notesContext.trim().length > 0,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />
-          <line x1="8" y1="7" x2="15" y2="7" />
-          <line x1="8" y1="11" x2="15" y2="11" />
-        </svg>
-      ),
-    },
-    {
-      id: 'file',
-      label: 'Attach',
-      hasContent: !!attachedFile,
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-        </svg>
-      ),
-    },
+  const tabs: { id: Mode; label: string }[] = [
+    { id: 'ask', label: 'Ask a question' },
+    { id: 'notes', label: 'Paste notes' },
+    { id: 'file', label: 'Attach a file' },
   ];
 
   return (
     <div className="bg-white border border-g100 rounded-2xl shadow-[0_14px_34px_-16px_rgba(10,27,61,0.4)] flex flex-col h-[56vh] overflow-hidden">
-      {/* tabs */}
+      {/* tabs — evenly split thirds, active tab reads as "the one you're in" */}
       <div className="flex border-b border-g100 flex-shrink-0">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setMode(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-4 font-condensed font-bold text-[11px] uppercase tracking-wide transition-colors relative ${
-              mode === t.id ? 'text-gold' : 'text-g600 hover:text-g800'
+            className={`flex-1 flex items-center justify-center py-2.5 font-condensed font-bold text-[11px] uppercase tracking-wide transition-colors border-r border-g100 last:border-r-0 border-b-2 whitespace-nowrap ${
+              mode === t.id
+                ? 'bg-white text-navy border-b-gold'
+                : 'bg-off-white text-g600 hover:text-g800 border-b-transparent'
             }`}
           >
-            {t.icon}
             {t.label}
-            {t.hasContent && (
-              <span className="w-1.5 h-1.5 rounded-full bg-gold" aria-hidden />
-            )}
-            {mode === t.id && (
-              <span className="absolute -bottom-px left-3.5 right-3.5 h-0.5 rounded-full bg-gold" />
-            )}
           </button>
         ))}
       </div>
@@ -182,7 +148,7 @@ export default function Companion() {
                   </svg>
                 </div>
                 <p className="font-body text-sm text-g600 leading-relaxed max-w-[28ch]">
-                  Ask about a concept, request a summary, or switch to Paste notes / Attach to ground your answer.
+                  Ask about a concept, request a summary, or switch to Paste notes / Attach a file to ground your answer.
                 </p>
               </div>
             ) : (
