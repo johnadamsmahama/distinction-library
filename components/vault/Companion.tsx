@@ -96,36 +96,38 @@ export default function Companion() {
     if (res.ok) setSaved(true);
   };
 
-  const tabs: { id: Mode; label: string }[] = [
-    { id: 'ask', label: 'Ask a question' },
-    { id: 'notes', label: 'Paste notes' },
-    { id: 'file', label: 'Attach a file' },
+  const tabs: { id: Mode; label: string; hasContent: boolean }[] = [
+    { id: 'ask', label: 'ask', hasContent: false },
+    { id: 'notes', label: 'notes', hasContent: notesContext.trim().length > 0 },
+    { id: 'file', label: 'attach', hasContent: !!attachedFile },
   ];
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl shadow-[0_14px_34px_-16px_rgba(10,27,61,0.4)] flex flex-col h-[56vh] overflow-hidden">
-      {/* tabs — evenly split thirds, active tab reads as "the one you're in" */}
-      <div className="flex border-b border-g100 flex-shrink-0">
+    <div
+      className="flex flex-col min-h-[60vh]"
+      style={{
+        backgroundImage:
+          'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }}
+    >
+      {/* tabs — terminal-pane style */}
+      <div className="flex gap-0 px-0">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setMode(t.id)}
-            className={`flex-1 flex items-center justify-center py-2.5 font-condensed font-bold text-[11px] uppercase tracking-wide transition-colors border-r border-g100 last:border-r-0 border-b-2 whitespace-nowrap ${
+            className={`font-mono text-[11px] px-3.5 py-2 flex items-center gap-1.5 relative ${
               mode === t.id
-                ? 'bg-white text-navy border-b-gold'
-                : 'bg-off-white text-g600 hover:text-g800 border-b-transparent'
+                ? 'text-gold border border-gold/40 border-b-transparent bg-navy-deep top-px'
+                : 'text-white/40 border border-transparent hover:text-white/70'
             }`}
           >
             {t.label}
+            {t.hasContent && <span className="w-1 h-1 rounded-full bg-gold inline-block" />}
           </button>
         ))}
       </div>
-
-      {fileError && (
-        <div className="px-5 py-2 bg-red-50 border-b border-g100 flex-shrink-0">
-          <p className="font-body text-xs text-red-600">{fileError}</p>
-        </div>
-      )}
 
       <input
         ref={fileInputRef}
@@ -135,20 +137,19 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* content pane */}
-      <div className="flex-1 overflow-y-auto p-5 flex flex-col">
+      {/* work canvas */}
+      <div className="flex-1 mx-0 border border-gold/25 bg-black/15 p-5 flex flex-col overflow-y-auto">
+        {fileError && (
+          <p className="font-mono text-xs text-red-400 mb-3">{fileError}</p>
+        )}
+
         {mode === 'ask' && (
           <>
             {messages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
-                <div className="w-12 h-12 rounded-xl bg-off-white border border-g100 flex items-center justify-center mb-3.5">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                  </svg>
-                </div>
-                <p className="font-body text-sm text-g600 leading-relaxed max-w-[28ch]">
-                  Ask about a concept, request a summary, or switch to Paste notes / Attach a file to ground your answer.
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
+                <div className="font-mono text-gold text-base">&gt; _</div>
+                <p className="font-mono text-xs text-white/50 leading-relaxed max-w-[32ch]">
+                  type a concept, request a summary, or switch modes to ground your answer in your own material.
                 </p>
               </div>
             ) : (
@@ -156,8 +157,10 @@ export default function Companion() {
                 {messages.map((m, i) => (
                   <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`max-w-[80%] rounded-xl px-4 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap ${
-                        m.role === 'user' ? 'bg-navy text-white' : 'bg-off-white text-g800'
+                      className={`max-w-[80%] px-4 py-2.5 font-mono text-xs leading-relaxed whitespace-pre-wrap border ${
+                        m.role === 'user'
+                          ? 'bg-gold/10 border-gold/30 text-white'
+                          : 'bg-white/5 border-white/10 text-white/80'
                       }`}
                     >
                       {m.content}
@@ -166,7 +169,9 @@ export default function Companion() {
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="bg-off-white rounded-xl px-4 py-2.5 font-body text-sm text-g600">Thinking…</div>
+                    <div className="bg-white/5 border border-white/10 px-4 py-2.5 font-mono text-xs text-white/50">
+                      thinking…
+                    </div>
                   </div>
                 )}
                 <div ref={bottomRef} />
@@ -177,14 +182,14 @@ export default function Companion() {
 
         {mode === 'notes' && (
           <div className="flex-1 flex flex-col">
-            <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-g600 mb-2">
-              Your notes
+            <div className="font-mono text-[10.5px] uppercase tracking-wide text-white/40 mb-2">
+              your notes
             </div>
             <textarea
               value={notesContext}
               onChange={(e) => setNotesContext(e.target.value)}
-              placeholder="Paste your notes here, then ask a question below…"
-              className="flex-1 min-h-[110px] w-full px-3.5 py-3 rounded-xl border border-g100 bg-off-white font-body text-sm leading-relaxed outline-none focus:border-gold resize-none"
+              placeholder="paste your notes here, then ask a question below…"
+              className="flex-1 min-h-[110px] w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
             />
           </div>
         )}
@@ -194,33 +199,30 @@ export default function Companion() {
             {!attachedFile ? (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center rounded-xl border-[1.5px] border-dashed border-gold bg-gold/[0.06] px-4 py-6 hover:bg-gold/[0.1] transition-colors"
+                className="flex-1 min-h-[110px] flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold mb-2">
-                  <path d="M12 16V4M6 10l6-6 6 6" />
-                  <path d="M4 20h16" />
-                </svg>
-                <p className="font-body text-xs text-g600 mb-2">
-                  <span className="font-semibold text-g800">Tap to attach</span> a file, or drop it here
+                <div className="font-mono text-gold text-lg mb-2">↑</div>
+                <p className="font-mono text-[11px] text-white/50 mb-2">
+                  tap to attach a file, or drop it here
                 </p>
                 <div className="flex gap-1.5 flex-wrap justify-center">
                   {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
-                    <span key={t} className="font-condensed text-[9.5px] font-bold px-2 py-1 bg-white border border-g100 rounded text-g600">
+                    <span key={t} className="font-mono text-[9px] px-2 py-1 bg-black/30 border border-white/10 text-white/50">
                       {t}
                     </span>
                   ))}
                 </div>
               </button>
             ) : (
-              <div className="flex items-center gap-2.5 bg-off-white border border-g100 rounded-xl px-3 py-3">
-                <div className="w-9 h-9 rounded-lg bg-navy text-gold-light flex items-center justify-center font-condensed font-bold text-[9px] flex-shrink-0">
+              <div className="flex items-center gap-2.5 bg-black/25 border border-white/10 px-3 py-3">
+                <div className="w-9 h-9 bg-gold/15 text-gold flex items-center justify-center font-mono text-[9px] flex-shrink-0">
                   {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-body font-semibold text-sm text-g800 truncate">{attachedFile.name}</div>
-                  <div className="font-condensed text-[10.5px] text-g600">Attached</div>
+                  <div className="font-mono text-xs text-white truncate">{attachedFile.name}</div>
+                  <div className="font-mono text-[10px] text-white/40">attached</div>
                 </div>
-                <button onClick={removeFile} className="text-g600 hover:text-navy text-base px-1" aria-label="Remove file">
+                <button onClick={removeFile} className="text-white/40 hover:text-white text-sm px-1" aria-label="Remove file">
                   ✕
                 </button>
               </div>
@@ -231,24 +233,24 @@ export default function Companion() {
 
       {/* save session */}
       {messages.length > 0 && (
-        <div className="px-5 pb-2 flex-shrink-0 flex justify-end">
+        <div className="pt-2 flex justify-end">
           <button
             onClick={saveSession}
             disabled={saved}
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-1.5 hover:border-gold transition-colors disabled:opacity-50"
+            className="font-mono text-[10px] text-white/60 border border-white/15 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
           >
-            {saved ? 'Saved to Vault ✓' : 'Save session'}
+            {saved ? 'saved ✓' : 'save session'}
           </button>
         </div>
       )}
 
-      {/* composer — always visible, never requires scrolling */}
+      {/* composer */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           send(input);
         }}
-        className="p-4 border-t border-g100 flex gap-2 flex-shrink-0"
+        className="pt-3 flex gap-2"
       >
         <input
           type="text"
@@ -256,19 +258,19 @@ export default function Companion() {
           onChange={(e) => setInput(e.target.value)}
           placeholder={
             mode === 'notes'
-              ? 'Ask a question about the notes above…'
+              ? 'ask a question about the notes above…'
               : mode === 'file'
-              ? 'Ask a question about the attached file…'
-              : 'Ask a question…'
+              ? 'ask a question about the attached file…'
+              : 'ask a question…'
           }
-          className="flex-1 px-4 py-2.5 rounded-lg border border-g100 bg-off-white font-body text-sm outline-none focus:border-gold"
+          className="flex-1 px-4 py-2.5 bg-white/5 border border-gold/30 font-mono text-xs text-white outline-none focus:border-gold placeholder:text-white/30"
         />
         <button
           type="submit"
           disabled={loading || (!input.trim() && !attachedFile)}
-          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
+          className="bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
         >
-          Send
+          Run
         </button>
       </form>
     </div>
