@@ -130,7 +130,13 @@ export default function SolvePaperView({
           overflow: 'hidden',
         }}
       >
-        <PaperHeader courseCode={courseCode} courseName={courseName} examType={examType} year={year} />
+        <PaperHeader
+          courseCode={courseCode}
+          courseName={courseName}
+          examType={examType}
+          year={year}
+          solved={state === 'ready'}
+        />
 
         <div style={{ background: RULED_PAPER, backgroundPosition: '0 4px' }} className="px-5 sm:px-8 pt-6 pb-2">
           {state === 'checking' && <ChromeSpinner label="Loading paper…" />}
@@ -158,18 +164,20 @@ function PaperHeader({
   courseName,
   examType,
   year,
+  solved,
 }: {
   courseCode: string;
   courseName: string;
   examType: string;
   year: number;
+  solved: boolean;
 }) {
   return (
     <div style={{ background: '#fdfbf6', borderBottom: '2px solid #0F2244' }} className="px-5 sm:px-8 pt-5 pb-4">
       <Link
         href="/papers"
         style={{ color: '#0F2244' }}
-        className="font-condensed text-[10px] font-bold uppercase tracking-[0.08em] hover:opacity-70 transition-opacity"
+        className="font-condensed text-[13px] font-bold uppercase tracking-[0.08em] hover:opacity-70 transition-opacity inline-block py-1"
       >
         ← Library
       </Link>
@@ -190,17 +198,23 @@ function PaperHeader({
           </div>
         </div>
 
-        <div
-          style={{
-            border: '2px solid #8a2e2e',
-            color: '#8a2e2e',
-            transform: 'rotate(6deg)',
-            fontFamily: 'Georgia, serif',
-          }}
-          className="text-[9.5px] font-bold uppercase tracking-[0.08em] px-2 py-1 whitespace-nowrap shrink-0"
-        >
-          Solved
-        </div>
+        {/* Only stamp the paper as "Solved" once it genuinely has solved
+            questions to show — never during loading, a not-ready wait,
+            or an extraction failure. A stamp that shows regardless of
+            outcome is misleading. */}
+        {solved && (
+          <div
+            style={{
+              border: '2px solid #8a2e2e',
+              color: '#8a2e2e',
+              transform: 'rotate(6deg)',
+              fontFamily: 'Georgia, serif',
+            }}
+            className="text-[9.5px] font-bold uppercase tracking-[0.08em] px-2 py-1 whitespace-nowrap shrink-0"
+          >
+            Solved
+          </div>
+        )}
       </div>
     </div>
   );
