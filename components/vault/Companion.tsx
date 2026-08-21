@@ -130,7 +130,7 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* work canvas — capped at 30 grid boxes (600px); composer pinned at row 27 (540px) */}
+      {/* work canvas — capped at 30 grid boxes (600px); composer pinned at row 26 (520px) */}
       <div
         className="relative border border-gold/25 bg-black/15"
         style={{
@@ -145,7 +145,7 @@ export default function Companion() {
         )}
 
         {/* content zone — fills the space above the composer */}
-        <div className="absolute inset-0 p-5 flex flex-col" style={{ paddingBottom: '100px' }}>
+        <div className="absolute inset-0 p-5 flex flex-col" style={{ paddingBottom: '120px' }}>
           {mode === 'ask' && (
             <>
               {messages.length === 0 ? (
@@ -234,9 +234,9 @@ export default function Companion() {
           )}
         </div>
 
-        {/* save session — sits just above the composer */}
+        {/* save session — sits just above the composer, 1 box up from before */}
         {messages.length > 0 && (
-          <div className="absolute left-5 right-5 flex justify-end" style={{ top: '500px' }}>
+          <div className="absolute left-5 right-5 flex justify-end" style={{ top: '480px' }}>
             <button
               onClick={saveSession}
               disabled={saved}
@@ -247,8 +247,8 @@ export default function Companion() {
           </div>
         )}
 
-        {/* composer — pinned at row 27 (540px), within the 30-box canvas */}
-        <div className="absolute left-5 right-5" style={{ top: '540px' }}>
+        {/* composer — pinned at row 26 (520px), 1 box up from before */}
+        <div className="absolute left-5 right-5" style={{ top: '520px' }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
