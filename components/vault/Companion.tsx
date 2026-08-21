@@ -103,14 +103,7 @@ export default function Companion() {
   ];
 
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        backgroundImage:
-          'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-      }}
-    >
+    <div className="flex flex-col">
       {/* tabs — terminal-pane style */}
       <div className="flex gap-0 px-0">
         {tabs.map((t) => (
@@ -137,8 +130,15 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* work canvas — no internal scroll, grows naturally, dominates the initial view */}
-      <div className="min-h-[80vh] border border-gold/25 bg-black/15 p-5 flex flex-col">
+      {/* work canvas — dominates the screen, extra bottom padding so content never hides behind the fixed composer */}
+      <div
+        className="min-h-[80vh] border border-gold/25 bg-black/15 p-5 pb-32 flex flex-col"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+        }}
+      >
         {fileError && (
           <p className="font-mono text-xs text-red-400 mb-3">{fileError}</p>
         )}
@@ -231,48 +231,50 @@ export default function Companion() {
         )}
       </div>
 
-      {/* save session */}
-      {messages.length > 0 && (
-        <div className="pt-2 flex justify-end">
-          <button
-            onClick={saveSession}
-            disabled={saved}
-            className="font-mono text-[10px] text-white/60 border border-white/15 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+      {/* composer — fixed near the bottom of the viewport, always visible without scrolling */}
+      <div className="fixed left-0 right-0 bottom-[120px] px-4 z-20 flex justify-center pointer-events-none">
+        <div className="w-full max-w-2xl pointer-events-auto">
+          {messages.length > 0 && (
+            <div className="pb-2 flex justify-end">
+              <button
+                onClick={saveSession}
+                disabled={saved}
+                className="font-mono text-[10px] text-white/60 border border-white/15 bg-navy-deep px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+              >
+                {saved ? 'saved ✓' : 'save session'}
+              </button>
+            </div>
+          )}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              send(input);
+            }}
+            className="flex gap-2"
           >
-            {saved ? 'saved ✓' : 'save session'}
-          </button>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={
+                mode === 'notes'
+                  ? 'ask a question about the notes above…'
+                  : mode === 'file'
+                  ? 'ask a question about the attached file…'
+                  : 'ask a question…'
+              }
+              className="flex-1 px-4 py-2.5 bg-navy-deep border border-gold/30 font-mono text-xs text-white outline-none focus:border-gold placeholder:text-white/30 shadow-lg"
+            />
+            <button
+              type="submit"
+              disabled={loading || (!input.trim() && !attachedFile)}
+              className="bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0 shadow-lg"
+            >
+              Run
+            </button>
+          </form>
         </div>
-      )}
-
-      {/* composer — sits below the fold, reached only by scrolling */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          send(input);
-        }}
-        className="pt-3 flex gap-2"
-      >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            mode === 'notes'
-              ? 'ask a question about the notes above…'
-              : mode === 'file'
-              ? 'ask a question about the attached file…'
-              : 'ask a question…'
-          }
-          className="flex-1 px-4 py-2.5 bg-white/5 border border-gold/30 font-mono text-xs text-white outline-none focus:border-gold placeholder:text-white/30"
-        />
-        <button
-          type="submit"
-          disabled={loading || (!input.trim() && !attachedFile)}
-          className="bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50 flex-shrink-0"
-        >
-          Run
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
