@@ -104,7 +104,7 @@ export default function Companion() {
 
   return (
     <div
-      className="flex flex-col min-h-[78vh]"
+      className="flex flex-col"
       style={{
         backgroundImage:
           'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
@@ -137,8 +137,8 @@ export default function Companion() {
         className="hidden"
       />
 
-      {/* work canvas */}
-      <div className="flex-1 mx-0 border border-gold/25 bg-black/15 p-5 flex flex-col overflow-y-auto">
+      {/* work canvas — no internal scroll, grows naturally, dominates the initial view */}
+      <div className="min-h-[80vh] border border-gold/25 bg-black/15 p-5 flex flex-col">
         {fileError && (
           <p className="font-mono text-xs text-red-400 mb-3">{fileError}</p>
         )}
@@ -244,7 +244,7 @@ export default function Companion() {
         </div>
       )}
 
-      {/* composer */}
+      {/* composer — sits below the fold, reached only by scrolling */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
