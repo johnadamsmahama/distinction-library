@@ -11,10 +11,14 @@ export default function CompanionLayout({ children }: { children: React.ReactNod
         }}
       />
       <Constellation />
-      <div className="relative z-10 px-6 py-6">
-        <Link href="/ai-tools" className="font-condensed font-bold text-xs uppercase text-gold hover:underline">
-          ← AI Tools
-        </Link>
+      <div className="relative z-10 px-6 py-5">
+        <div className="flex items-baseline gap-3">
+          <Link href="/ai-tools" className="font-condensed font-bold text-xs uppercase text-gold hover:underline whitespace-nowrap">
+            ← AI Tools
+          </Link>
+          <span className="w-px h-4 bg-white/15" />
+          <h1 className="font-display font-bold text-lg text-white truncate">AI Study Companion</h1>
+        </div>
         <div className="mt-4">{children}</div>
       </div>
     </div>
