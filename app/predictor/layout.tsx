@@ -1,4 +1,5 @@
 import DashboardNav from '@/components/dashboard/DashboardNav';
+import BackToDashboard from '@/components/shared/BackToDashboard';
 import { createClient } from '@/lib/supabase/server';
 import { isStaffRole, isAdminRole } from '@/lib/auth-helpers';
 
@@ -7,7 +8,8 @@ import { isStaffRole, isAdminRole } from '@/lib/auth-helpers';
 // would add a padded off-white <main> wrapper and break the full-bleed
 // look). It only adds the same DashboardNav header, using the same
 // data-fetching pattern AppShell uses, so the hamburger/notifications menu
-// is present here too.
+// is present here too. BackToDashboard is added directly here since
+// Predictor is never the dashboard home page itself.
 export default async function PredictorLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const {
@@ -37,6 +39,9 @@ export default async function PredictorLayout({ children }: { children: React.Re
   return (
     <>
       <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
+      <div className="px-4 pt-3">
+        <BackToDashboard />
+      </div>
       {children}
     </>
   );
