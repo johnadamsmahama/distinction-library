@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { resolveGradeInput, calculateGPA } from '@/lib/gpa-calculations';
 import { LetterGrade } from '@/lib/gpa-constants';
+import NewSemesterModal from '@/components/gpa-calculator/NewSemesterModal';
 
 interface Course {
   id: string;
@@ -37,6 +38,7 @@ export default function GpaCalculatorPage() {
   const [courseOptions, setCourseOptions] = useState<Course[]>([]);
   const [studentLevel, setStudentLevel] = useState<string>('100');
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadSemesters = useCallback(async () => {
     const { data: profile } = await supabase.auth.getUser();
@@ -99,10 +101,7 @@ export default function GpaCalculatorPage() {
     return () => clearTimeout(timeout);
   }, [courseSearch, studentLevel, supabase]);
 
-  async function createSemester() {
-    const label = window.prompt('Semester label (e.g. "Level 100, Semester 1")');
-    if (!label) return;
-
+  async function handleCreateSemester(label: string): Promise<boolean> {
     const { data, error } = await supabase
       .from('gpa_semesters')
       .insert({ label, level: studentLevel })
@@ -112,7 +111,9 @@ export default function GpaCalculatorPage() {
     if (!error && data) {
       setSemesters((prev) => [...prev, data]);
       setActiveSemesterId(data.id);
+      return true;
     }
+    return false;
   }
 
   async function addCourse(course: Course | null, manualName?: string) {
@@ -187,116 +188,145 @@ export default function GpaCalculatorPage() {
         </p>
       </header>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        {semesters.map((s) => (
+      {semesters.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-g100 bg-off-white p-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold/10">
+            <span className="font-display text-xl text-gold">+</span>
+          </div>
+          <h2 className="font-condensed text-sm uppercase tracking-wide text-navy">
+            No semesters yet
+          </h2>
+          <p className="mx-auto mt-2 mb-5 max-w-xs font-body text-sm text-g600">
+            Add your first semester to start tracking results as they&apos;re
+            released — or test hypothetical grades before exams even begin.
+          </p>
           <button
-            key={s.id}
-            onClick={() => setActiveSemesterId(s.id)}
-            className={`px-3 py-1.5 rounded-full text-sm font-condensed border ${
-              activeSemesterId === s.id
-                ? 'bg-navy text-off-white border-navy'
-                : 'bg-off-white text-navy border-g100'
-            }`}
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-full bg-navy px-6 py-2.5 font-condensed text-sm font-semibold text-off-white"
           >
-            {s.label}
+            + Add Your First Semester
           </button>
-        ))}
-        <button
-          onClick={createSemester}
-          className="px-3 py-1.5 rounded-full text-sm font-condensed border border-dashed border-g500 text-g600"
-        >
-          + New Semester
-        </button>
-      </div>
-
-      {activeSemesterId && (
+        </div>
+      ) : (
         <>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border-t-4 border-gold bg-off-white p-4 shadow-sm">
-              <div className="font-condensed text-xs text-g600 uppercase">Released GPA</div>
-              <div className="font-display text-3xl text-navy">{releasedOnlyGpa.toFixed(2)}</div>
-              <div className="text-xs text-g500">
-                {rows.filter((r) => r.status === 'released').length} of {rows.length} results out
-              </div>
-            </div>
-            <div className="rounded-lg border-t-4 border-gold-light bg-off-white p-4 shadow-sm">
-              <div className="font-condensed text-xs text-g600 uppercase">Projected GPA</div>
-              <div className="font-display text-3xl text-navy">{currentGpa.toFixed(2)}</div>
-              <div className="text-xs text-g500">including hypothetical grades</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {rows.map((row) => (
-              <div key={row.id} className="flex items-center gap-2 bg-off-white rounded-md border border-g100 p-3">
-                <div className="flex-1 min-w-0">
-                  <div className="font-condensed text-sm text-navy truncate">
-                    {row.courses?.code ?? row.manual_course_name}
-                  </div>
-                  <div className="text-xs text-g500 truncate">{row.courses?.name}</div>
-                </div>
-
-                <select
-                  value={row.status}
-                  onChange={(e) =>
-                    updateRow(row.id, {
-                      status: e.target.value as 'pending' | 'released',
-                      is_hypothetical: e.target.value === 'pending',
-                    })
-                  }
-                  className="text-xs border border-g100 rounded px-2 py-1 text-g800 bg-off-white"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="released">Released</option>
-                </select>
-
-                <input
-                  type="text"
-                  defaultValue={row.grade ?? ''}
-                  onBlur={(e) => handleGradeInput(row, e.target.value)}
-                  placeholder="A or 80"
-                  className="w-20 text-sm border border-g100 rounded px-2 py-1 text-center text-g800"
-                />
-
-                <button onClick={() => removeRow(row.id)} className="text-g500 hover:text-red-500 text-sm px-1">
-                  ✕
-                </button>
-              </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {semesters.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSemesterId(s.id)}
+                className={`px-3 py-1.5 rounded-full text-sm font-condensed border ${
+                  activeSemesterId === s.id
+                    ? 'bg-navy text-off-white border-navy'
+                    : 'bg-off-white text-navy border-g100'
+                }`}
+              >
+                {s.label}
+              </button>
             ))}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-3 py-1.5 rounded-full text-sm font-condensed border border-dashed border-g500 text-g600"
+            >
+              + New Semester
+            </button>
           </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              value={courseSearch}
-              onChange={(e) => setCourseSearch(e.target.value)}
-              placeholder="Search course code or name…"
-              className="w-full border border-g100 rounded-md px-3 py-2 text-sm text-g800"
-            />
-            {courseOptions.length > 0 && (
-              <div className="absolute z-10 w-full bg-off-white border border-g100 rounded-md shadow-lg mt-1 max-h-56 overflow-y-auto">
-                {courseOptions.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => addCourse(c)}
-                    className="w-full text-left px-3 py-2 text-sm text-g800 hover:bg-g100 border-b border-g100 last:border-0"
-                  >
-                    <span className="font-condensed">{c.code}</span> — {c.name}
-                  </button>
+          {activeSemesterId && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg border-t-4 border-gold bg-off-white p-4 shadow-sm">
+                  <div className="font-condensed text-xs text-g600 uppercase">Released GPA</div>
+                  <div className="font-display text-3xl text-navy">{releasedOnlyGpa.toFixed(2)}</div>
+                  <div className="text-xs text-g500">
+                    {rows.filter((r) => r.status === 'released').length} of {rows.length} results out
+                  </div>
+                </div>
+                <div className="rounded-lg border-t-4 border-gold-light bg-off-white p-4 shadow-sm">
+                  <div className="font-condensed text-xs text-g600 uppercase">Projected GPA</div>
+                  <div className="font-display text-3xl text-navy">{currentGpa.toFixed(2)}</div>
+                  <div className="text-xs text-g500">including hypothetical grades</div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {rows.map((row) => (
+                  <div key={row.id} className="flex items-center gap-2 bg-off-white rounded-md border border-g100 p-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-condensed text-sm text-navy truncate">
+                        {row.courses?.code ?? row.manual_course_name}
+                      </div>
+                      <div className="text-xs text-g500 truncate">{row.courses?.name}</div>
+                    </div>
+
+                    <select
+                      value={row.status}
+                      onChange={(e) =>
+                        updateRow(row.id, {
+                          status: e.target.value as 'pending' | 'released',
+                          is_hypothetical: e.target.value === 'pending',
+                        })
+                      }
+                      className="text-xs border border-g100 rounded px-2 py-1 text-g800 bg-off-white"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="released">Released</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      defaultValue={row.grade ?? ''}
+                      onBlur={(e) => handleGradeInput(row, e.target.value)}
+                      placeholder="A or 80"
+                      className="w-20 text-sm border border-g100 rounded px-2 py-1 text-center text-g800"
+                    />
+
+                    <button onClick={() => removeRow(row.id)} className="text-g500 hover:text-red-500 text-sm px-1">
+                      ✕
+                    </button>
+                  </div>
                 ))}
               </div>
-            )}
-            {courseSearch.trim().length >= 2 && courseOptions.length === 0 && (
-              <button
-                onClick={() => addCourse(null, courseSearch.trim())}
-                className="mt-1 text-xs text-g600 underline"
-              >
-                Not in catalog — add "{courseSearch.trim()}" manually
-              </button>
-            )}
-          </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={courseSearch}
+                  onChange={(e) => setCourseSearch(e.target.value)}
+                  placeholder="Search course code or name…"
+                  className="w-full border border-g100 rounded-md px-3 py-2 text-sm text-g800"
+                />
+                {courseOptions.length > 0 && (
+                  <div className="absolute z-10 w-full bg-off-white border border-g100 rounded-md shadow-lg mt-1 max-h-56 overflow-y-auto">
+                    {courseOptions.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => addCourse(c)}
+                        className="w-full text-left px-3 py-2 text-sm text-g800 hover:bg-g100 border-b border-g100 last:border-0"
+                      >
+                        <span className="font-condensed">{c.code}</span> — {c.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {courseSearch.trim().length >= 2 && courseOptions.length === 0 && (
+                  <button
+                    onClick={() => addCourse(null, courseSearch.trim())}
+                    className="mt-1 text-xs text-g600 underline"
+                  >
+                    Not in catalog — add &quot;{courseSearch.trim()}&quot; manually
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
+
+      <NewSemesterModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={handleCreateSemester}
+      />
     </div>
   );
 }
