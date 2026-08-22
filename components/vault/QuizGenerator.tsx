@@ -175,90 +175,100 @@ export default function QuizGenerator() {
             className="hidden"
           />
 
-          {/* work canvas */}
+          {/* work canvas — fixed at 30 grid boxes (600px). Content fills rows 1-24, topic input at rows 26-27,
+              row 28 left empty as a buffer, count buttons + Run at rows 29-30 */}
           <div
-            className="border border-gold/25 bg-black/15 p-5 flex flex-col gap-4"
+            className="relative border border-gold/25 bg-black/15"
             style={{
+              height: '600px',
               backgroundImage:
                 'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
               backgroundSize: '20px 20px',
             }}
           >
             {fileError && (
-              <p className="font-mono text-xs text-red-400">{fileError}</p>
+              <p className="absolute top-3 left-5 right-5 font-mono text-xs text-red-400">{fileError}</p>
             )}
 
-            {mode === 'notes' && (
-              <div className="flex flex-col">
-                <div className="font-mono text-[10.5px] uppercase tracking-wide text-white/40 mb-2">
-                  your notes
-                </div>
-                <textarea
-                  value={notesContext}
-                  onChange={(e) => setNotesContext(e.target.value)}
-                  placeholder="paste your notes or past paper text here…"
-                  className="min-h-[140px] w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
-                />
-              </div>
-            )}
-
-            {mode === 'file' && (
-              <div className="flex flex-col">
-                {!attachedFile ? (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="min-h-[140px] flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
-                  >
-                    <div className="font-mono text-gold text-lg mb-2">↑</div>
-                    <p className="font-mono text-[11px] text-white/50 mb-2">
-                      tap to attach a file, or drop it here
-                    </p>
-                    <div className="flex gap-1.5 flex-wrap justify-center">
-                      {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
-                        <span key={t} className="font-mono text-[9px] px-2 py-1 bg-black/30 border border-white/10 text-white/50">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2.5 bg-black/25 border border-white/10 px-3 py-3">
-                    <div className="w-9 h-9 bg-gold/15 text-gold flex items-center justify-center font-mono text-[9px] flex-shrink-0">
-                      {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-xs text-white truncate">{attachedFile.name}</div>
-                      <div className="font-mono text-[10px] text-white/40">attached</div>
-                    </div>
-                    <button onClick={removeFile} className="text-white/40 hover:text-white text-sm px-1" aria-label="Remove file">
-                      ✕
-                    </button>
+            {/* content zone — fills rows 1-24 (up to 480px) */}
+            <div className="absolute p-5" style={{ top: 0, left: 0, right: 0, height: '480px' }}>
+              {mode === 'notes' && (
+                <div className="h-full flex flex-col">
+                  <div className="font-mono text-[10.5px] uppercase tracking-wide text-white/40 mb-2">
+                    your notes
                   </div>
-                )}
-              </div>
+                  <textarea
+                    value={notesContext}
+                    onChange={(e) => setNotesContext(e.target.value)}
+                    placeholder="paste your notes or past paper text here…"
+                    className="flex-1 w-full px-3.5 py-3 bg-black/25 border border-white/10 font-mono text-xs leading-relaxed text-white outline-none focus:border-gold/50 resize-none placeholder:text-white/30"
+                  />
+                </div>
+              )}
+
+              {mode === 'file' && (
+                <div className="h-full flex flex-col">
+                  {!attachedFile ? (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 flex flex-col items-center justify-center text-center border border-dashed border-gold/40 bg-gold/[0.04] px-4 py-6 hover:bg-gold/[0.08] transition-colors"
+                    >
+                      <div className="font-mono text-gold text-lg mb-2">↑</div>
+                      <p className="font-mono text-[11px] text-white/50 mb-2">
+                        tap to attach a file, or drop it here
+                      </p>
+                      <div className="flex gap-1.5 flex-wrap justify-center">
+                        {['PDF', 'DOCX', 'PPTX', 'PHOTO'].map((t) => (
+                          <span key={t} className="font-mono text-[9px] px-2 py-1 bg-black/30 border border-white/10 text-white/50">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2.5 bg-black/25 border border-white/10 px-3 py-3">
+                      <div className="w-9 h-9 bg-gold/15 text-gold flex items-center justify-center font-mono text-[9px] flex-shrink-0">
+                        {attachedFile.name.split('.').pop()?.toUpperCase().slice(0, 4)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-xs text-white truncate">{attachedFile.name}</div>
+                        <div className="font-mono text-[10px] text-white/40">attached</div>
+                      </div>
+                      <button onClick={removeFile} className="text-white/40 hover:text-white text-sm px-1" aria-label="Remove file">
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {genError && (
+              <p className="absolute left-5 right-5 font-mono text-xs text-red-400" style={{ top: '480px' }}>
+                ⚠ {genError}
+              </p>
             )}
 
-            {/* optional focus/topic hint — applies to either tab */}
+            {/* topic input — rows 26-27 (500-540px) */}
             <input
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="optional: focus the quiz on a topic, e.g. 'chapter 3 only'"
-              className="w-full px-3.5 py-2.5 bg-black/25 border border-white/10 font-mono text-xs text-white outline-none focus:border-gold/50 placeholder:text-white/30"
+              className="absolute left-5 right-5 px-3.5 py-2.5 bg-black/25 border border-white/10 font-mono text-xs text-white outline-none focus:border-gold/50 placeholder:text-white/30"
+              style={{ top: '500px', height: '40px' }}
             />
 
-            {genError && (
-              <p className="font-mono text-xs text-red-400">⚠ {genError}</p>
-            )}
+            {/* row 28 intentionally left empty as a buffer */}
 
-            {/* footer: question count + generate */}
-            <div className="flex items-center gap-2 pt-1">
-              <div className="flex gap-1.5">
+            {/* count buttons + Run — rows 29-30 (560-600px) */}
+            <div className="absolute left-5 right-5 flex items-center gap-2" style={{ top: '560px', height: '40px' }}>
+              <div className="flex gap-1.5 h-full">
                 {QUESTION_COUNTS.map((n) => (
                   <button
                     key={n}
                     onClick={() => setNumQuestions(n)}
-                    className={`font-mono text-xs px-3 py-2.5 border transition-colors ${
+                    className={`font-mono text-sm px-4 h-full border transition-colors ${
                       numQuestions === n
                         ? 'bg-gold/15 text-gold border-gold/40'
                         : 'border-white/15 text-white/50 hover:border-gold/30'
@@ -271,7 +281,7 @@ export default function QuizGenerator() {
               <button
                 onClick={generateQuiz}
                 disabled={!canGenerate}
-                className="flex-1 bg-gold text-navy-deep font-condensed font-bold text-xs uppercase px-5 py-2.5 hover:bg-gold-light transition-colors disabled:opacity-50"
+                className="flex-1 h-full bg-gold text-navy-deep font-condensed font-bold text-sm uppercase hover:bg-gold-light transition-colors disabled:opacity-50"
               >
                 {loading ? 'generating…' : 'Run'}
               </button>
