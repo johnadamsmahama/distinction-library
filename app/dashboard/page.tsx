@@ -7,6 +7,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity';
 import MyRecentViews from '@/components/dashboard/MyRecentViews';
 import StudyProgress from '@/components/dashboard/StudyProgress';
 import { QuickActions } from '@/components/dashboard/VaultAndActions';
+import { GpaSummary } from '@/components/dashboard/GpaSummary';
 import InstallPrompt from '@/components/InstallPrompt';
 
 export default async function DashboardPage() {
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
         <StudyProgress items={data.studyProgress} />
         <MyRecentViews items={data.myRecentViews as any} />
         <RecentActivity papers={data.recentPapers as any} materials={data.recentMaterials as any} />
+        <GpaSummary summary={data.gpaSummary} />
         <QuickActions vaultSummary={data.vaultSummary} />
       </div>
     </div>
