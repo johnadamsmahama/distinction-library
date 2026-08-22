@@ -183,6 +183,21 @@ const ACTIONS: Action[] = [
     grain: true,
   },
   {
+    href: '/dashboard/gpa-calculator',
+    label: 'GPA Calculator',
+    desc: 'Track your GPA as results release, and test hypothetical grades for courses still pending.',
+    path: 'M3 3v18h18M8 17V10M13 17V6M18 17v-4',
+    background: 'radial-gradient(140% 140% at 15% 0%, #4F8271, #0F2244 65%)',
+    aurora:
+      'radial-gradient(40% 45% at 85% 10%, rgba(201,228,216,.45), transparent 70%), radial-gradient(45% 50% at 15% 90%, rgba(201,160,44,.3), transparent 70%)',
+    textClass: 'text-white',
+    subClass: 'text-white/80',
+    iconBgClass: 'bg-white/[.14]',
+    iconColorClass: 'text-mint-light',
+    arrowColorClass: 'text-mint-light',
+    grain: true,
+  },
+  {
     href: '/essentials',
     label: 'Essentials',
     desc: 'Mentors, jobs & opportunities, achievements',
