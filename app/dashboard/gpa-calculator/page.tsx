@@ -102,9 +102,12 @@ export default function GpaCalculatorPage() {
   }, [courseSearch, studentLevel, supabase]);
 
   async function handleCreateSemester(label: string): Promise<boolean> {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) return false;
+
     const { data, error } = await supabase
       .from('gpa_semesters')
-      .insert({ label, level: studentLevel })
+      .insert({ label, level: studentLevel, student_id: userData.user.id })
       .select()
       .single();
 
