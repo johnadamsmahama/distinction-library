@@ -1,5 +1,6 @@
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import InactivityLogout from '@/components/auth/InactivityLogout';
+import HomeButtonGate from '@/components/shared/HomeButtonGate';
 import { createClient } from '@/lib/supabase/server';
 import { isStaffRole, isAdminRole } from '@/lib/auth-helpers';
 
@@ -35,7 +36,10 @@ export default async function AppShell({ children }: { children: React.ReactNode
     <div className="min-h-screen bg-off-white">
       <InactivityLogout />
       <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
-      <main className="max-w-content mx-auto px-5 sm:px-7 py-8">{children}</main>
+      <main className="max-w-content mx-auto px-5 sm:px-7 py-8">
+        <HomeButtonGate />
+        {children}
+      </main>
     </div>
   );
 }
