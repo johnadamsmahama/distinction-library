@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { resolveGradeInput, calculateGPA } from '@/lib/gpa-calculations';
 import { LetterGrade } from '@/lib/gpa-constants';
 
@@ -28,7 +28,7 @@ interface Semester {
 }
 
 export default function GpaCalculatorPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [activeSemesterId, setActiveSemesterId] = useState<string | null>(null);
