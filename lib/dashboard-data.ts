@@ -1,4 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { calculateGPA } from './gpa-calculations';
+import { LetterGrade } from './gpa-constants';
+import type { GpaSummaryData } from '@/components/dashboard/GpaSummary';
 
 export async function getDashboardData(supabase: SupabaseClient, userId: string) {
   const [
@@ -11,6 +14,7 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
     notificationsRes,
     unreadCountRes,
     myViewsRes,
+    gpaSemesterRes,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
 
@@ -59,6 +63,13 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
       .eq('user_id', userId)
       .order('viewed_at', { ascending: false })
       .limit(200),
+
+    supabase
+      .from('gpa_semesters')
+      .select('id, label')
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1),
   ]);
 
   // Dedupe by resource so re-opening the same paper twice doesn't create two
@@ -114,6 +125,38 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
 
   const vaultItems = vaultRes.data ?? [];
 
+  // GPA summary: pull the courses for the student's most recently created
+  // semester (if any) and compute released-vs-projected GPA for the card.
+  const activeSemester = gpaSemesterRes.data?.[0] ?? null;
+  let gpaSummary: GpaSummaryData = {
+    hasSemesters: false,
+    activeSemesterLabel: null,
+    releasedGpa: 0,
+    projectedGpa: 0,
+    releasedCount: 0,
+    totalCount: 0,
+  };
+
+  if (activeSemester) {
+    const { data: gpaCourses } = await supabase
+      .from('gpa_semester_courses')
+      .select('status, grade')
+      .eq('semester_id', activeSemester.id);
+
+    const rows = (gpaCourses ?? []) as { status: 'pending' | 'released'; grade: LetterGrade | null }[];
+
+    gpaSummary = {
+      hasSemesters: true,
+      activeSemesterLabel: activeSemester.label,
+      releasedGpa: calculateGPA(
+        rows.filter((r) => r.status === 'released').map((r) => ({ grade: r.grade }))
+      ),
+      projectedGpa: calculateGPA(rows.map((r) => ({ grade: r.grade }))),
+      releasedCount: rows.filter((r) => r.status === 'released').length,
+      totalCount: rows.length,
+    };
+  }
+
   return {
     profile: profileRes.data,
     bookmarks: (bookmarksRes.data ?? []).map((b: any) => b.courses).filter(Boolean),
@@ -130,5 +173,6 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
     unreadCount: unreadCountRes.count ?? 0,
     myRecentViews,
     studyProgress,
+    gpaSummary,
   };
 }
