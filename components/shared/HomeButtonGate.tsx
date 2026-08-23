@@ -12,6 +12,15 @@ const SECTIONS: Record<string, { label: string; href: string }> = {
   essentials: { label: 'Essentials', href: '/essentials' },
   papers: { label: 'Library', href: '/papers' },
   vault: { label: 'Study Vault', href: '/vault' },
+  'ai-tools': { label: 'AI Tools', href: '/ai-tools' },
+};
+
+// AI Tools sub-pages go one level deeper than the standard two-level
+// breadcrumb (Home / AI Tools / [Tool Name]).
+const AI_TOOLS: Record<string, string> = {
+  companion: 'Study Companion',
+  'quiz-generator': 'Quiz Generator',
+  'presentation-kit': 'Presentation Kit',
 };
 
 // Career Resources sub-tools go one level deeper than the standard
@@ -41,6 +50,9 @@ export default function HomeButtonGate() {
 
   const isCareerTool = topSegment === 'essentials' && segments[1] === 'career' && segments.length === 3;
   const careerToolLabel = isCareerTool ? CAREER_TOOLS[segments[2]] : undefined;
+
+  const isAiTool = topSegment === 'ai-tools' && segments.length === 2;
+  const aiToolLabel = isAiTool ? AI_TOOLS[segments[1]] : undefined;
 
   return (
     <div className="relative mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
@@ -79,6 +91,13 @@ export default function HomeButtonGate() {
             </Link>
             <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
             <span className="text-gold-light flex-shrink-0">{careerToolLabel}</span>
+          </>
+        )}
+
+        {isAiTool && aiToolLabel && (
+          <>
+            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
+            <span className="text-gold flex-shrink-0">{aiToolLabel}</span>
           </>
         )}
       </div>
