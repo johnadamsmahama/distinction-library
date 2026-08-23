@@ -69,7 +69,7 @@ export default async function PredictorPage({ params }: PageProps) {
 
         {/* Empty state — no prediction yet */}
         {items.length === 0 && (
-          <div className="mt-12 rounded-lg border border-white/10 bg-white/5 p-8 text-center">
+          <div className="mt-12 rounded-none border border-white/10 bg-white/5 p-8 text-center">
             <p className="font-condensed text-lg text-gold">
               No prediction yet for this course
             </p>
@@ -93,7 +93,7 @@ export default async function PredictorPage({ params }: PageProps) {
               {items.map((item, i) => (
                 <li
                   key={i}
-                  className="rounded-lg border border-white/10 bg-white/5 p-5"
+                  className="rounded-none border border-white/10 bg-white/5 p-5"
                 >
                   <div className="flex items-start gap-4">
                     <span className="font-display shrink-0 text-2xl text-gold/70">
@@ -109,9 +109,9 @@ export default async function PredictorPage({ params }: PageProps) {
 
                       {/* Confidence bar */}
                       <div className="mt-3 flex items-center gap-2">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-none bg-white/10">
                           <div
-                            className="h-full rounded-full bg-gold"
+                            className="h-full rounded-none bg-gold"
                             style={{
                               width: `${Math.round(
                                 Math.max(0, Math.min(1, item.confidence)) * 100
