@@ -6,7 +6,7 @@ export function VaultSummary({
   summary: { quizzes: number; companionSessions: number; summaries: number; total: number };
 }) {
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
+    <div className="bg-white border border-g100 rounded-none p-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="font-display font-bold text-lg text-navy">Your Study Vault</h2>
         <Link href="/vault" className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:underline">
@@ -242,7 +242,7 @@ export function QuickActions({
           <Link
             key={a.href}
             href={a.href}
-            className={`group relative isolate overflow-hidden rounded-2xl p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(13,43,94,.20)] ${
+            className={`group relative isolate overflow-hidden rounded-none p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(13,43,94,.20)] ${
               a.borderColorClass ? a.borderColorClass : a.border ? 'border-[1.5px] border-navy' : 'border border-white/[.08]'
             }`}
             style={{ background: a.background }}
@@ -273,7 +273,7 @@ export function QuickActions({
             )}
 
             {a.badge && (
-              <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-white/20 text-white px-[9px] py-[4px] rounded-full">
+              <span className="absolute top-[18px] right-[18px] z-10 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] bg-white/20 text-white px-[9px] py-[4px] rounded-none">
                 {a.badge}
               </span>
             )}
@@ -287,7 +287,7 @@ export function QuickActions({
             </span>
 
             <div
-              className={`relative z-10 w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-[4deg] ${a.iconBgClass}`}
+              className={`relative z-10 w-11 h-11 rounded-none flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-[4deg] ${a.iconBgClass}`}
             >
               <svg viewBox="0 0 24 24" className={`w-[22px] h-[22px] stroke-current fill-none ${a.iconColorClass}`} strokeWidth={1.8}>
                 <path d={a.path} />
@@ -304,7 +304,7 @@ export function QuickActions({
         {/* Study Vault — now the 9th tile in the same grid, using real summary data */}
         <Link
           href="/vault"
-          className="group relative isolate overflow-hidden rounded-2xl p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(201,160,44,.25)] border border-[#E6D6A8]"
+          className="group relative isolate overflow-hidden rounded-none p-[22px] min-h-[190px] flex flex-col justify-between gap-4 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(201,160,44,.25)] border border-[#E6D6A8]"
           style={{ background: 'linear-gradient(150deg, #F3E7C9 0%, #F0D9A0 100%)' }}
         >
           <span
@@ -327,7 +327,7 @@ export function QuickActions({
             </svg>
           </span>
 
-          <div className="relative z-10 w-11 h-11 rounded-xl flex items-center justify-center bg-navy-deep/[.85] transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-[4deg]">
+          <div className="relative z-10 w-11 h-11 rounded-none flex items-center justify-center bg-navy-deep/[.85] transition-transform duration-300 group-hover:scale-[1.08] group-hover:-rotate-[4deg]">
             <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] stroke-current fill-none text-gold-light" strokeWidth={1.8}>
               <path d="M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4" />
             </svg>
