@@ -30,7 +30,7 @@ export default function EventsView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-navy border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-none border-2 border-navy border-t-transparent" />
       </div>
     )
   }
@@ -49,12 +49,12 @@ export default function EventsView() {
           </p>
         </div>
 
-        <div className="flex rounded-xl bg-white border border-g100 p-1 self-start">
+        <div className="flex rounded-none bg-white border border-g100 p-1 self-start">
           {(['list', 'calendar'] as ViewMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setView(mode)}
-              className={`rounded-lg px-4 py-1.5 font-body text-sm font-semibold capitalize transition-colors ${
+              className={`rounded-none px-4 py-1.5 font-body text-sm font-semibold capitalize transition-colors ${
                 view === mode ? 'bg-navy text-[#E4C878]' : 'text-g600 hover:text-navy'
               }`}
             >
@@ -65,7 +65,7 @@ export default function EventsView() {
       </div>
 
       {events.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-g100 bg-[#EAF3ED] py-16 text-center">
+        <div className="rounded-none border border-dashed border-g100 bg-[#EAF3ED] py-16 text-center">
           <p className="font-body text-g600">No events scheduled yet</p>
           <p className="mt-1 font-body text-sm text-g600/70">
             Check back soon — new sessions are added regularly.
@@ -94,24 +94,24 @@ function EventRow({ event }: { event: DLEvent }) {
 
   return (
     <div className="relative flex gap-4">
-      <div className="z-10 flex w-14 flex-shrink-0 flex-col items-center justify-center rounded-xl bg-navy border-[1.5px] border-gold py-2 shadow-sm">
+      <div className="z-10 flex w-14 flex-shrink-0 flex-col items-center justify-center rounded-none bg-navy border-[1.5px] border-gold py-2 shadow-sm">
         <span className="font-body text-[10px] font-bold uppercase tracking-wide text-[#E4C878] opacity-85">
           {start.toLocaleDateString('en-GB', { month: 'short' })}
         </span>
         <span className="font-display text-lg font-semibold text-white">{start.getDate()}</span>
       </div>
 
-      <div className="min-w-0 flex-1 bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5">
+      <div className="min-w-0 flex-1 bg-white border border-g100 border-l-[3px] border-l-navy rounded-none p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           {event.cover_image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={event.cover_image_url}
               alt=""
-              className="w-9 h-9 rounded-[9px] object-cover flex-shrink-0"
+              className="w-9 h-9 rounded-none object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-9 h-9 rounded-[9px] bg-navy flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-none bg-navy flex items-center justify-center flex-shrink-0">
               <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#E4C878]" fill="none" strokeWidth={1.8}>
                 <rect x="3" y="5" width="18" height="16" rx="2" />
                 <path d="M16 3v4M8 3v4M3 10h18" />
@@ -119,7 +119,7 @@ function EventRow({ event }: { event: DLEvent }) {
             </div>
           )}
           <span
-            className="inline-block rounded-full px-2.5 py-0.5 font-body text-[10.5px] font-bold"
+            className="inline-block rounded-none px-2.5 py-0.5 font-body text-[10.5px] font-bold"
             style={{ backgroundColor: `${color}22`, color }}
           >
             {EVENT_TYPE_LABELS[event.event_type]}
@@ -173,7 +173,7 @@ function EventGroup({ events, showRail = true }: { events: DLEvent[]; showRail?:
 
 function ListView({ upcoming, past }: { upcoming: DLEvent[]; past: DLEvent[] }) {
   return (
-    <div className="relative rounded-3xl bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] p-4 sm:p-6 space-y-8">
+    <div className="relative rounded-none bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] p-4 sm:p-6 space-y-8">
       <div>
         <h2 className="mb-4 font-body text-[11px] font-bold uppercase tracking-[0.12em] text-gold">Upcoming</h2>
         {upcoming.length === 0 ? (
@@ -232,11 +232,11 @@ function CalendarView({
   const selectedDayEvents = selectedDate ? eventsByDay[selectedDate.getDate()] || [] : []
 
   return (
-    <div className="rounded-3xl bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] p-4 sm:p-6">
+    <div className="rounded-none bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] p-4 sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <button
           onClick={() => setMonthCursor(new Date(year, month - 1, 1))}
-          className="rounded-lg px-3 py-1 text-navy hover:bg-white/60 font-body"
+          className="rounded-none px-3 py-1 text-navy hover:bg-white/60 font-body"
         >
           ←
         </button>
@@ -245,7 +245,7 @@ function CalendarView({
         </h3>
         <button
           onClick={() => setMonthCursor(new Date(year, month + 1, 1))}
-          className="rounded-lg px-3 py-1 text-navy hover:bg-white/60 font-body"
+          className="rounded-none px-3 py-1 text-navy hover:bg-white/60 font-body"
         >
           →
         </button>
@@ -266,7 +266,7 @@ function CalendarView({
             <button
               key={i}
               onClick={() => setSelectedDate(new Date(year, month, day))}
-              className={`relative aspect-square rounded-lg font-body text-sm transition-colors ${
+              className={`relative aspect-square rounded-none font-body text-sm transition-colors ${
                 isSelected
                   ? 'bg-navy text-white'
                   : hasEvents
@@ -276,7 +276,7 @@ function CalendarView({
             >
               {day}
               {hasEvents && !isSelected && (
-                <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gold" />
+                <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-none bg-gold" />
               )}
             </button>
           )
