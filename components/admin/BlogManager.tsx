@@ -297,7 +297,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <form onSubmit={createPost} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
+      <form onSubmit={createPost} className="bg-white border border-g100 rounded-none p-6 space-y-4 h-fit">
         <h2 className="font-display font-bold text-lg text-navy mb-1">New post</h2>
 
         <div>
@@ -330,12 +330,12 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
             type="file"
             accept={IMAGE_ACCEPT}
             onChange={handleCoverChange}
-            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-none file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
           />
           <p className="font-body text-xs text-g600 mt-1">JPEG, PNG, WebP, or GIF.</p>
           {coverPreviewUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverPreviewUrl} alt="" className="w-full h-32 object-cover rounded-lg mt-2" />
+            <img src={coverPreviewUrl} alt="" className="w-full h-32 object-cover rounded-none mt-2" />
           )}
         </div>
 
@@ -347,14 +347,14 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
                 type="button"
                 onClick={handleInsertImageClick}
                 disabled={insertingImage}
-                className="font-condensed font-bold text-[11px] uppercase px-2.5 py-1 rounded-lg border border-g100 hover:border-gold transition-colors disabled:opacity-60"
+                className="font-condensed font-bold text-[11px] uppercase px-2.5 py-1 rounded-none border border-g100 hover:border-gold transition-colors disabled:opacity-60"
               >
                 {insertingImage ? 'Uploading…' : 'Insert image'}
               </button>
               <button
                 type="button"
                 onClick={handleInsertLink}
-                className="font-condensed font-bold text-[11px] uppercase px-2.5 py-1 rounded-lg border border-g100 hover:border-gold transition-colors"
+                className="font-condensed font-bold text-[11px] uppercase px-2.5 py-1 rounded-none border border-g100 hover:border-gold transition-colors"
               >
                 Insert link
               </button>
@@ -387,7 +387,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
             accept={ATTACHMENT_ACCEPT}
             multiple
             onChange={handleAttachmentChange}
-            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-none file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
           />
           <p className="font-body text-xs text-g600 mt-1">PDF, Word, or PowerPoint — up to {MAX_ATTACHMENT_MB}MB each.</p>
           {attachmentWarning && <p className="font-body text-xs text-red-500 mt-1">{attachmentWarning}</p>}
@@ -396,7 +396,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
               {attachmentFiles.map((f, i) => (
                 <li
                   key={`${f.name}-${i}`}
-                  className="flex items-center justify-between gap-2 bg-off-white rounded-lg px-3 py-1.5"
+                  className="flex items-center justify-between gap-2 bg-off-white rounded-none px-3 py-1.5"
                 >
                   <span className="font-body text-xs text-g800 truncate">
                     {f.name} <span className="text-g600">({formatBytes(f.size)})</span>
@@ -404,7 +404,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
                   <button
                     type="button"
                     onClick={() => removeAttachment(i)}
-                    className="w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-5 h-5 flex-shrink-0 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
                     aria-label={`Remove ${f.name}`}
                   >
                     ✕
@@ -419,7 +419,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Saving…' : 'Save as draft'}
         </button>
@@ -432,7 +432,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
         <h2 className="font-display font-bold text-lg text-navy mb-4">All posts ({posts.length})</h2>
         <div className="space-y-2">
           {posts.map((p) => (
-            <div key={p.id} className="bg-white border border-g100 rounded-lg px-4 py-3">
+            <div key={p.id} className="bg-white border border-g100 rounded-none px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-condensed font-semibold text-sm text-g800 truncate">{p.title}</div>
@@ -455,7 +455,7 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
                   <select
                     value={p.category ?? ''}
                     onChange={(e) => changeCategory(p, e.target.value as Category)}
-                    className="font-condensed text-xs px-2 py-1.5 rounded-lg border border-g100 outline-none focus:border-gold transition-colors"
+                    className="font-condensed text-xs px-2 py-1.5 rounded-none border border-g100 outline-none focus:border-gold transition-colors"
                   >
                     <option value="" disabled>
                       No category
@@ -468,13 +468,13 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
                   </select>
                   <button
                     onClick={() => togglePublish(p)}
-                    className="font-condensed font-bold text-xs uppercase px-3 py-1.5 rounded-lg border border-g100 hover:border-gold transition-colors"
+                    className="font-condensed font-bold text-xs uppercase px-3 py-1.5 rounded-none border border-g100 hover:border-gold transition-colors"
                   >
                     {p.published ? 'Unpublish' : 'Publish'}
                   </button>
                   <button
                     onClick={() => deletePost(p.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
                     aria-label="Delete"
                   >
                     ✕
@@ -492,4 +492,4 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
