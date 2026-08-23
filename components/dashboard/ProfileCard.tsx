@@ -40,7 +40,7 @@ export default function ProfileCard({
       {/* wax seal */}
       {contributorBadge && (
         <div
-          className={`absolute -top-4 right-5 w-[54px] h-[54px] rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(201,160,44,0.9),0_6px_14px_rgba(0,0,0,0.15)] flex items-center justify-center -rotate-[9deg] ${
+          className={`absolute -top-4 right-5 w-[54px] h-[54px] rounded-none border-2 border-white shadow-[0_0_0_1px_rgba(201,160,44,0.9),0_6px_14px_rgba(0,0,0,0.15)] flex items-center justify-center -rotate-[9deg] ${
             SEAL_STYLES[contributorBadge] ?? SEAL_STYLES.gold
           }`}
         >
