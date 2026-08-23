@@ -30,7 +30,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
   };
 
   return (
-    <div className="relative overflow-hidden flex flex-col min-h-[280px] rounded-2xl border border-[#D8D3C6] bg-[#EDEAE2]">
+    <div className="relative overflow-hidden flex flex-col min-h-[280px] rounded-none border border-[#D8D3C6] bg-[#EDEAE2]">
       <div
         className="absolute inset-0 pointer-events-none opacity-[.16]"
         style={{ backgroundImage: GRAIN, mixBlendMode: 'multiply' }}
@@ -58,7 +58,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
             </p>
             <Link
               href="/papers"
-              className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg hover:bg-gold-light transition-colors"
+              className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:bg-gold-light transition-colors"
             >
               Browse courses
             </Link>
@@ -68,7 +68,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
             {list.map((c) => (
               <div
                 key={c.course_id}
-                className="flex items-center justify-between bg-white border border-[#D8D3C6] border-l-4 border-l-[#A45A2A] rounded-xl px-4 py-3"
+                className="flex items-center justify-between bg-white border border-[#D8D3C6] border-l-4 border-l-[#A45A2A] rounded-none px-4 py-3"
               >
                 <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
                   <div className="font-condensed font-bold text-sm text-navy truncate">
@@ -81,7 +81,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
                 <button
                   onClick={() => removeBookmark(c.course_id)}
                   aria-label={`Remove bookmark for ${c.code}`}
-                  className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
                   ✕
                 </button>
