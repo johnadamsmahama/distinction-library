@@ -8,7 +8,7 @@ export default function BuyDataLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-6 py-16">
+    <div className="px-6 pt-6 pb-16">
       <BackToDashboard />
       {children}
     </div>
