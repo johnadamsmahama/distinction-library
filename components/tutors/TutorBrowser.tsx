@@ -75,7 +75,7 @@ export default function TutorBrowser({
           placeholder="Search by name, course, or keyword…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+          className="w-full pl-11 pr-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
         />
       </div>
 
@@ -107,7 +107,7 @@ export default function TutorBrowser({
       </div>
 
       {visible.length === 0 ? (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-10 text-center">
+        <div className="bg-amber-50 border border-amber-100 rounded-none p-10 text-center">
           <p className="font-body text-sm text-g600">
             {tutors.length === 0
               ? 'No peer tutors are listed yet — check back soon.'
@@ -119,7 +119,7 @@ export default function TutorBrowser({
         // tear-lines between entries, rather than separately boxed cards.
         // This only reads correctly as a single column, so unlike the old
         // grid this stays one-wide at every breakpoint.
-        <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-100 rounded-[18px] shadow-inner overflow-hidden">
+        <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-100 rounded-none shadow-inner overflow-hidden">
           {visible.map((t, i) => {
             const isRevealed = revealed.has(t.id);
             const primaryCourse = t.peer_tutor_courses[0]?.courses.code;
@@ -127,7 +127,7 @@ export default function TutorBrowser({
               <div key={t.id}>
                 <div className="relative px-5 pt-9 pb-6">
                   {primaryCourse && (
-                    <span className="absolute -top-px left-5 -translate-y-full bg-gold text-navy font-condensed font-bold text-[11px] tracking-wide px-3 py-1.5 rounded-t-md">
+                    <span className="absolute -top-px left-5 -translate-y-full bg-gold text-navy font-condensed font-bold text-[11px] tracking-wide px-3 py-1.5 rounded-none">
                       {primaryCourse}
                     </span>
                   )}
@@ -136,7 +136,7 @@ export default function TutorBrowser({
                   </span>
 
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-[46px] h-[46px] flex-shrink-0 rounded-full bg-navy overflow-hidden flex items-center justify-center">
+                    <div className="w-[46px] h-[46px] flex-shrink-0 rounded-none bg-navy overflow-hidden flex items-center justify-center">
                       {t.photo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={t.photo_url} alt={t.full_name} className="w-full h-full object-cover" />
@@ -170,12 +170,12 @@ export default function TutorBrowser({
                   )}
 
                   <div className="flex gap-3 mb-4">
-                    <span className="w-0.5 flex-shrink-0 rounded-full bg-gold" />
+                    <span className="w-0.5 flex-shrink-0 rounded-none bg-gold" />
                     <p className="font-body text-sm leading-relaxed text-g800">{t.bio}</p>
                   </div>
 
                   <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
-                    <span className="inline-flex items-center gap-1.5 -rotate-2 border border-dashed border-emerald-600 text-emerald-700 font-condensed font-bold text-[10.5px] uppercase tracking-wide px-2.5 py-1.5 rounded-md">
+                    <span className="inline-flex items-center gap-1.5 -rotate-2 border border-dashed border-emerald-600 text-emerald-700 font-condensed font-bold text-[10.5px] uppercase tracking-wide px-2.5 py-1.5 rounded-none">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="flex-shrink-0">
                         <circle cx="12" cy="12" r="9" />
                         <path d="M8 12l2.5 2.5L16 9" />
@@ -214,7 +214,7 @@ export default function TutorBrowser({
                     ) : (
                       <button
                         onClick={() => toggleReveal(t.id)}
-                        className="bg-gold text-navy font-condensed font-bold text-[13px] uppercase tracking-wide px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors"
+                        className="bg-gold text-navy font-condensed font-bold text-[13px] uppercase tracking-wide px-5 py-2.5 rounded-none hover:bg-gold-light transition-colors"
                       >
                         Contact
                       </button>
@@ -225,8 +225,8 @@ export default function TutorBrowser({
                 {/* Perforated tear-line between entries — omitted after the last one */}
                 {i < visible.length - 1 && (
                   <div className="relative mx-5 border-t-[1.5px] border-dashed border-g100">
-                    <span className="absolute -top-[5px] -left-[25px] w-2.5 h-2.5 rounded-full bg-off-white" />
-                    <span className="absolute -top-[5px] -right-[25px] w-2.5 h-2.5 rounded-full bg-off-white" />
+                    <span className="absolute -top-[5px] -left-[25px] w-2.5 h-2.5 rounded-none bg-off-white" />
+                    <span className="absolute -top-[5px] -right-[25px] w-2.5 h-2.5 rounded-none bg-off-white" />
                   </div>
                 )}
               </div>
