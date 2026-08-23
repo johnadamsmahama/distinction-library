@@ -61,8 +61,8 @@ export default async function CareerCentrePage() {
   return (
     <div>
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy to-[#081527] px-6 py-8 mb-6">
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[radial-gradient(circle,rgba(201,162,75,0.16)_0%,rgba(201,162,75,0)_70%)]" />
+      <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-navy to-[#081527] px-6 py-8 mb-6">
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-none bg-[radial-gradient(circle,rgba(201,162,75,0.16)_0%,rgba(201,162,75,0)_70%)]" />
         <p className="relative font-body text-[11px] font-semibold tracking-[0.14em] uppercase text-gold mb-3">
           Essentials
         </p>
@@ -75,7 +75,7 @@ export default async function CareerCentrePage() {
       </div>
 
       {/* Sequence rail */}
-      <div className="relative rounded-3xl bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] px-4 py-5 sm:px-6">
+      <div className="relative rounded-none bg-gradient-to-b from-[#EAF3ED] via-[#DCEDE3] to-[#EAF3ED] px-4 py-5 sm:px-6">
         <div className="absolute left-[34px] top-5 bottom-10 w-px bg-gradient-to-b from-gold to-g100 sm:hidden" />
 
         <div className="flex flex-col gap-1 sm:grid sm:grid-cols-2 sm:gap-4">
@@ -83,16 +83,16 @@ export default async function CareerCentrePage() {
             <div key={tool.step}>
               <div className="flex gap-4 sm:block">
                 <div className="flex flex-col items-center w-6 pt-5 flex-shrink-0 sm:hidden">
-                  <div className="w-6 h-6 rounded-full bg-navy border-[1.5px] border-gold flex items-center justify-center font-display font-semibold text-[11px] text-[#E4C878] shadow-sm">
+                  <div className="w-6 h-6 rounded-none bg-navy border-[1.5px] border-gold flex items-center justify-center font-display font-semibold text-[11px] text-[#E4C878] shadow-sm">
                     {tool.step}
                   </div>
                 </div>
 
                 <Link
                   href={tool.href}
-                  className="flex-1 block bg-white border border-g100 border-l-[3px] border-l-navy rounded-2xl p-5 hover:border-gold hover:border-l-navy transition-colors"
+                  className="flex-1 block bg-white border border-g100 border-l-[3px] border-l-navy rounded-none p-5 hover:border-gold hover:border-l-navy transition-colors"
                 >
-                  <div className="w-9 h-9 shrink-0 overflow-hidden rounded-[9px] bg-navy flex items-center justify-center mb-3">
+                  <div className="w-9 h-9 shrink-0 overflow-hidden rounded-none bg-navy flex items-center justify-center mb-3">
                     <svg
                       viewBox="0 0 24 24"
                       width={18}
