@@ -15,6 +15,15 @@ const SECTIONS: Record<string, { label: string; href: string }> = {
   tutors: { label: 'Peer Tutors', href: '/tutors' },
 };
 
+// Career Resources sub-tools go one level deeper than the standard
+// two-level breadcrumb (Home / Essentials / Career Resources / [Tool]).
+const CAREER_TOOLS: Record<string, string> = {
+  'cv-builder': 'AI CV Builder',
+  'cover-letter': 'Cover Letter Generator',
+  'interview-coach': 'Interview Coach',
+  'linkedin-optimizer': 'LinkedIn Optimizer',
+};
+
 export default function HomeButtonGate() {
   const pathname = usePathname();
   if (pathname === '/dashboard') return null;
@@ -23,6 +32,9 @@ export default function HomeButtonGate() {
   const topSegment = segments[0];
   const section = SECTIONS[topSegment];
   const showSectionCrumb = !!section && segments.length > 1;
+
+  const isCareerTool = topSegment === 'essentials' && segments[1] === 'career' && segments.length === 3;
+  const careerToolLabel = isCareerTool ? CAREER_TOOLS[segments[2]] : undefined;
 
   return (
     <div className="inline-flex items-center gap-2 font-condensed font-extrabold text-sm sm:text-base uppercase tracking-wide mb-4">
@@ -40,6 +52,17 @@ export default function HomeButtonGate() {
           <Link href={section.href} className="text-gold hover:text-gold-light drop-shadow-sm">
             {section.label}
           </Link>
+        </>
+      )}
+
+      {isCareerTool && careerToolLabel && (
+        <>
+          <span className="text-g600/50 normal-case font-normal">/</span>
+          <Link href="/essentials/career" className="text-gold hover:text-gold-light drop-shadow-sm">
+            Career Resources
+          </Link>
+          <span className="text-g600/50 normal-case font-normal">/</span>
+          <span className="text-gold-light">{careerToolLabel}</span>
         </>
       )}
     </div>
