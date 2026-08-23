@@ -11,8 +11,8 @@ export default async function InterviewCoachPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="relative overflow-hidden bg-gradient-to-br from-navy-mid via-navy to-navy-deep px-5 pt-5 pb-7 -mx-4 sm:mx-0 sm:rounded-2xl">
-        <div className="absolute -right-14 -top-14 w-56 h-56 rounded-full bg-gold-light/10 blur-2xl" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-navy-mid via-navy to-navy-deep px-5 pt-5 pb-7 -mx-4 sm:mx-0 sm:rounded-none">
+        <div className="absolute -right-14 -top-14 w-56 h-56 rounded-none bg-gold-light/10 blur-2xl" />
         <h1 className="relative font-display font-semibold text-3xl text-white mb-2 tracking-tight">
           Interview Coach
         </h1>
