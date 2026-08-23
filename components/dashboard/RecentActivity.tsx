@@ -58,7 +58,7 @@ export default function RecentActivity({
 
   return (
     <div
-      className="rounded-2xl p-6 border border-navy/[0.12]"
+      className="rounded-none p-6 border border-navy/[0.12]"
       style={{ backgroundImage: 'linear-gradient(165deg, #C3D6DC 0%, #E4EEEF 65%)' }}
     >
       <h2 className="font-display font-bold text-lg text-navy mb-4">Recently added</h2>
@@ -86,7 +86,7 @@ export default function RecentActivity({
                   i === 0 ? '' : 'border-t border-navy/[0.13]'
                 }`}
               >
-                <div className="flex-shrink-0 w-[42px] h-[42px] rounded-[10px] bg-navy flex flex-col items-center justify-center">
+                <div className="flex-shrink-0 w-[42px] h-[42px] rounded-none bg-navy flex flex-col items-center justify-center">
                   <div className="font-display font-bold text-sm text-white leading-none">{chip.value}</div>
                   <div className="font-condensed font-bold text-[7px] uppercase tracking-wide text-gold-light leading-[1.15] text-center mt-0.5">
                     {chip.unit.split(' ').map((word, idx) => (
