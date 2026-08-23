@@ -72,7 +72,7 @@ export default function CommunityAndToolsSection() {
       {/* Buy Data — gold family, desaturated + locked, still linked to /buy-data */}
       <Link
         href="/buy-data"
-        className="relative overflow-hidden rounded-[18px] p-[22px] text-navy-deep block hover:opacity-95 transition-opacity saturate-[.75]"
+        className="relative overflow-hidden rounded-none p-[22px] text-navy-deep block hover:opacity-95 transition-opacity saturate-[.75]"
         style={{
           backgroundImage: `linear-gradient(135deg, #E2BE5A 0%, #C9A02C 60%, #A8801F 100%)`,
         }}
@@ -91,14 +91,14 @@ export default function CommunityAndToolsSection() {
           <path d="M8 6h8M8 10h8M8 14h4" />
         </svg>
         <div className="relative z-10">
-          <div className="w-11 h-11 rounded-xl bg-navy-deep/15 flex items-center justify-center mb-3.5">
+          <div className="w-11 h-11 rounded-none bg-navy-deep/15 flex items-center justify-center mb-3.5">
             <DataIcon />
           </div>
           <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-navy-deep/60 mb-0.5">
             Affordable mobile data
           </div>
           <h3 className="font-display font-bold text-lg text-navy-deep">Buy Data</h3>
-          <div className="font-condensed font-bold text-[9.5px] uppercase tracking-wide text-navy-deep bg-navy-deep/16 rounded-full px-2.5 py-1 mt-2.5 inline-flex items-center gap-1.5 w-fit">
+          <div className="font-condensed font-bold text-[9.5px] uppercase tracking-wide text-navy-deep bg-navy-deep/16 rounded-none px-2.5 py-1 mt-2.5 inline-flex items-center gap-1.5 w-fit">
             <LockIcon />
             Coming soon
           </div>
@@ -107,7 +107,7 @@ export default function CommunityAndToolsSection() {
 
       {/* Community & Tools — original diagonal duotone, grain + watermarks added */}
       <div
-        className="relative overflow-hidden rounded-[18px] text-white"
+        className="relative overflow-hidden rounded-none text-white"
         style={{
           backgroundImage: `linear-gradient(115deg, #060F1E 0%, #0D2B5E 42%, #8A6A22 78%, #C9A02C 100%)`,
         }}
@@ -135,14 +135,14 @@ export default function CommunityAndToolsSection() {
             rel="noopener noreferrer"
             className="flex items-center gap-3.5 py-3.5 border-t border-white/20 hover:bg-white/5 -mx-5 px-5 transition-colors"
           >
-            <div className="w-10 h-10 rounded-[11px] bg-white/14 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-none bg-white/14 flex items-center justify-center flex-shrink-0">
               <ClassroomIcon />
             </div>
             <div className="flex-1 min-w-0">
               <b className="block font-condensed font-bold text-[14.5px]">Join our Google Classroom</b>
               <span className="block text-[11.5px] text-white/75 mt-0.5">Free online classes</span>
             </div>
-            <div className="w-7 h-7 rounded-full bg-white/14 flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 rounded-none bg-white/14 flex items-center justify-center flex-shrink-0">
               <ArrowIcon />
             </div>
           </a>
@@ -153,14 +153,14 @@ export default function CommunityAndToolsSection() {
             rel="noopener noreferrer"
             className="flex items-center gap-3.5 py-3.5 border-t border-white/20 hover:bg-white/5 -mx-5 px-5 transition-colors"
           >
-            <div className="w-10 h-10 rounded-[11px] bg-white/14 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-none bg-white/14 flex items-center justify-center flex-shrink-0">
               <WhatsAppIcon />
             </div>
             <div className="flex-1 min-w-0">
               <b className="block font-condensed font-bold text-[14.5px]">Join WhatsApp</b>
               <span className="block text-[11.5px] text-white/75 mt-0.5">Tutorials &amp; campus updates</span>
             </div>
-            <div className="w-7 h-7 rounded-full bg-white/14 flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 rounded-none bg-white/14 flex items-center justify-center flex-shrink-0">
               <ArrowIcon />
             </div>
           </a>
