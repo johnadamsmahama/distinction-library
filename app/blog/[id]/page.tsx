@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
     <article className="max-w-2xl mx-auto">
       {post.cover_image_url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={post.cover_image_url} alt="" className="w-full h-56 object-cover rounded-xl mb-6" />
+        <img src={post.cover_image_url} alt="" className="w-full h-56 object-cover rounded-none mb-6" />
       )}
       {post.category && (
         <span className="inline-block font-condensed font-bold text-[10px] uppercase tracking-wide px-2 py-0.5 rounded bg-g100 text-navy mb-3">
@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
           components={{
             img: ({ src, alt }) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={src} alt={alt ?? ''} className="w-full rounded-xl my-4" />
+              <img src={src} alt={alt ?? ''} className="w-full rounded-none my-4" />
             ),
             a: ({ href, children }) => (
               <a
@@ -88,7 +88,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
                 target="_blank"
                 rel="noopener noreferrer"
                 download={a.file_name}
-                className="flex items-center justify-between gap-3 bg-off-white rounded-lg px-4 py-3 hover:bg-g100 transition-colors"
+                className="flex items-center justify-between gap-3 bg-off-white rounded-none px-4 py-3 hover:bg-g100 transition-colors"
               >
                 <div className="min-w-0">
                   <div className="font-condensed font-semibold text-sm text-g800 truncate">{a.file_name}</div>
