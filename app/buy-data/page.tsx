@@ -114,12 +114,12 @@ export default function BuyDataPage() {
         style={{
           fontFamily: "'Segoe UI', sans-serif",
           background: "#0f1f45",
-          minHeight: "100dvh",
+          minHeight: "auto",
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          padding: "clamp(16px, 4vh, 40px) 20px",
+          justifyContent: "flex-start",
+          padding: "clamp(8px, 2vh, 20px) 20px",
           boxSizing: "border-box",
         }}
       >
