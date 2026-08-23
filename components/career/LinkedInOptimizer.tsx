@@ -56,7 +56,7 @@ export default function LinkedInOptimizer() {
 
   return (
     <div className="space-y-6 mt-6">
-      <div className="relative bg-off-white rounded-2xl border border-g100 shadow-sm px-5 pb-7 pt-2">
+      <div className="relative bg-off-white rounded-none border border-g100 shadow-sm px-5 pb-7 pt-2">
         {/* gold dotted thread */}
         <div
           className="absolute left-[34px] top-0 bottom-8 w-[2px] opacity-50"
@@ -110,13 +110,13 @@ export default function LinkedInOptimizer() {
       <button
         onClick={generate}
         disabled={loading}
-        className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
+        className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-none shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
       >
         {loading ? 'Generating…' : 'Optimize my LinkedIn'}
       </button>
 
       {result && (
-        <div className="bg-off-white border border-g100 rounded-2xl p-6">
+        <div className="bg-off-white border border-g100 rounded-none p-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-lg text-navy">Suggestions</h2>
             <button onClick={copyResult} className={smallActionClass}>
@@ -146,7 +146,7 @@ function Section({
   return (
     <div className={`relative pt-6 pb-1 ${!isLast ? 'border-b border-g100' : ''}`}>
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-7 h-7 rounded-full bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
+        <div className="w-7 h-7 rounded-none bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
           {num}
         </div>
         <div className="font-condensed font-bold text-xs uppercase tracking-wide text-navy">{label}</div>
@@ -158,6 +158,6 @@ function Section({
 }
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-none border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
 const smallActionClass =
-  'font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-1.5 hover:border-gold transition-colors';
+  'font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-none px-3 py-1.5 hover:border-gold transition-colors';
