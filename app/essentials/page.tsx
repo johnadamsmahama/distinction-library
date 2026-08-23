@@ -19,9 +19,9 @@ export default async function SuccessCentrePage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/tutors"
-          className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
+          className="group bg-navy border border-gold/25 rounded-none p-6 min-h-[210px] hover:border-gold transition-colors"
         >
-          <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center text-gold mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
+          <div className="w-11 h-11 rounded-none border border-gold/60 flex items-center justify-center text-gold mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8.5" cy="8" r="2.6"></circle>
               <path d="M3 19c0-3.1 2.5-5 5.5-5s5.5 1.9 5.5 5"></path>
@@ -31,16 +31,16 @@ export default async function SuccessCentrePage() {
           </div>
           <h2 className="font-display font-bold text-lg text-white mb-1.5">Distinction Mentors</h2>
           <p className="font-body text-sm text-white/60">
-            Peer tutors and Distinction Programme facilitators — ask questions, book revision
-            sessions, get study strategies.
+            Peer tutors and Distinction Programme facilitators — book sessions and get study
+            strategies.
           </p>
         </Link>
 
         <Link
           href="/essentials/opportunity-hub"
-          className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
+          className="group bg-navy border border-gold/25 rounded-none p-6 min-h-[210px] hover:border-gold transition-colors"
         >
-          <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
+          <div className="w-11 h-11 rounded-none border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             ◈
           </div>
           <h2 className="font-display font-bold text-lg text-white mb-1.5">Jobs &amp; Opportunities</h2>
@@ -51,9 +51,9 @@ export default async function SuccessCentrePage() {
 
         <Link
           href="/essentials/achievements"
-          className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
+          className="group bg-navy border border-gold/25 rounded-none p-6 min-h-[210px] hover:border-gold transition-colors"
         >
-          <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
+          <div className="w-11 h-11 rounded-none border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             ★
           </div>
           <h2 className="font-display font-bold text-lg text-white mb-1.5">Achievement Portfolio</h2>
@@ -64,9 +64,9 @@ export default async function SuccessCentrePage() {
 
         <Link
           href="/essentials/career"
-          className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
+          className="group bg-navy border border-gold/25 rounded-none p-6 min-h-[210px] hover:border-gold transition-colors"
         >
-          <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center text-gold mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
+          <div className="w-11 h-11 rounded-none border border-gold/60 flex items-center justify-center text-gold mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="7.5" width="18" height="12" rx="1.8"></rect>
               <path d="M8.5 7.5V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.5"></path>
@@ -81,9 +81,9 @@ export default async function SuccessCentrePage() {
 
         <Link
           href="/essentials/events"
-          className="group bg-navy border border-gold/25 rounded-2xl p-6 hover:border-gold transition-colors"
+          className="group bg-navy border border-gold/25 rounded-none p-6 min-h-[210px] hover:border-gold transition-colors"
         >
-          <div className="w-11 h-11 rounded-full border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
+          <div className="w-11 h-11 rounded-none border border-gold/60 flex items-center justify-center font-display text-gold text-lg mb-4 group-hover:bg-gold group-hover:text-navy-deep transition-colors">
             ▦
           </div>
           <h2 className="font-display font-bold text-lg text-white mb-1.5">Events &amp; Sessions</h2>
