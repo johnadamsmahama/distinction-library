@@ -20,7 +20,7 @@ export default function MyRecentViews({ items }: { items: ViewedItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
+    <div className="bg-white border border-g100 rounded-none p-6">
       <h2 className="font-display font-bold text-lg text-navy mb-4">Recently Viewed</h2>
       <div className="space-y-2">
         {items.map((item) => (
