@@ -63,8 +63,8 @@ export default function SupportForm({
   return (
     <div className="space-y-4">
       {/* vault dial */}
-      <div className="w-14 h-14 rounded-full mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
-        <div className="absolute inset-1.5 rounded-full border border-dashed border-gold-light/40" />
+      <div className="w-14 h-14 rounded-none mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
+        <div className="absolute inset-1.5 rounded-none border border-dashed border-gold-light/40" />
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[22px] h-[22px] stroke-gold-light">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
@@ -83,7 +83,7 @@ export default function SupportForm({
           href="https://wa.me/233248111310"
           target="_blank"
           rel="noopener noreferrer"
-          className="relative inline-flex items-center justify-center gap-2 bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[11px] uppercase tracking-wide px-4 py-2.5 rounded-lg flex-shrink-0"
+          className="relative inline-flex items-center justify-center gap-2 bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[11px] uppercase tracking-wide px-4 py-2.5 rounded-none flex-shrink-0"
         >
           Chat on WhatsApp
         </a>
@@ -144,14 +144,14 @@ export default function SupportForm({
               {tickets.map((t) => (
                 <div
                   key={t.id}
-                  className="bg-gold-light/5 border border-dashed border-gold-light/35 rounded-[10px] px-3.5 py-3"
+                  className="bg-gold-light/5 border border-dashed border-gold-light/35 rounded-none px-3.5 py-3"
                 >
                   <div className="flex items-center justify-between mb-1 gap-2">
                     <span className="font-body font-semibold text-[12.5px] text-[#F0F2F8] truncate">
                       {t.subject}
                     </span>
                     <span
-                      className={`font-condensed font-bold text-[9px] uppercase tracking-wide px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                      className={`font-condensed font-bold text-[9px] uppercase tracking-wide px-2 py-0.5 rounded-none border flex-shrink-0 ${
                         t.resolved
                           ? 'text-green-300 bg-green-400/10 border-green-400/30'
                           : 'text-amber-300 bg-amber-400/10 border-amber-400/30'
@@ -174,7 +174,7 @@ export default function SupportForm({
   );
 }
 
-const panelClass = 'relative overflow-hidden bg-navy rounded-2xl p-[18px]';
+const panelClass = 'relative overflow-hidden bg-navy rounded-none p-[18px]';
 const panelTexture =
   'absolute inset-0 pointer-events-none [background-image:repeating-linear-gradient(115deg,rgba(223,190,94,0.04)_0px,rgba(223,190,94,0.04)_1px,transparent_1px,transparent_12px)]';
 const panelHead = 'flex items-center gap-2.5 mb-4 relative';
@@ -182,6 +182,6 @@ const panelTitle = 'font-display font-semibold text-[14.5px] text-[#F9F5E9]';
 const lockIcon = 'w-[18px] h-[18px] stroke-gold-light flex-shrink-0';
 const labelClass = 'block font-condensed text-[9.5px] tracking-wide uppercase text-[#8593B8] mb-1.5';
 const inputClass =
-  'w-full px-[11px] py-[9px] rounded-lg bg-white/[0.06] border border-gold-light/25 font-body text-[13.5px] text-[#F0F2F8] placeholder:text-[#5C6785] outline-none focus:border-gold-light transition-colors';
+  'w-full px-[11px] py-[9px] rounded-none bg-white/[0.06] border border-gold-light/25 font-body text-[13.5px] text-[#F0F2F8] placeholder:text-[#5C6785] outline-none focus:border-gold-light transition-colors';
 const btnGold =
-  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-lg disabled:opacity-60 transition-opacity';
+  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-none disabled:opacity-60 transition-opacity';
