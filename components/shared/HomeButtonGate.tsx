@@ -43,43 +43,45 @@ export default function HomeButtonGate() {
   const careerToolLabel = isCareerTool ? CAREER_TOOLS[segments[2]] : undefined;
 
   return (
-    <div className="inline-flex items-center gap-2 font-condensed font-extrabold text-sm sm:text-base uppercase tracking-wide mb-4">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold drop-shadow-sm flex-shrink-0">
-        <path d="M19 12H5M12 19l-7-7 7-7" />
-      </svg>
+    <div className="relative mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-condensed font-extrabold text-sm sm:text-base uppercase tracking-wide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold drop-shadow-sm flex-shrink-0">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
 
-      <Link href="/dashboard" className="text-gold hover:text-gold-light drop-shadow-sm">
-        Home
-      </Link>
+        <Link href="/dashboard" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+          Home
+        </Link>
 
-      {showSectionCrumb && (
-        <>
-          <span className="text-g600/50 normal-case font-normal">/</span>
-          <Link href={section.href} className="text-gold hover:text-gold-light drop-shadow-sm">
-            {section.label}
-          </Link>
-        </>
-      )}
+        {showSectionCrumb && (
+          <>
+            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
+            <Link href={section.href} className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+              {section.label}
+            </Link>
+          </>
+        )}
 
-      {isEssentialsAlias && (
-        <>
-          <span className="text-g600/50 normal-case font-normal">/</span>
-          <Link href="/essentials" className="text-gold hover:text-gold-light drop-shadow-sm">
-            Essentials
-          </Link>
-        </>
-      )}
+        {isEssentialsAlias && (
+          <>
+            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
+            <Link href="/essentials" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+              Essentials
+            </Link>
+          </>
+        )}
 
-      {isCareerTool && careerToolLabel && (
-        <>
-          <span className="text-g600/50 normal-case font-normal">/</span>
-          <Link href="/essentials/career" className="text-gold hover:text-gold-light drop-shadow-sm">
-            Career Resources
-          </Link>
-          <span className="text-g600/50 normal-case font-normal">/</span>
-          <span className="text-gold-light">{careerToolLabel}</span>
-        </>
-      )}
+        {isCareerTool && careerToolLabel && (
+          <>
+            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
+            <Link href="/essentials/career" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+              Career Resources
+            </Link>
+            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
+            <span className="text-gold-light flex-shrink-0">{careerToolLabel}</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
