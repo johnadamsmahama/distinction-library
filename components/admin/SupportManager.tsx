@@ -73,7 +73,7 @@ export default function SupportManager({ tickets: initialTickets }: { tickets: T
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-lg transition-colors ${
+            className={`font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2 rounded-none transition-colors ${
               filter === f ? 'bg-navy text-white' : 'bg-white border border-g100 text-g600'
             }`}
           >
@@ -89,7 +89,7 @@ export default function SupportManager({ tickets: initialTickets }: { tickets: T
           {visible.map((t) => {
             const alreadyDeleted = t.user_id ? deletedUserIds.has(t.user_id) : false;
             return (
-              <div key={t.id} className="bg-white border border-g100 rounded-xl p-4">
+              <div key={t.id} className="bg-white border border-g100 rounded-none p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="font-condensed font-bold text-sm text-navy">{t.subject}</div>
@@ -101,7 +101,7 @@ export default function SupportManager({ tickets: initialTickets }: { tickets: T
                   <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                     <button
                       onClick={() => toggleResolved(t.id, !t.resolved)}
-                      className={`font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg transition-colors ${
+                      className={`font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-none transition-colors ${
                         t.resolved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                       }`}
                     >
@@ -112,14 +112,14 @@ export default function SupportManager({ tickets: initialTickets }: { tickets: T
                       <button
                         onClick={() => deleteUserAccount(t)}
                         disabled={deletingId === t.id}
-                        className="font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
+                        className="font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-none bg-red-100 text-red-700 hover:bg-red-200 transition-colors disabled:opacity-50"
                       >
                         {deletingId === t.id ? 'Deleting…' : 'Delete User Account'}
                       </button>
                     )}
 
                     {alreadyDeleted && (
-                      <span className="font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg bg-g100 text-g600">
+                      <span className="font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-none bg-g100 text-g600">
                         Account Deleted
                       </span>
                     )}
