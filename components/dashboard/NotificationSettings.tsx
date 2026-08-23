@@ -27,10 +27,10 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       role="switch"
       aria-checked={on}
       onClick={onClick}
-      className={`w-10 h-[23px] rounded-full flex-shrink-0 relative transition-colors ${on ? 'bg-gold' : 'bg-white/15'}`}
+      className={`w-10 h-[23px] rounded-none flex-shrink-0 relative transition-colors ${on ? 'bg-gold' : 'bg-white/15'}`}
     >
       <span
-        className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-full bg-white transition-all ${
+        className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-none bg-white transition-all ${
           on ? 'left-[19px]' : 'left-[2.5px]'
         }`}
       />
@@ -85,8 +85,8 @@ export default function NotificationSettings({
   return (
     <div className="max-w-2xl space-y-4">
       {/* vault dial */}
-      <div className="w-14 h-14 rounded-full mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
-        <div className="absolute inset-1.5 rounded-full border border-dashed border-gold-light/40" />
+      <div className="w-14 h-14 rounded-none mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
+        <div className="absolute inset-1.5 rounded-none border border-dashed border-gold-light/40" />
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[22px] h-[22px] stroke-gold-light">
           <path d="M4 4h16v16H4z" />
           <path d="m4 4 8 8 8-8" />
@@ -155,7 +155,7 @@ export default function NotificationSettings({
               key={freq}
               type="button"
               onClick={() => setFrequency(freq)}
-              className={`flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide px-3 py-2.5 rounded-lg border transition-colors ${
+              className={`flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide px-3 py-2.5 rounded-none border transition-colors ${
                 prefs.frequency === freq
                   ? 'bg-gradient-to-br from-gold-light to-gold border-gold text-navy-deep'
                   : 'border-gold-light/30 text-[#8593B8]'
@@ -176,7 +176,7 @@ export default function NotificationSettings({
   );
 }
 
-const panelClass = 'relative overflow-hidden bg-navy rounded-2xl p-[18px]';
+const panelClass = 'relative overflow-hidden bg-navy rounded-none p-[18px]';
 const panelTexture =
   'absolute inset-0 pointer-events-none [background-image:repeating-linear-gradient(115deg,rgba(223,190,94,0.04)_0px,rgba(223,190,94,0.04)_1px,transparent_1px,transparent_12px)]';
 const panelHead = 'flex items-start gap-2.5 mb-4 relative';
@@ -184,4 +184,4 @@ const panelTitle = 'font-display font-semibold text-[14.5px] text-[#F9F5E9]';
 const panelSub = 'font-body text-[11.5px] text-[#8593B8] mt-0.5 leading-relaxed';
 const lockIcon = 'w-[18px] h-[18px] stroke-gold-light flex-shrink-0 mt-0.5';
 const btnGold =
-  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-lg disabled:opacity-60 transition-opacity';
+  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-none disabled:opacity-60 transition-opacity';
