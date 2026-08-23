@@ -21,7 +21,7 @@ type AutoPublishedItem = {
 };
 
 const selectClass =
-  'w-full border border-g100 rounded-lg px-2.5 py-2 font-body text-sm text-g800 outline-none focus:border-gold bg-white';
+  'w-full border border-g100 rounded-none px-2.5 py-2 font-body text-sm text-g800 outline-none focus:border-gold bg-white';
 
 function confidenceStyle(confidence: number | null) {
   const pct = Math.round((confidence ?? 0) * 100);
@@ -129,15 +129,15 @@ export default function AutoPublishReview({
   return (
     <div>
       <div className="grid grid-cols-3 gap-2.5 mb-5">
-        <div className="bg-white border border-g100 rounded-xl px-3.5 py-3">
+        <div className="bg-white border border-g100 rounded-none px-3.5 py-3">
           <div className="font-condensed font-bold text-xl text-navy">{totalCount}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600 mt-0.5">Auto-published</div>
         </div>
-        <div className="bg-white border border-g100 rounded-xl px-3.5 py-3">
+        <div className="bg-white border border-g100 rounded-none px-3.5 py-3">
           <div className="font-condensed font-bold text-xl text-amber-600">{lowConfidenceCount}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600 mt-0.5">Below 75%</div>
         </div>
-        <div className="bg-white border border-g100 rounded-xl px-3.5 py-3">
+        <div className="bg-white border border-g100 rounded-none px-3.5 py-3">
           <div className="font-condensed font-bold text-xl text-navy">{awaitingCount}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600 mt-0.5">Awaiting check</div>
         </div>
@@ -153,7 +153,7 @@ export default function AutoPublishReview({
           />
           Hide reviewed
         </label>
-        <span className="ml-auto font-condensed text-[11px] text-g600 bg-g50 border border-g100 rounded-full px-2.5 py-1">
+        <span className="ml-auto font-condensed text-[11px] text-g600 bg-g50 border border-g100 rounded-none px-2.5 py-1">
           confidence ↑
         </span>
       </div>
@@ -170,7 +170,7 @@ export default function AutoPublishReview({
             return (
               <div
                 key={item.id}
-                className={`bg-white border border-g100 rounded-xl p-4 ${isReviewed ? 'opacity-50' : ''}`}
+                className={`bg-white border border-g100 rounded-none p-4 ${isReviewed ? 'opacity-50' : ''}`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -197,20 +197,20 @@ export default function AutoPublishReview({
                     <div className="flex flex-wrap gap-2 flex-shrink-0">
                       <button
                         onClick={() => setPreviewId(previewId === item.id ? null : item.id)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
                       >
                         {previewId === item.id ? 'Hide' : 'Preview'}
                       </button>
                       <button
                         disabled={busyId === item.id}
                         onClick={() => markReviewed(item.id)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
                       >
                         {busyId === item.id ? 'Working…' : 'Looks Good'}
                       </button>
                       <button
                         onClick={() => openReassign(item)}
-                        className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border transition-colors ${
+                        className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border transition-colors ${
                           reassignId === item.id
                             ? 'border-red-300 text-red-600 bg-red-50'
                             : 'border-red-300 text-red-500 hover:bg-red-50'
@@ -253,14 +253,14 @@ export default function AutoPublishReview({
                       <button
                         disabled={busyId === item.id}
                         onClick={() => saveReassign(item.id)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-navy text-white hover:bg-navy-mid transition-colors disabled:opacity-60"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-navy text-white hover:bg-navy-mid transition-colors disabled:opacity-60"
                       >
                         Save Course
                       </button>
                       <button
                         disabled={busyId === item.id}
                         onClick={() => unpublish(item.id)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
                       >
                         Unpublish
                       </button>
