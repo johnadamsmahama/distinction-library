@@ -6,7 +6,7 @@ export default function StudyProgress({ items }: { items: ProgressItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
+    <div className="bg-white border border-g100 rounded-none p-6">
       <h2 className="font-display font-bold text-lg text-navy mb-1">Study Progress</h2>
       <p className="font-body text-xs text-g600 mb-4">
         Resources you've opened out of everything approved for each course.
@@ -24,8 +24,8 @@ export default function StudyProgress({ items }: { items: ProgressItem[] }) {
                   {item.viewed} / {item.total}
                 </span>
               </div>
-              <div className="h-2 rounded-full bg-g100 overflow-hidden">
-                <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${pct}%` }} />
+              <div className="h-2 rounded-none bg-g100 overflow-hidden">
+                <div className="h-full bg-gold rounded-none transition-all" style={{ width: `${pct}%` }} />
               </div>
             </Link>
           );
