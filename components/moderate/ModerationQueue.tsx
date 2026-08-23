@@ -51,7 +51,7 @@ type PaperEditValues = { courseId: string; year: number; examType: string };
 type MaterialEditValues = { courseId: string; title: string; weekNumber: number; contentType: string };
 
 const selectClass =
-  'w-full border border-g100 rounded-lg px-2.5 py-2 font-body text-sm text-g800 outline-none focus:border-gold bg-white';
+  'w-full border border-g100 rounded-none px-2.5 py-2 font-body text-sm text-g800 outline-none focus:border-gold bg-white';
 const editLabelClass = 'font-condensed font-bold text-[10px] uppercase text-g600 block mb-1';
 
 export default function ModerationQueue({
@@ -277,7 +277,7 @@ export default function ModerationQueue({
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setTab('papers')}
-          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-lg transition-colors ${
+          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-none transition-colors ${
             tab === 'papers' ? 'bg-navy text-white' : 'bg-white border border-g100 text-g600'
           }`}
         >
@@ -285,7 +285,7 @@ export default function ModerationQueue({
         </button>
         <button
           onClick={() => setTab('materials')}
-          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-lg transition-colors ${
+          className={`font-condensed font-bold text-sm uppercase tracking-wide px-5 py-2.5 rounded-none transition-colors ${
             tab === 'materials' ? 'bg-navy text-white' : 'bg-white border border-g100 text-g600'
           }`}
         >
@@ -302,7 +302,7 @@ export default function ModerationQueue({
               const isEditing = openEditIds.has(p.id);
               const edit = getPaperEdit(p);
               return (
-                <div key={p.id} className="bg-white border border-g100 rounded-xl p-4">
+                <div key={p.id} className="bg-white border border-g100 rounded-none p-4">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-condensed font-bold text-sm text-navy">
@@ -321,13 +321,13 @@ export default function ModerationQueue({
                     <div className="flex flex-wrap gap-2 flex-shrink-0">
                       <button
                         onClick={() => setPreviewId(previewId === p.id ? null : p.id)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
                       >
                         {previewId === p.id ? 'Hide' : 'Preview'}
                       </button>
                       <button
                         onClick={() => toggleEdit(p.id)}
-                        className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border transition-colors ${
+                        className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border transition-colors ${
                           isEditing ? 'border-navy text-navy bg-navy/5' : 'border-g100 text-g600 hover:border-navy hover:text-navy'
                         }`}
                       >
@@ -336,25 +336,25 @@ export default function ModerationQueue({
                       <button
                         disabled={busyId === p.id}
                         onClick={() => approvePaper(p, isEditing ? edit : undefined)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
                       >
                         {busyId === p.id ? 'Working…' : 'Approve'}
                       </button>
                       <button
                         onClick={() => setPanel(panel?.id === p.id && panel.decision === 'needs_revision' ? null : { id: p.id, decision: 'needs_revision' })}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
                       >
                         Request Changes
                       </button>
                       <button
                         onClick={() => setPanel(panel?.id === p.id && panel.decision === 'rejected' ? null : { id: p.id, decision: 'rejected' })}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => setDeleteTarget(deleteTarget?.id === p.id ? null : { id: p.id, kind: 'paper' })}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
                       >
                         Delete
                       </button>
@@ -404,7 +404,7 @@ export default function ModerationQueue({
             const isEditing = openEditIds.has(m.id);
             const edit = getMaterialEdit(m);
             return (
-              <div key={m.id} className="bg-white border border-g100 rounded-xl p-4">
+              <div key={m.id} className="bg-white border border-g100 rounded-none p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="font-condensed font-bold text-sm text-navy">
@@ -430,13 +430,13 @@ export default function ModerationQueue({
                   <div className="flex flex-wrap gap-2 flex-shrink-0">
                     <button
                       onClick={() => setPreviewId(previewId === m.id ? null : m.id)}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-navy hover:text-navy transition-colors"
                     >
                       {previewId === m.id ? 'Hide' : 'Preview'}
                     </button>
                     <button
                       onClick={() => toggleEdit(m.id)}
-                      className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border transition-colors ${
+                      className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border transition-colors ${
                         isEditing ? 'border-navy text-navy bg-navy/5' : 'border-g100 text-g600 hover:border-navy hover:text-navy'
                       }`}
                     >
@@ -445,25 +445,25 @@ export default function ModerationQueue({
                     <button
                       disabled={busyId === m.id}
                       onClick={() => approveMaterial(m, isEditing ? edit : undefined)}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
                     >
                       {busyId === m.id ? 'Working…' : 'Approve'}
                     </button>
                     <button
                       onClick={() => setPanel(panel?.id === m.id && panel.decision === 'needs_revision' ? null : { id: m.id, decision: 'needs_revision' })}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
                     >
                       Request Changes
                     </button>
                     <button
                       onClick={() => setPanel(panel?.id === m.id && panel.decision === 'rejected' ? null : { id: m.id, decision: 'rejected' })}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600 hover:border-red-300 hover:text-red-500 transition-colors"
                     >
                       Reject
                     </button>
                     <button
                       onClick={() => setDeleteTarget(deleteTarget?.id === m.id ? null : { id: m.id, kind: 'material' })}
-                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                      className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
                     >
                       Delete
                     </button>
@@ -532,7 +532,7 @@ function ClassificationBadge({
 
   if (mismatch) {
     return (
-      <div className="mt-1.5 flex flex-col gap-1 sm:inline-flex sm:flex-row sm:items-start sm:gap-1.5 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 max-w-full sm:max-w-md">
+      <div className="mt-1.5 flex flex-col gap-1 sm:inline-flex sm:flex-row sm:items-start sm:gap-1.5 bg-red-50 border border-red-200 rounded-none px-2.5 py-1.5 max-w-full sm:max-w-md">
         <span className="font-condensed font-bold text-[11px] uppercase text-red-600 shrink-0">
           ⚠ Possible mismatch
         </span>
@@ -545,7 +545,7 @@ function ClassificationBadge({
   }
 
   return (
-    <div className="mt-1.5 inline-flex items-center gap-1.5 bg-g50 border border-g100 rounded-lg px-2.5 py-1">
+    <div className="mt-1.5 inline-flex items-center gap-1.5 bg-g50 border border-g100 rounded-none px-2.5 py-1">
       <span className="font-condensed font-bold text-[10px] uppercase text-g600">
         AI detected: {label}
       </span>
@@ -679,7 +679,7 @@ function DecisionPanel({
         onChange={(e) => setReason(e.target.value)}
         placeholder={isReject ? 'Reason for rejection…' : 'What needs to change before this can be approved…'}
         rows={2}
-        className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-2"
+        className="w-full px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-2"
       />
       {isReject && (
         <label className="flex items-center gap-2 font-body text-xs text-g600 mb-3">
@@ -690,7 +690,7 @@ function DecisionPanel({
       <div className="flex gap-2">
         <button
           onClick={onConfirm}
-          className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white transition-colors ${
+          className={`font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none text-white transition-colors ${
             isReject ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
           }`}
         >
@@ -698,7 +698,7 @@ function DecisionPanel({
         </button>
         <button
           onClick={onCancel}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600"
         >
           Cancel
         </button>
@@ -734,19 +734,19 @@ function DeleteConfirmPanel({
         onChange={(e) => setReason(e.target.value)}
         placeholder="Reason (optional, sent to the uploader)…"
         rows={2}
-        className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
+        className="w-full px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
       />
       <div className="flex gap-2">
         <button
           disabled={busy}
           onClick={onConfirm}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
         >
           {busy ? 'Deleting…' : 'Confirm delete'}
         </button>
         <button
           onClick={onCancel}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600"
         >
           Cancel
         </button>
