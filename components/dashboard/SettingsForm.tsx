@@ -66,7 +66,7 @@ export default function SettingsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-none p-6 space-y-4 max-w-md">
       <div>
         <label className={labelClass}>Full name</label>
         <input
@@ -105,7 +105,7 @@ export default function SettingsForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
       >
         {loading ? 'Saving…' : 'Save changes'}
       </button>
@@ -115,4 +115,4 @@ export default function SettingsForm({
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
