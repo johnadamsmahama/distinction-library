@@ -41,7 +41,7 @@ export default async function ModeratePage() {
       {isAdminRole(profile?.role) && (
         <Link
           href="/moderate/trusted-upload"
-          className="inline-flex items-center gap-2 bg-navy text-white font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2.5 rounded-[6px] mb-6 hover:brightness-110 transition-all"
+          className="inline-flex items-center gap-2 bg-navy text-white font-condensed font-bold text-xs uppercase tracking-wide px-4 py-2.5 rounded-none mb-6 hover:brightness-110 transition-all"
         >
           Trusted Upload — bulk publish pre-sorted files →
         </Link>
