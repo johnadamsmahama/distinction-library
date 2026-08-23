@@ -58,7 +58,7 @@ export default async function AchievementPortfolioPage() {
       </p>
 
       {badges.length === 0 ? (
-        <div className="bg-white border border-g100 rounded-2xl p-8 text-center">
+        <div className="bg-white border border-g100 rounded-none p-8 text-center">
           <p className="font-body text-sm text-g600">
             No badges yet — Gold, Silver, and Bronze go to the top 3 contributors on the Leaderboard
             each semester and all-time. Upload an approved past paper or study material to get on
@@ -74,7 +74,7 @@ export default async function AchievementPortfolioPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {badges.map((b, i) => (
-            <div key={i} className={`border rounded-2xl p-6 text-center ${TIER_STYLES[b.tier]}`}>
+            <div key={i} className={`border rounded-none p-6 text-center ${TIER_STYLES[b.tier]}`}>
               <div className="text-4xl mb-2">{TIER_ICON[b.tier]}</div>
               <div className="font-display font-bold text-base capitalize">{b.tier}</div>
               <div className="font-condensed font-semibold text-sm mt-1">{b.label}</div>
@@ -84,7 +84,7 @@ export default async function AchievementPortfolioPage() {
         </div>
       )}
 
-      <div className="bg-white border border-g100 rounded-2xl p-6">
+      <div className="bg-white border border-g100 rounded-none p-6">
         <h2 className="font-display font-bold text-base text-navy mb-3">Standing</h2>
         <div className="space-y-2 font-body text-sm">
           <div className="flex justify-between">
