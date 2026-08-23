@@ -7,18 +7,28 @@ import { createClient } from '@/lib/supabase/client';
 
 // Primary nav per spec Section 2. Reconciled against the live app's old
 // hamburger (Section 2.1): Leaderboard now lives under Dashboard/Profile,
-// Tutors under Essentials, Support under Settings — all still reachable,
-// just no longer top-level. See CHANGELOG_STEP3.md for the full mapping.
-// Opportunity Hub moved under Essentials — no longer a top-level link.
-const NAV_LINKS = [
+// Tutors under Essentials — all still reachable, just no longer top-level.
+// See CHANGELOG_STEP3.md for the full mapping. Opportunity Hub moved under
+// Essentials — no longer a top-level link.
+//
+// Split into two groups (2026-08-23): core content destinations vs. account
+// utilities. Notifications was previously duplicated here as a text link
+// on top of the dedicated bell icon already in the header — removed as a
+// link since the bell covers it everywhere. Support was previously only
+// linked from the public homepage footer, which never renders once a
+// student is logged in — added here so it's actually reachable.
+const CORE_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/papers', label: 'Library' },
   { href: '/ai-tools', label: 'AI Tools' },
   { href: '/predictor', label: 'Exam Predictor' },
   { href: '/essentials', label: 'Essentials' },
   { href: '/blog', label: 'Blog' },
-  { href: '/dashboard/notifications', label: 'Notifications' },
+];
+
+const UTILITY_LINKS = [
   { href: '/dashboard/settings', label: 'Settings' },
+  { href: '/support', label: 'Support' },
 ];
 
 export default function DashboardNav({
@@ -64,7 +74,7 @@ export default function DashboardNav({
         </Link>
 
         <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-[11px] overflow-x-auto max-w-[52vw]">
-          {NAV_LINKS.map((link) => {
+          {CORE_LINKS.map((link) => {
             const active = pathname === link.href || pathname?.startsWith(link.href + '/');
             return (
               <Link
@@ -81,6 +91,19 @@ export default function DashboardNav({
         </div>
 
         <div className="flex items-center gap-3.5">
+          <Link
+            href="/dashboard/settings"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/45 hover:text-white transition-colors hidden sm:block"
+          >
+            Settings
+          </Link>
+          <Link
+            href="/support"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/45 hover:text-white transition-colors hidden sm:block"
+          >
+            Support
+          </Link>
+
           {isStaff && (
             <Link
               href="/moderate"
@@ -160,7 +183,10 @@ export default function DashboardNav({
           >
             Profile
           </Link>
-          {NAV_LINKS.map((link) => (
+
+          <div className="border-t border-white/10" />
+
+          {CORE_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -170,6 +196,22 @@ export default function DashboardNav({
               {link.label}
             </Link>
           ))}
+
+          <div className="border-t border-white/10" />
+
+          {UTILITY_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {(isStaff || isAdmin) && <div className="border-t border-white/10" />}
+
           {isStaff && (
             <Link href="/moderate" onClick={() => setMenuOpen(false)} className="font-condensed font-bold text-sm uppercase tracking-wide text-gold hover:text-gold-light transition-colors">
               Moderate
@@ -180,6 +222,9 @@ export default function DashboardNav({
               Admin
             </Link>
           )}
+
+          <div className="border-t border-white/10" />
+
           <button
             onClick={handleLogout}
             className="text-left font-condensed font-bold text-sm uppercase tracking-wide text-white/70 hover:text-white transition-colors"
