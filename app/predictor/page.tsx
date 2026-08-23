@@ -38,7 +38,7 @@ export default async function PredictorLandingPage() {
         </p>
 
         {(!courses || courses.length === 0) ? (
-          <div className="mt-12 rounded-lg border border-white/10 bg-white/5 p-8 text-center">
+          <div className="mt-12 rounded-none border border-white/10 bg-white/5 p-8 text-center">
             <p className="font-condensed text-lg text-gold">
               No courses available yet
             </p>
