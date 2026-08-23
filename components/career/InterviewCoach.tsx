@@ -75,7 +75,7 @@ export default function InterviewCoach() {
   if (!started) {
     return (
       <div className="space-y-6 mt-6">
-        <div className="relative bg-off-white rounded-2xl border border-g100 shadow-sm px-5 pb-7 pt-2">
+        <div className="relative bg-off-white rounded-none border border-g100 shadow-sm px-5 pb-7 pt-2">
           {/* gold dotted thread */}
           <div
             className="absolute left-[34px] top-0 bottom-8 w-[2px] opacity-50"
@@ -110,7 +110,7 @@ export default function InterviewCoach() {
         <button
           onClick={startInterview}
           disabled={loading}
-          className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
+          className="w-full sm:w-auto bg-gradient-to-br from-navy-mid to-navy text-white font-condensed font-bold text-sm px-6 py-3.5 rounded-none shadow-lg hover:opacity-95 transition-opacity disabled:opacity-60"
         >
           {loading ? 'Starting…' : 'Start mock interview'}
         </button>
@@ -119,7 +119,7 @@ export default function InterviewCoach() {
   }
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl flex flex-col h-[70vh] mt-6">
+    <div className="bg-white border border-g100 rounded-none flex flex-col h-[70vh] mt-6">
       <div className="p-4 border-b border-g100 flex items-center justify-between">
         <p className="font-condensed font-bold text-xs uppercase tracking-wide text-g600">
           Practising for: {targetRole}
@@ -127,7 +127,7 @@ export default function InterviewCoach() {
         <button
           onClick={requestSummary}
           disabled={loading}
-          className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-lg px-3 py-1.5 hover:border-gold transition-colors disabled:opacity-50"
+          className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g100 rounded-none px-3 py-1.5 hover:border-gold transition-colors disabled:opacity-50"
         >
           End & get feedback
         </button>
@@ -139,7 +139,7 @@ export default function InterviewCoach() {
           .map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className={`max-w-[80%] rounded-xl px-4 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[80%] rounded-none px-4 py-2.5 font-body text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === 'user' ? 'bg-navy text-white' : 'bg-off-white text-g800'
                 }`}
               >
@@ -149,7 +149,7 @@ export default function InterviewCoach() {
           ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-off-white rounded-xl px-4 py-2.5 font-body text-sm text-g600">Thinking…</div>
+            <div className="bg-off-white rounded-none px-4 py-2.5 font-body text-sm text-g600">Thinking…</div>
           </div>
         )}
         <div ref={bottomRef} />
@@ -169,12 +169,12 @@ export default function InterviewCoach() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type your answer…"
-          className="flex-1 px-4 py-2.5 rounded-lg border border-g100 font-body text-sm outline-none focus:border-gold"
+          className="flex-1 px-4 py-2.5 rounded-none border border-g100 font-body text-sm outline-none focus:border-gold"
         />
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-50"
+          className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-5 py-2.5 rounded-none hover:bg-gold-light transition-colors disabled:opacity-50"
         >
           Send
         </button>
@@ -199,7 +199,7 @@ function Section({
   return (
     <div className={`relative pt-6 pb-1 ${!isLast ? 'border-b border-g100' : ''}`}>
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-7 h-7 rounded-full bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
+        <div className="w-7 h-7 rounded-none bg-navy text-gold-light font-display font-semibold text-xs flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_#F7F8FC]">
           {num}
         </div>
         <div className="font-condensed font-bold text-xs uppercase tracking-wide text-navy">{label}</div>
@@ -211,4 +211,4 @@ function Section({
 }
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-none border border-g100 bg-white font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
