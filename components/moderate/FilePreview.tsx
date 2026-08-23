@@ -81,7 +81,7 @@ export default function FilePreview({ kind, fileUrl }: { kind: 'paper' | 'materi
           )}
           <iframe
             src={displaySrc}
-            className="w-full h-[60vh] max-h-[420px] rounded-lg border border-g100 bg-white"
+            className="w-full h-[60vh] max-h-[420px] rounded-none border border-g100 bg-white"
             title="Document preview"
           />
           {previewUrl && (
