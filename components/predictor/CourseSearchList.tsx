@@ -43,12 +43,12 @@ export default function CourseSearchList({ courses }: { courses: Course[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by course code or name..."
-          className="w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 font-body text-sm text-white placeholder:text-white/40 focus:border-gold/50 focus:outline-none"
+          className="w-full rounded-none border border-white/10 bg-white/5 py-3 pl-11 pr-4 font-body text-sm text-white placeholder:text-white/40 focus:border-gold/50 focus:outline-none"
         />
       </div>
 
       {filtered.length === 0 && (
-        <div className="mt-8 rounded-lg border border-white/10 bg-white/5 p-8 text-center">
+        <div className="mt-8 rounded-none border border-white/10 bg-white/5 p-8 text-center">
           <p className="font-condensed text-lg text-gold">No courses match your search</p>
           <p className="font-body mt-2 text-sm text-white/70">Try a different course code or name.</p>
         </div>
@@ -60,7 +60,7 @@ export default function CourseSearchList({ courses }: { courses: Course[] }) {
             <li key={course.id}>
               <Link
                 href={`/predictor/${course.id}`}
-                className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-4 transition-colors hover:border-gold/50 hover:bg-white/10"
+                className="group flex items-center justify-between rounded-none border border-white/10 bg-white/5 p-4 transition-colors hover:border-gold/50 hover:bg-white/10"
               >
                 <div>
                   <p className="font-condensed text-base">{course.name}</p>
