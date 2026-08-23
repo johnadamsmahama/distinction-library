@@ -89,7 +89,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
       </p>
 
       {/* Everything below sits in a self-contained navy panel */}
-      <div className="bg-navy-deep rounded-2xl overflow-hidden">
+      <div className="bg-navy-deep rounded-none overflow-hidden">
         {/* Filter tabs, with scroll-fade edges to signal there's more to swipe to */}
         <div className="relative border-b border-white/6">
           <div
@@ -103,7 +103,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                 <button
                   key={f.id}
                   onClick={() => setTab(f.id)}
-                  className={`px-3 py-1.5 rounded-full font-condensed text-[11.5px] font-semibold whitespace-nowrap border transition-colors flex-shrink-0 ${
+                  className={`px-3 py-1.5 rounded-none font-condensed text-[11.5px] font-semibold whitespace-nowrap border transition-colors flex-shrink-0 ${
                     active
                       ? 'bg-gold/15 border-gold text-gold'
                       : 'border-white/10 text-white/45 hover:text-white/70'
@@ -151,7 +151,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                     href={o.application_link ?? '#'}
                     target={o.application_link ? '_blank' : undefined}
                     rel="noopener noreferrer"
-                    className="flex items-start gap-3 bg-navy border border-white/6 rounded-xl p-4 hover:border-gold transition-colors border-l-4"
+                    className="flex items-start gap-3 bg-navy border border-white/6 rounded-none p-4 hover:border-gold transition-colors border-l-4"
                     style={{ borderLeftColor: cat.color }}
                   >
                     {o.cover_image_url && (
@@ -159,7 +159,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                       <img
                         src={o.cover_image_url}
                         alt=""
-                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                        className="w-12 h-12 rounded-none object-cover flex-shrink-0"
                       />
                     )}
                     <div className="min-w-0 flex-1">
