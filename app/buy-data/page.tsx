@@ -90,7 +90,7 @@ export default function BuyDataPage() {
                 background: "transparent",
                 border: "1.5px solid #C9A843",
                 color: "#C9A843",
-                borderRadius: 10,
+                borderRadius: 0,
                 padding: "10px 24px",
                 cursor: "pointer",
                 fontWeight: 700,
@@ -182,7 +182,7 @@ export default function BuyDataPage() {
                     selected === net.key
                       ? `1.5px solid ${net.color}`
                       : "1.5px solid rgba(255,255,255,0.07)",
-                  borderRadius: 14,
+                  borderRadius: 0,
                   padding: "clamp(7px, 1.4vh, 11px) 16px",
                   cursor: "pointer",
                   transition: "all 0.2s",
@@ -194,7 +194,7 @@ export default function BuyDataPage() {
                   style={{
                     width: 46,
                     height: 46,
-                    borderRadius: 10,
+                    borderRadius: 0,
                     background: "#ffffff",
                     display: "flex",
                     alignItems: "center",
@@ -255,7 +255,7 @@ export default function BuyDataPage() {
           <div
             style={{
               background: "rgba(255,255,255,0.04)",
-              borderRadius: 14,
+              borderRadius: 0,
               padding: "clamp(10px, 1.8vh, 14px) 16px",
               marginBottom: "clamp(10px, 1.8vh, 16px)",
             }}
@@ -278,7 +278,7 @@ export default function BuyDataPage() {
                 style={{
                   display: "flex",
                   border: "1.5px solid rgba(255,255,255,0.08)",
-                  borderRadius: 10,
+                  borderRadius: 0,
                   overflow: "hidden",
                 }}
               >
@@ -337,7 +337,7 @@ export default function BuyDataPage() {
                 style={{
                   width: "100%",
                   border: "1.5px solid rgba(255,255,255,0.08)",
-                  borderRadius: 10,
+                  borderRadius: 0,
                   padding: "10px 14px",
                   fontSize: 14,
                   color: "#fff",
@@ -365,7 +365,7 @@ export default function BuyDataPage() {
               background: canSubmit && !loading ? "#C9A843" : "rgba(201,168,67,0.12)",
               color: canSubmit && !loading ? "#0f1f45" : "#C9A843",
               border: canSubmit && !loading ? "none" : "1.5px solid rgba(201,168,67,0.4)",
-              borderRadius: 14,
+              borderRadius: 0,
               padding: "clamp(10px, 1.6vh, 14px)",
               fontSize: 14,
               fontWeight: 800,
