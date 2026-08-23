@@ -52,9 +52,6 @@ export default async function AchievementPortfolioPage() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <Link href="/essentials" className="font-condensed font-bold text-xs uppercase text-gold hover:underline">
-        ← Essentials
-      </Link>
       <h1 className="font-display font-bold text-2xl text-navy mt-2 mb-1">Achievement Portfolio</h1>
       <p className="font-body text-sm text-g600 mb-6">
         Badges you've earned from contributing approved papers and study materials.
