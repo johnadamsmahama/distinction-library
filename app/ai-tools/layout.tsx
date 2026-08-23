@@ -1,6 +1,6 @@
 import Constellation from '@/components/ai-tools/Constellation';
 import DashboardNav from '@/components/dashboard/DashboardNav';
-import BackToDashboard from '@/components/shared/BackToDashboard';
+import HomeButtonGate from '@/components/shared/HomeButtonGate';
 import { createClient } from '@/lib/supabase/server';
 import { isStaffRole, isAdminRole } from '@/lib/auth-helpers';
 
@@ -42,7 +42,7 @@ export default async function AiToolsLayout({ children }: { children: React.Reac
       <div className="relative z-10">
         <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
         <div className="mx-auto max-w-3xl px-4 py-3">
-          <BackToDashboard />
+          <HomeButtonGate />
           {children}
         </div>
       </div>
