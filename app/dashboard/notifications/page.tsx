@@ -129,11 +129,11 @@ export default async function NotificationsPage() {
             return (
               <div
                 key={n.id}
-                className={`flex gap-3.5 p-4 rounded-xl border border-g100 bg-white ${style.border} ${
+                className={`flex gap-3.5 p-4 rounded-none border border-g100 bg-white ${style.border} ${
                   !n.read ? 'ring-1 ring-gold/30' : ''
                 }`}
               >
-                <div className={`shrink-0 w-8 h-8 rounded-[9px] flex items-center justify-center ${style.iconBg}`}>
+                <div className={`shrink-0 w-8 h-8 rounded-none flex items-center justify-center ${style.iconBg}`}>
                   <svg viewBox="0 0 24 24" fill="none" strokeWidth={2.2} className={`w-4 h-4 ${style.iconStroke}`}>
                     {style.icon}
                   </svg>
