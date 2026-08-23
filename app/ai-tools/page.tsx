@@ -95,7 +95,7 @@ export default async function AiToolsPage() {
                 }}
               />
               <div
-                className="relative rounded-2xl p-4 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
+                className="relative rounded-none p-4 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
                 style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
               >
                 <div
@@ -105,7 +105,7 @@ export default async function AiToolsPage() {
                   }}
                 />
                 <div
-                  className="relative w-9 h-9 rounded-full flex items-center justify-center mb-2.5"
+                  className="relative w-9 h-9 rounded-none flex items-center justify-center mb-2.5"
                   style={{ border: '1px solid rgba(212,160,23,0.6)', background: 'rgba(212,160,23,0.06)' }}
                 >
                   <Icon />
