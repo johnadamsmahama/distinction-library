@@ -190,8 +190,8 @@ export default function AccountSettings({
   return (
     <div className="space-y-4 max-w-2xl">
       {/* vault dial */}
-      <div className="w-14 h-14 rounded-full mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
-        <div className="absolute inset-1.5 rounded-full border border-dashed border-gold-light/40" />
+      <div className="w-14 h-14 rounded-none mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
+        <div className="absolute inset-1.5 rounded-none border border-dashed border-gold-light/40" />
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[22px] h-[22px] stroke-gold-light">
           <rect x="3" y="11" width="18" height="10" rx="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -258,7 +258,7 @@ export default function AccountSettings({
           </svg>
           <h2 className={`${panelTitle} flex-1`}>Access Email</h2>
           <span
-            className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${
+            className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-none border ${
               emailConfirmed
                 ? 'text-green-300 bg-green-400/10 border-green-400/30'
                 : 'text-amber-300 bg-amber-400/10 border-amber-400/30'
@@ -342,7 +342,7 @@ export default function AccountSettings({
           <h2 className={panelTitle}>Privacy Shield</h2>
         </div>
         <div className="flex items-start gap-3 relative">
-          <div className="w-[38px] h-[38px] rounded-[10px] bg-gold-light/10 border border-gold-light/30 flex items-center justify-center flex-shrink-0">
+          <div className="w-[38px] h-[38px] rounded-none bg-gold-light/10 border border-gold-light/30 flex items-center justify-center flex-shrink-0">
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-gold-light">
               <path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z" />
             </svg>
@@ -361,12 +361,12 @@ export default function AccountSettings({
             aria-checked={leaderboardOptOut}
             onClick={togglePrivacy}
             disabled={privacyLoading}
-            className={`w-10 h-[23px] rounded-full flex-shrink-0 mt-0.5 relative transition-colors disabled:opacity-60 ${
+            className={`w-10 h-[23px] rounded-none flex-shrink-0 mt-0.5 relative transition-colors disabled:opacity-60 ${
               leaderboardOptOut ? 'bg-gold' : 'bg-white/15'
             }`}
           >
             <span
-              className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-full bg-white transition-all ${
+              className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-none bg-white transition-all ${
                 leaderboardOptOut ? 'left-[19px]' : 'left-[2.5px]'
               }`}
             />
@@ -387,22 +387,22 @@ export default function AccountSettings({
           These are handled as requests reviewed by our team, not instant actions.
         </p>
         <div className="space-y-2.5 relative">
-          <div className="flex items-center justify-between bg-gold-light/5 border border-dashed border-gold-light/35 rounded-[10px] px-3.5 py-3">
+          <div className="flex items-center justify-between bg-gold-light/5 border border-dashed border-gold-light/35 rounded-none px-3.5 py-3">
             <span className="font-body font-semibold text-[12.5px] text-[#F0F2F8]">Data Export</span>
             <button
               onClick={() => submitRequest('export')}
               disabled={requestLoading !== null}
-              className="font-condensed font-bold text-[10.5px] text-gold-light border border-gold-light/40 px-3 py-1.5 rounded-md disabled:opacity-60 flex-shrink-0 ml-3"
+              className="font-condensed font-bold text-[10.5px] text-gold-light border border-gold-light/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
             >
               {requestLoading === 'export' ? 'Sending…' : requestSent === 'export' ? 'Requested ✓' : 'Request'}
             </button>
           </div>
-          <div className="flex items-center justify-between bg-red-500/5 border border-dashed border-red-400/35 rounded-[10px] px-3.5 py-3">
+          <div className="flex items-center justify-between bg-red-500/5 border border-dashed border-red-400/35 rounded-none px-3.5 py-3">
             <span className="font-body font-semibold text-[12.5px] text-[#E28A8A]">Account Deletion</span>
             <button
               onClick={() => submitRequest('delete')}
               disabled={requestLoading !== null}
-              className="font-condensed font-bold text-[10.5px] text-[#E28A8A] border border-[#E28A8A]/40 px-3 py-1.5 rounded-md disabled:opacity-60 flex-shrink-0 ml-3"
+              className="font-condensed font-bold text-[10.5px] text-[#E28A8A] border border-[#E28A8A]/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
             >
               {requestLoading === 'delete' ? 'Sending…' : requestSent === 'delete' ? 'Requested ✓' : 'Request'}
             </button>
@@ -413,7 +413,7 @@ export default function AccountSettings({
   );
 }
 
-const panelClass = 'relative overflow-hidden bg-navy rounded-2xl p-[18px]';
+const panelClass = 'relative overflow-hidden bg-navy rounded-none p-[18px]';
 const panelTexture =
   'absolute inset-0 pointer-events-none [background-image:repeating-linear-gradient(115deg,rgba(223,190,94,0.04)_0px,rgba(223,190,94,0.04)_1px,transparent_1px,transparent_12px)]';
 const panelHead = 'flex items-center gap-2.5 mb-4 relative';
@@ -421,9 +421,9 @@ const panelTitle = 'font-display font-semibold text-[14.5px] text-[#F9F5E9]';
 const lockIcon = 'w-[18px] h-[18px] stroke-gold-light flex-shrink-0';
 const labelClass = 'block font-condensed text-[9.5px] tracking-wide uppercase text-[#8593B8] mb-1.5';
 const inputClass =
-  'w-full px-[11px] py-[9px] rounded-lg bg-white/[0.06] border border-gold-light/25 font-body text-[13.5px] text-[#F0F2F8] placeholder:text-[#5C6785] outline-none focus:border-gold-light transition-colors';
+  'w-full px-[11px] py-[9px] rounded-none bg-white/[0.06] border border-gold-light/25 font-body text-[13.5px] text-[#F0F2F8] placeholder:text-[#5C6785] outline-none focus:border-gold-light transition-colors';
 const selectClass = `${inputClass} appearance-none`;
 const btnGold =
-  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-lg disabled:opacity-60 transition-opacity';
+  'w-full bg-gradient-to-br from-gold-light to-gold text-navy-deep font-condensed font-bold text-[12.5px] py-[11px] rounded-none disabled:opacity-60 transition-opacity';
 const btnGhost =
-  'w-full border-[1.5px] border-gold-light/40 text-gold-light font-condensed font-bold text-[12.5px] py-[11px] rounded-lg disabled:opacity-60 hover:bg-gold-light/10 transition-colors';
+  'w-full border-[1.5px] border-gold-light/40 text-gold-light font-condensed font-bold text-[12.5px] py-[11px] rounded-none disabled:opacity-60 hover:bg-gold-light/10 transition-colors';
