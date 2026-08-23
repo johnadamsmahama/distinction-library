@@ -12,7 +12,6 @@ const SECTIONS: Record<string, { label: string; href: string }> = {
   essentials: { label: 'Essentials', href: '/essentials' },
   papers: { label: 'Library', href: '/papers' },
   vault: { label: 'Study Vault', href: '/vault' },
-  tutors: { label: 'Peer Tutors', href: '/tutors' },
 };
 
 // Career Resources sub-tools go one level deeper than the standard
@@ -24,6 +23,11 @@ const CAREER_TOOLS: Record<string, string> = {
   'linkedin-optimizer': 'LinkedIn Optimizer',
 };
 
+// Top-level URL segments that don't nest under /essentials in the folder
+// structure, but conceptually belong there in the nav — so their
+// breadcrumb should still read "Home / Essentials" rather than just "Home".
+const ESSENTIALS_ALIASES = ['tutors'];
+
 export default function HomeButtonGate() {
   const pathname = usePathname();
   if (pathname === '/dashboard') return null;
@@ -32,6 +36,8 @@ export default function HomeButtonGate() {
   const topSegment = segments[0];
   const section = SECTIONS[topSegment];
   const showSectionCrumb = !!section && segments.length > 1;
+
+  const isEssentialsAlias = ESSENTIALS_ALIASES.includes(topSegment);
 
   const isCareerTool = topSegment === 'essentials' && segments[1] === 'career' && segments.length === 3;
   const careerToolLabel = isCareerTool ? CAREER_TOOLS[segments[2]] : undefined;
@@ -51,6 +57,15 @@ export default function HomeButtonGate() {
           <span className="text-g600/50 normal-case font-normal">/</span>
           <Link href={section.href} className="text-gold hover:text-gold-light drop-shadow-sm">
             {section.label}
+          </Link>
+        </>
+      )}
+
+      {isEssentialsAlias && (
+        <>
+          <span className="text-g600/50 normal-case font-normal">/</span>
+          <Link href="/essentials" className="text-gold hover:text-gold-light drop-shadow-sm">
+            Essentials
           </Link>
         </>
       )}
