@@ -34,7 +34,7 @@ export default function InstallPrompt() {
   };
 
   return (
-    <div className="bg-navy rounded-2xl p-4 mb-6 flex items-center justify-between gap-3">
+    <div className="bg-navy rounded-none p-4 mb-6 flex items-center justify-between gap-3">
       <div>
         <div className="font-condensed font-bold text-sm text-white">
           Install Distinction Library
@@ -45,7 +45,7 @@ export default function InstallPrompt() {
       </div>
       <button
         onClick={handleInstall}
-        className="flex-shrink-0 bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2.5 rounded-lg hover:bg-gold-light transition-colors"
+        className="flex-shrink-0 bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2.5 rounded-none hover:bg-gold-light transition-colors"
       >
         Install
       </button>
