@@ -73,7 +73,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
           {stats.map((s) => (
-            <div key={s.label} className="bg-white rounded p-3 border-l-[3px] border-gold">
+            <div key={s.label} className="bg-white rounded-none p-3 border-l-[3px] border-gold">
               <div className="font-display font-bold text-2xl text-navy mb-0.5">{s.value}</div>
               <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">{s.label}</div>
             </div>
@@ -87,7 +87,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <Link
                 key={t.href}
                 href={t.href}
-                className="rounded p-3 flex items-center gap-2.5 border-l-[3px] hover:brightness-[0.97] transition-[filter]"
+                className="rounded-none p-3 flex items-center gap-2.5 border-l-[3px] hover:brightness-[0.97] transition-[filter]"
                 style={{ background: tint.bg, borderColor: tint.border, borderLeftColor: '#C9A02C' }}
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0 stroke-navy fill-none" strokeWidth={1.6}>
