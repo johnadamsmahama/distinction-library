@@ -9,12 +9,9 @@ export default function Hero() {
           backgroundSize: '52px 52px',
         }}
       />
-      <div className="absolute w-[480px] h-[480px] rounded-full blur-[90px] bg-gold/[0.14] -top-40 -left-28 pointer-events-none" />
-      <div className="absolute w-[420px] h-[420px] rounded-full blur-[90px] bg-navy/[0.55] -bottom-40 -right-24 pointer-events-none" />
 
       <div className="relative z-[2] max-w-hero text-center">
-        <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-full px-4 py-[7px] mb-7">
-          <span className="w-[6px] h-[6px] rounded-full bg-gold animate-pulse" />
+        <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-none px-4 py-[7px] mb-7">
           <span className="font-condensed font-bold text-[10.5px] tracking-[1.5px] uppercase text-gold">
             J.A. Mahama Initiative · UPSA
           </span>
@@ -24,21 +21,27 @@ export default function Hero() {
           Study with clarity. Graduate with <em className="italic text-gold">distinction</em>.
         </h1>
 
+        <div className="inline-flex items-center justify-center w-[92px] h-[92px] rounded-none border-2 border-gold text-gold-light font-condensed font-extrabold text-[11px] leading-tight tracking-wide text-center -rotate-[8deg] mb-[26px]">
+          DISTINCTION
+          <br />
+          SCHOLARS
+        </div>
+
         <p className="font-body text-[15px] leading-[1.65] text-white/70 mb-[34px]">
-          The all-in-one academic platform, built exclusively for UPSA students. Past questions,
-          curated study materials, and AI-powered learning — all in one place.
+          The one place UPSA students go to prepare — past questions, curated materials, and
+          AI-powered study tools, built exclusively for you.
         </p>
 
         <div className="flex gap-[14px] justify-center flex-wrap mb-9">
           <a
             href="/signup"
-            className="inline-flex items-center gap-[6px] bg-gold text-navy font-condensed font-bold text-sm px-[26px] py-[13px] rounded-lg hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,160,44,0.30)] transition-all"
+            className="inline-flex items-center gap-[6px] bg-gold text-navy font-condensed font-bold text-sm px-[26px] py-[13px] rounded-none hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,160,44,0.30)] transition-all"
           >
             Get Started Free →
           </a>
           <a
             href="#features"
-            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-lg border-[1.5px] border-white/20 hover:border-white/50 hover:-translate-y-0.5 transition-all"
+            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-none border-[1.5px] border-white/20 hover:border-white/50 hover:-translate-y-0.5 transition-all"
           >
             Explore Features
           </a>
