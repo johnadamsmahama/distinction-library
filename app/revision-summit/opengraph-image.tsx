@@ -6,6 +6,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default async function Image() {
+  const interBlack = await fetch(
+    'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-900-normal.ttf'
+  ).then((res) => res.arrayBuffer());
+
   return new ImageResponse(
     (
       <div
@@ -18,6 +22,7 @@ export default async function Image() {
           padding: '64px 72px 56px',
           background: 'linear-gradient(160deg, #16264d 0%, #1e3a70 55%, #24468a 100%)',
           position: 'relative',
+          fontFamily: 'Inter',
         }}
       >
         {/* corner brackets */}
@@ -61,8 +66,8 @@ export default async function Image() {
             <div
               style={{
                 fontSize: 12,
-                fontWeight: 800,
-                color: 'rgba(245,241,230,0.65)',
+                fontWeight: 900,
+                color: 'rgba(245,241,230,0.85)',
                 marginTop: 6,
                 letterSpacing: '0.05em',
               }}
@@ -82,8 +87,8 @@ export default async function Image() {
           <div
             style={{
               fontSize: 26,
-              fontWeight: 800,
-              color: 'rgba(245,241,230,0.9)',
+              fontWeight: 900,
+              color: 'rgba(245,241,230,0.95)',
               marginTop: 14,
               paddingLeft: 16,
               borderLeft: '4px solid #d4af37',
@@ -112,7 +117,7 @@ export default async function Image() {
                 <span
                   style={{
                     fontSize: 10,
-                    fontWeight: 800,
+                    fontWeight: 900,
                     letterSpacing: '0.12em',
                     color: '#f0d878',
                     textTransform: 'uppercase',
@@ -137,7 +142,7 @@ export default async function Image() {
               <span
                 style={{
                   fontSize: 10,
-                  fontWeight: 800,
+                  fontWeight: 900,
                   letterSpacing: '0.12em',
                   color: '#f0d878',
                   textTransform: 'uppercase',
@@ -147,7 +152,7 @@ export default async function Image() {
                 Mode
               </span>
               <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 900 }}>Online</span>
-              <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(245,241,230,0.7)', marginTop: 2 }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(245,241,230,0.85)', marginTop: 2 }}>
                 Google Classroom
               </span>
             </div>
@@ -174,7 +179,7 @@ export default async function Image() {
           >
             TAP TO JOIN →
           </div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(245,241,230,0.55)', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: 'rgba(245,241,230,0.75)', letterSpacing: '0.04em' }}>
             distinctionlibrary.com/revision-summit
           </div>
         </div>
@@ -183,6 +188,14 @@ export default async function Image() {
     {
       width: 1200,
       height: 630,
+      fonts: [
+        {
+          name: 'Inter',
+          data: interBlack,
+          weight: 900,
+          style: 'normal',
+        },
+      ],
     }
   );
 }
