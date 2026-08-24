@@ -4,6 +4,21 @@ export const metadata: Metadata = {
   title: 'Revision Summit — Mock Session | Distinction Library',
   description:
     'BGEC102 — Scholarly Writing · Mock Session · 25 Aug, 8:30 PM · Online (Google Classroom). Data stipend available for students joining online. Tap to sign up.',
+  openGraph: {
+    title: 'Revision Summit — Mock Session',
+    description:
+      'BGEC102 — Scholarly Writing · 25 Aug, 8:30 PM · Online (Google Classroom). Data stipend available. Tap to sign up.',
+    url: 'https://distinctionlibrary.com/revision-summit',
+    siteName: 'Distinction Library',
+    type: 'website',
+    images: [
+      {
+        url: 'https://distinctionlibrary.com/revision-summit/opengraph-image',
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
 };
 
 export default function RevisionSummitLayout({
