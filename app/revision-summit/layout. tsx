@@ -1,0 +1,15 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Revision Summit — Mock Session | Distinction Library',
+  description:
+    'BGEC102 — Scholarly Writing · Mock Session · 25 Aug, 8:30 PM · Online (Google Classroom). Data stipend available for students joining online. Tap to sign up.',
+};
+
+export default function RevisionSummitLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
+}
