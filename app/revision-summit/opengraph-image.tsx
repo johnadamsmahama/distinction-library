@@ -28,8 +28,8 @@ export default async function Image() {
             left: 36,
             width: 34,
             height: 34,
-            borderTop: '2px solid #d4af37',
-            borderLeft: '2px solid #d4af37',
+            borderTop: '3px solid #d4af37',
+            borderLeft: '3px solid #d4af37',
           }}
         />
         <div
@@ -39,8 +39,8 @@ export default async function Image() {
             right: 36,
             width: 34,
             height: 34,
-            borderBottom: '2px solid #d4af37',
-            borderRight: '2px solid #d4af37',
+            borderBottom: '3px solid #d4af37',
+            borderRight: '3px solid #d4af37',
           }}
         />
 
@@ -50,7 +50,7 @@ export default async function Image() {
             <div
               style={{
                 fontSize: 14,
-                fontWeight: 700,
+                fontWeight: 900,
                 letterSpacing: '0.18em',
                 color: '#f0d878',
                 textTransform: 'uppercase',
@@ -61,7 +61,8 @@ export default async function Image() {
             <div
               style={{
                 fontSize: 12,
-                color: 'rgba(245,241,230,0.5)',
+                fontWeight: 800,
+                color: 'rgba(245,241,230,0.65)',
                 marginTop: 6,
                 letterSpacing: '0.05em',
               }}
@@ -74,18 +75,18 @@ export default async function Image() {
         {/* middle */}
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 18 }}>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.02 }}>
-            <span style={{ fontSize: 76, fontWeight: 700, color: '#f5f1e6' }}>Revision</span>
-            <span style={{ fontSize: 76, fontWeight: 700, color: '#d4af37' }}>Summit.</span>
+            <span style={{ fontSize: 76, fontWeight: 900, color: '#f5f1e6' }}>Revision</span>
+            <span style={{ fontSize: 76, fontWeight: 900, color: '#d4af37' }}>Summit.</span>
           </div>
 
           <div
             style={{
               fontSize: 26,
-              fontWeight: 600,
-              color: 'rgba(245,241,230,0.8)',
+              fontWeight: 800,
+              color: 'rgba(245,241,230,0.9)',
               marginTop: 14,
               paddingLeft: 16,
-              borderLeft: '3px solid #d4af37',
+              borderLeft: '4px solid #d4af37',
             }}
           >
             BGEC102 — Scholarly Writing · Mock Session
@@ -111,6 +112,7 @@ export default async function Image() {
                 <span
                   style={{
                     fontSize: 10,
+                    fontWeight: 800,
                     letterSpacing: '0.12em',
                     color: '#f0d878',
                     textTransform: 'uppercase',
@@ -119,7 +121,7 @@ export default async function Image() {
                 >
                   {d.k}
                 </span>
-                <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 700 }}>{d.v}</span>
+                <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 900 }}>{d.v}</span>
               </div>
             ))}
             <div
@@ -135,6 +137,7 @@ export default async function Image() {
               <span
                 style={{
                   fontSize: 10,
+                  fontWeight: 800,
                   letterSpacing: '0.12em',
                   color: '#f0d878',
                   textTransform: 'uppercase',
@@ -143,14 +146,14 @@ export default async function Image() {
               >
                 Mode
               </span>
-              <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 700 }}>Online</span>
-              <span style={{ fontSize: 12, color: 'rgba(245,241,230,0.55)', marginTop: 2 }}>
+              <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 900 }}>Online</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'rgba(245,241,230,0.7)', marginTop: 2 }}>
                 Google Classroom
               </span>
             </div>
           </div>
 
-          <div style={{ fontSize: 15, fontWeight: 500, color: '#f0d878', marginTop: 16, display: 'flex' }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: '#f0d878', marginTop: 16, display: 'flex' }}>
             Data stipend available for students joining online
           </div>
         </div>
@@ -160,7 +163,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: 17,
-              fontWeight: 700,
+              fontWeight: 900,
               letterSpacing: '0.03em',
               color: '#0a1628',
               background: 'linear-gradient(180deg, #f0d878, #d4af37)',
@@ -171,7 +174,7 @@ export default async function Image() {
           >
             TAP TO JOIN →
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(245,241,230,0.4)', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'rgba(245,241,230,0.55)', letterSpacing: '0.04em' }}>
             distinctionlibrary.com/revision-summit
           </div>
         </div>
