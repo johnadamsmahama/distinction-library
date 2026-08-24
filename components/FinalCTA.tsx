@@ -22,13 +22,13 @@ export default function FinalCTA() {
         <div className="flex gap-[14px] justify-center flex-wrap">
           <a
             href="/signup"
-            className="inline-flex items-center gap-[6px] bg-gold text-navy font-condensed font-bold text-sm px-[26px] py-[13px] rounded-lg hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,160,44,0.30)] transition-all"
+            className="inline-flex items-center gap-[6px] bg-gold text-navy font-condensed font-bold text-sm px-[26px] py-[13px] rounded-none hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,160,44,0.30)] transition-all"
           >
             Get Started Free →
           </a>
           <a
             href="#features"
-            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-lg border-[1.5px] border-white/20 hover:border-white/50 hover:-translate-y-0.5 transition-all"
+            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-none border-[1.5px] border-white/20 hover:border-white/50 hover:-translate-y-0.5 transition-all"
           >
             See All Features
           </a>
