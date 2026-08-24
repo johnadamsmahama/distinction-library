@@ -20,7 +20,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="py-[70px] px-7 bg-off-white border-t border-[#EEF1F8]">
+    <section id="how" className="py-[70px] px-7 bg-mint-light">
       <div className="max-w-content mx-auto">
         <Reveal className="text-center max-w-[520px] mx-auto mb-11">
           <div className="eyebrow">Simple By Design</div>
