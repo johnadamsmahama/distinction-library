@@ -19,8 +19,8 @@ export default async function Image() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: '64px 72px 56px',
-          background: 'linear-gradient(160deg, #16264d 0%, #1e3a70 55%, #24468a 100%)',
+          padding: '60px 68px 52px',
+          background: 'linear-gradient(160deg, #0e1c3f 0%, #16305e 55%, #1c3d78 100%)',
           position: 'relative',
           fontFamily: 'Inter',
         }}
@@ -29,23 +29,23 @@ export default async function Image() {
         <div
           style={{
             position: 'absolute',
-            top: 36,
-            left: 36,
-            width: 34,
-            height: 34,
-            borderTop: '3px solid #d4af37',
-            borderLeft: '3px solid #d4af37',
+            top: 34,
+            left: 34,
+            width: 36,
+            height: 36,
+            borderTop: '4px solid #d4af37',
+            borderLeft: '4px solid #d4af37',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: 36,
-            right: 36,
-            width: 34,
-            height: 34,
-            borderBottom: '3px solid #d4af37',
-            borderRight: '3px solid #d4af37',
+            bottom: 34,
+            right: 34,
+            width: 36,
+            height: 36,
+            borderBottom: '4px solid #d4af37',
+            borderRight: '4px solid #d4af37',
           }}
         />
 
@@ -54,10 +54,10 @@ export default async function Image() {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div
               style={{
-                fontSize: 14,
+                fontSize: 19,
                 fontWeight: 900,
-                letterSpacing: '0.18em',
-                color: '#f0d878',
+                letterSpacing: '0.16em',
+                color: '#f5da8a',
                 textTransform: 'uppercase',
               }}
             >
@@ -65,10 +65,10 @@ export default async function Image() {
             </div>
             <div
               style={{
-                fontSize: 12,
+                fontSize: 17,
                 fontWeight: 900,
-                color: 'rgba(245,241,230,0.85)',
-                marginTop: 6,
+                color: '#ffffff',
+                marginTop: 9,
                 letterSpacing: '0.05em',
               }}
             >
@@ -78,20 +78,20 @@ export default async function Image() {
         </div>
 
         {/* middle */}
-        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.02 }}>
-            <span style={{ fontSize: 76, fontWeight: 900, color: '#f5f1e6' }}>Revision</span>
-            <span style={{ fontSize: 76, fontWeight: 900, color: '#d4af37' }}>Summit.</span>
+            <span style={{ fontSize: 78, fontWeight: 900, color: '#ffffff' }}>Revision</span>
+            <span style={{ fontSize: 78, fontWeight: 900, color: '#e0b74a' }}>Summit.</span>
           </div>
 
           <div
             style={{
-              fontSize: 26,
+              fontSize: 32,
               fontWeight: 900,
-              color: 'rgba(245,241,230,0.95)',
-              marginTop: 14,
-              paddingLeft: 16,
-              borderLeft: '4px solid #d4af37',
+              color: '#ffffff',
+              marginTop: 20,
+              paddingLeft: 18,
+              borderLeft: '6px solid #e0b74a',
             }}
           >
             BGEC102 — Scholarly Writing · Mock Session
@@ -107,58 +107,58 @@ export default async function Image() {
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  border: '1px solid rgba(212,175,55,0.35)',
-                  background: 'rgba(212,175,55,0.06)',
-                  padding: '12px 20px',
+                  border: '2px solid rgba(224,183,74,0.6)',
+                  background: 'rgba(224,183,74,0.14)',
+                  padding: '14px 24px',
                   marginRight: 14,
                   borderRadius: 3,
                 }}
               >
                 <span
                   style={{
-                    fontSize: 10,
+                    fontSize: 14,
                     fontWeight: 900,
-                    letterSpacing: '0.12em',
-                    color: '#f0d878',
+                    letterSpacing: '0.1em',
+                    color: '#f5da8a',
                     textTransform: 'uppercase',
-                    marginBottom: 4,
+                    marginBottom: 6,
                   }}
                 >
                   {d.k}
                 </span>
-                <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 900 }}>{d.v}</span>
+                <span style={{ fontSize: 24, color: '#ffffff', fontWeight: 900 }}>{d.v}</span>
               </div>
             ))}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                border: '1px solid rgba(212,175,55,0.35)',
-                background: 'rgba(212,175,55,0.06)',
-                padding: '12px 20px',
+                border: '2px solid rgba(224,183,74,0.6)',
+                background: 'rgba(224,183,74,0.14)',
+                padding: '14px 24px',
                 borderRadius: 3,
               }}
             >
               <span
                 style={{
-                  fontSize: 10,
+                  fontSize: 14,
                   fontWeight: 900,
-                  letterSpacing: '0.12em',
-                  color: '#f0d878',
+                  letterSpacing: '0.1em',
+                  color: '#f5da8a',
                   textTransform: 'uppercase',
-                  marginBottom: 4,
+                  marginBottom: 6,
                 }}
               >
                 Mode
               </span>
-              <span style={{ fontSize: 18, color: '#f5f1e6', fontWeight: 900 }}>Online</span>
-              <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(245,241,230,0.85)', marginTop: 2 }}>
+              <span style={{ fontSize: 24, color: '#ffffff', fontWeight: 900 }}>Online</span>
+              <span style={{ fontSize: 16, fontWeight: 900, color: '#ffffff', marginTop: 3 }}>
                 Google Classroom
               </span>
             </div>
           </div>
 
-          <div style={{ fontSize: 15, fontWeight: 900, color: '#f0d878', marginTop: 16, display: 'flex' }}>
+          <div style={{ fontSize: 21, fontWeight: 900, color: '#f5da8a', marginTop: 22, display: 'flex' }}>
             Data stipend available for students joining online
           </div>
         </div>
@@ -167,19 +167,19 @@ export default async function Image() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div
             style={{
-              fontSize: 17,
+              fontSize: 21,
               fontWeight: 900,
               letterSpacing: '0.03em',
-              color: '#0a1628',
-              background: 'linear-gradient(180deg, #f0d878, #d4af37)',
-              padding: '16px 28px',
+              color: '#08132b',
+              background: 'linear-gradient(180deg, #f5da8a, #e0b74a)',
+              padding: '18px 32px',
               borderRadius: 4,
               display: 'flex',
             }}
           >
             TAP TO JOIN →
           </div>
-          <div style={{ fontSize: 13, fontWeight: 900, color: 'rgba(245,241,230,0.75)', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: 17, fontWeight: 900, color: '#ffffff', letterSpacing: '0.04em' }}>
             distinctionlibrary.com/revision-summit
           </div>
         </div>
