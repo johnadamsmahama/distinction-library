@@ -27,19 +27,31 @@ export default async function Stats() {
   ];
 
   return (
-    <section className="bg-navy py-14 px-7">
-      <div className="max-w-content mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-6 gap-y-9 text-center">
-        {STATS.map((s) => (
-          <div key={s.label}>
+    <section className="relative bg-navy py-16 px-7 overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(201,160,44,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(201,160,44,0.06) 1px, transparent 1px)',
+          backgroundSize: '44px 44px',
+        }}
+      />
+      <div className="relative z-10 max-w-content mx-auto flex flex-wrap justify-center gap-[22px]">
+        {STATS.map((s, i) => (
+          <div
+            key={s.label}
+            className="relative w-[118px] h-[122px] border border-gold/50 flex flex-col items-center justify-center text-center pt-1 before:content-[''] before:absolute before:inset-[6px] before:border before:border-gold/30"
+            style={{ transform: `rotate(${[-3, 2, -2, 4][i % 4]}deg)`, marginTop: [0, 8, 0, 6][i % 4] }}
+          >
             <svg
               viewBox="0 0 24 24"
-              className="w-5 h-5 mx-auto mb-[14px] stroke-gold fill-none"
-              strokeWidth={1.8}
+              className="relative z-10 w-[18px] h-[18px] mb-1.5 stroke-gold fill-none"
+              strokeWidth={2.2}
             >
               <path d={s.path} />
             </svg>
-            <div className="font-display font-bold text-[30px] text-gold mb-2">{s.num}</div>
-            <div className="font-condensed font-semibold text-[10px] uppercase tracking-[1.2px] text-white/70">
+            <div className="relative z-10 font-display font-black text-[21px] text-gold-light">{s.num}</div>
+            <div className="relative z-10 font-condensed font-extrabold text-[7.5px] uppercase tracking-[.07em] text-white/70 mt-1">
               {s.label}
             </div>
           </div>
