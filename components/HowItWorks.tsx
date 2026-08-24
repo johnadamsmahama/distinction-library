@@ -20,42 +20,35 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="py-[70px] px-7 bg-mint-light">
+    <section id="how" className="py-[46px] px-7 bg-white">
       <div className="max-w-content mx-auto">
-        <Reveal className="text-center max-w-[520px] mx-auto mb-11">
+        <Reveal className="text-center max-w-[520px] mx-auto mb-7">
           <div className="eyebrow">Simple By Design</div>
-          <h2 className="font-display font-bold text-[clamp(26px,4vw,36px)] text-navy mt-[10px]">
+          <h2 className="font-display font-bold text-[clamp(26px,4vw,36px)] text-navy mt-[8px]">
             Up and running in minutes.
           </h2>
         </Reveal>
 
         <Reveal>
-          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div
-              className="hidden md:block absolute top-[31px] left-[calc(16.66%+31px)] right-[calc(16.66%+31px)] h-0.5"
-              style={{
-                backgroundImage: 'linear-gradient(to right, #C9A02C 0, #C9A02C 8px, transparent 8px, transparent 16px)',
-                backgroundSize: '16px 2px',
-              }}
-            />
-            {STEPS.map((s, i) => (
-              <div key={s.title} className="relative text-center">
-                <div className="relative w-[62px] h-[62px] mx-auto mb-[22px]">
-                  <div className="w-[62px] h-[62px] bg-navy border-2 border-gold flex items-center justify-center relative z-[1]">
-                    <svg viewBox="0 0 24 24" className="w-[26px] h-[26px] stroke-gold fill-none" strokeWidth={2.2}>
+          <div className="border-[3px] border-navy py-5 px-[30px] bg-[#F1E7C6]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {STEPS.map((s, i) => (
+                <div key={s.title} className="text-center">
+                  <div className="font-condensed font-extrabold text-[11px] tracking-[1.5px] text-gold mb-[6px]">
+                    STEP 0{i + 1}
+                  </div>
+                  <div className="w-[52px] h-[52px] mx-auto mb-4 bg-navy flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] stroke-gold fill-none" strokeWidth={2}>
                       <path d={s.path} />
                     </svg>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gold text-navy font-condensed font-black text-[12px] flex items-center justify-center z-[2]">
-                    {i + 1}
-                  </div>
+                  <h3 className="font-display font-bold text-lg text-navy mb-2">{s.title}</h3>
+                  <p className="font-body text-[13px] leading-[1.6] text-g600">
+                    {s.desc}
+                  </p>
                 </div>
-                <h3 className="font-display font-black text-lg text-navy mb-[10px]">{s.title}</h3>
-                <p className="font-body text-[13.5px] leading-[1.6] text-g600 max-w-[280px] mx-auto">
-                  {s.desc}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </Reveal>
       </div>
