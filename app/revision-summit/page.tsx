@@ -3,19 +3,17 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-// Edit these five values per session — everything else stays the same.
+// Edit these values per session — everything else stays the same.
 const SESSION_COURSE = 'BGEC102 — Scholarly Writing';
 const SESSION_DATE = '2026-08-25';
 const SESSION_DATE_LABEL = '25 Aug';
-const SESSION_TIME = '11:00 AM';
-const SESSION_LOCATION = 'LBC Block';
+const SESSION_TIME = '8:30 PM';
+const SESSION_MODE = 'Online (Google Classroom) — link shared after you sign up';
 
 export default function RevisionSummitPage() {
   const [fullName, setFullName] = useState('');
   const [courseLevel, setCourseLevel] = useState('');
-  const [livesInHostel, setLivesInHostel] = useState('yes');
-  const [preferredFormat, setPreferredFormat] = useState<'in_person' | 'online'>('in_person');
-  const [needsTransport, setNeedsTransport] = useState('yes');
+  const [wantsStipend, setWantsStipend] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
@@ -40,14 +38,12 @@ export default function RevisionSummitPage() {
       student_id: userData?.user?.id ?? null,
       full_name: fullName.trim(),
       course_level: courseLevel.trim(),
-      lives_in_hostel: livesInHostel === 'yes',
-      preferred_format: preferredFormat,
-      needs_transport: needsTransport === 'yes',
+      wants_stipend: wantsStipend,
       phone_number: phoneNumber.trim(),
       session_course: SESSION_COURSE,
       session_date: SESSION_DATE,
       session_time: SESSION_TIME,
-      session_location: SESSION_LOCATION,
+      session_location: SESSION_MODE,
     });
 
     setSubmitting(false);
@@ -66,7 +62,8 @@ export default function RevisionSummitPage() {
         <div className="max-w-[340px] w-full bg-white rounded-xl border border-g100 p-8 text-center">
           <p className="font-display font-bold text-xl text-navy mb-2">You&apos;re signed up</p>
           <p className="font-body text-sm text-g600 leading-relaxed">
-            See you at the Revision Summit — {SESSION_DATE_LABEL}, {SESSION_TIME} at {SESSION_LOCATION}.
+            See you at the Revision Summit — {SESSION_DATE_LABEL}, {SESSION_TIME}, online.
+            {wantsStipend && ' We\u2019ll be in touch about your data stipend before the session.'}
           </p>
         </div>
       </div>
@@ -85,7 +82,7 @@ export default function RevisionSummitPage() {
           </p>
           <p className="font-body font-semibold text-[13px] text-white mt-2">{SESSION_COURSE}</p>
           <p className="font-body text-[11px] text-white/65 mt-1">
-            Date: {SESSION_DATE_LABEL} &middot; Time: {SESSION_TIME} &middot; {SESSION_LOCATION}
+            Date: {SESSION_DATE_LABEL} &middot; Time: {SESSION_TIME} &middot; {SESSION_MODE}
           </p>
         </div>
 
@@ -113,54 +110,6 @@ export default function RevisionSummitPage() {
           </div>
 
           <div>
-            <label className="block text-[13px] font-semibold text-g800 mb-1.5">Do you live in the hostel?</label>
-            <select
-              value={livesInHostel}
-              onChange={(e) => setLivesInHostel(e.target.value)}
-              className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm"
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-semibold text-g800 mb-2">Preferred format</label>
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2.5 bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm">
-                <input
-                  type="radio"
-                  name="format"
-                  checked={preferredFormat === 'in_person'}
-                  onChange={() => setPreferredFormat('in_person')}
-                />
-                In-person mock session
-              </label>
-              <label className="flex items-center gap-2.5 bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm">
-                <input
-                  type="radio"
-                  name="format"
-                  checked={preferredFormat === 'online'}
-                  onChange={() => setPreferredFormat('online')}
-                />
-                Online mock session
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[13px] font-semibold text-g800 mb-1.5">Need transport support?</label>
-            <select
-              value={needsTransport}
-              onChange={(e) => setNeedsTransport(e.target.value)}
-              className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm"
-            >
-              <option value="yes">Yes, I&apos;m off-campus</option>
-              <option value="no">No, I&apos;m in the hostel</option>
-            </select>
-          </div>
-
-          <div>
             <label className="block text-[13px] font-semibold text-g800 mb-1.5">Phone number</label>
             <input
               type="tel"
@@ -170,6 +119,16 @@ export default function RevisionSummitPage() {
               className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm placeholder:text-g600/70"
             />
           </div>
+
+          <label className="flex items-start gap-2.5 bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm">
+            <input
+              type="checkbox"
+              checked={wantsStipend}
+              onChange={(e) => setWantsStipend(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span>I&apos;d like a mobile data stipend to join the session online</span>
+          </label>
 
           {error && <p className="text-xs text-red-600">{error}</p>}
 
