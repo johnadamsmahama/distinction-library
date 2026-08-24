@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'Revision Summit — Mock Session, Distinction Library';
+export const alt = 'Revision Summit — Mock Session, J.A. Mahama Distinction Programme';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -16,7 +16,7 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '64px 72px 56px',
-          background: 'linear-gradient(180deg, #0a1628 0%, #0f2340 100%)',
+          background: 'linear-gradient(160deg, #16264d 0%, #1e3a70 55%, #24468a 100%)',
           position: 'relative',
         }}
       >
@@ -66,7 +66,7 @@ export default async function Image() {
                 letterSpacing: '0.05em',
               }}
             >
-              DISTINCTION LIBRARY · UPSA
+              PEER-LED PREP SERIES · UPSA
             </div>
           </div>
         </div>
