@@ -1,6 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 
-export default async function AdminRevisionSummitPage() {
+type Filter = 'all' | 'stipend' | 'in_person' | 'online';
+
+export default async function AdminRevisionSummitPage({
+  searchParams,
+}: {
+  searchParams: { filter?: string };
+}) {
   const supabase = createClient();
 
   const { data: signups } = await supabase
@@ -14,6 +20,29 @@ export default async function AdminRevisionSummitPage() {
   const needTransport = rows.filter((r) => r.preferred_format === 'in_person' && r.needs_transport);
   const needStipend = rows.filter((r) => r.preferred_format === 'online' && r.wants_stipend);
 
+  const activeFilter: Filter =
+    searchParams.filter === 'stipend' ||
+    searchParams.filter === 'in_person' ||
+    searchParams.filter === 'online'
+      ? searchParams.filter
+      : 'all';
+
+  const filteredRows =
+    activeFilter === 'stipend'
+      ? needStipend
+      : activeFilter === 'in_person'
+      ? inPerson
+      : activeFilter === 'online'
+      ? online
+      : rows;
+
+  const tabs: { key: Filter; label: string; count: number }[] = [
+    { key: 'all', label: 'All', count: rows.length },
+    { key: 'stipend', label: 'Needs data stipend', count: needStipend.length },
+    { key: 'in_person', label: 'In-person', count: inPerson.length },
+    { key: 'online', label: 'Online', count: online.length },
+  ];
+
   return (
     <div>
       <h2 className="font-display font-bold text-xl text-navy mb-1">Revision Summit signups</h2>
@@ -21,7 +50,7 @@ export default async function AdminRevisionSummitPage() {
         {rows.length} total responses
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="bg-white rounded p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{rows.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Total signups</div>
@@ -44,11 +73,27 @@ export default async function AdminRevisionSummitPage() {
         </div>
       </div>
 
-      {rows.length === 0 ? (
-        <p className="font-body text-sm text-g600">No signups yet.</p>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {tabs.map((tab) => (
+          <a
+            key={tab.key}
+            href={tab.key === 'all' ? '?' : `?filter=${tab.key}`}
+            className="font-condensed text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
+            style={{
+              background: activeFilter === tab.key ? '#0D2B5E' : '#E9EFF6',
+              color: activeFilter === tab.key ? '#FFFFFF' : '#0D2B5E',
+            }}
+          >
+            {tab.label} ({tab.count})
+          </a>
+        ))}
+      </div>
+
+      {filteredRows.length === 0 ? (
+        <p className="font-body text-sm text-g600">No signups match this filter.</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {rows.map((r) => {
+          {filteredRows.map((r) => {
             const isInPerson = r.preferred_format === 'in_person';
             return (
               <div key={r.id} className="bg-white rounded p-4 border-l-[3px] border-gold">
