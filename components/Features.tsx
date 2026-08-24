@@ -6,64 +6,77 @@ import Reveal from './Reveal';
 const CARDS = [
   {
     title: 'Library',
-    desc: 'Past papers and curated study materials — notes, slides, summaries — searchable by course, level, and week. Browse, download, or upload your own.',
-    tag: 'Community-contributed & platform-curated · Moderated · Watermarked',
+    desc: 'Past papers and curated study materials — notes, slides, summaries — searchable by course, level, and week. Browse, download, or contribute your own.',
+    tag: 'Community-contributed & platform-curated · Moderated',
     path: 'M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z',
     badge: 'Core',
   },
   {
-    title: 'Upload Resources',
-    desc: 'Upload slides, past papers, or notes for other students — help build the library while earning leaderboard recognition.',
-    tag: 'Moderated on submission · Earns leaderboard points',
-    path: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
-  },
-  {
     title: 'Exam Predictor',
-    desc: 'AI-ranked predictions of likely exam questions, built from past papers, course materials, and examiner patterns — plus AI-written answers for any past paper, on demand.',
-    tag: 'Beta · Course-specific rankings · Solved Past Papers',
+    desc: 'AI-ranked predictions of likely exam questions, built from past papers and examiner patterns — plus AI-written answers for any past paper, on demand.',
+    tag: 'Beta · Course-specific · Solved Past Papers',
     path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 16a4 4 0 100-8 4 4 0 000 8z M12 13a1 1 0 100-2 1 1 0 000 2z',
   },
   {
     title: 'Study Companion',
-    desc: 'Upload notes, ask anything — instant explanations, summaries, revision notes.',
+    desc: 'Upload notes, ask anything — instant explanations, summaries, and revision notes.',
     tag: 'Private to you · Saved to your Study Vault',
     path: 'M12 3a6 6 0 016 6c0 3.5-2.5 5-3 7H9c-.5-2-3-3.5-3-7a6 6 0 016-6zM9 21h6',
   },
   {
     title: 'Quiz Generator',
-    desc: 'PDF → MCQs, true/false, and short-answer with answers & explanations.',
-    tag: 'Generated from your own materials · Always private',
+    desc: 'PDF → MCQs, true/false, and short-answer questions, with answers & explanations included.',
+    tag: 'Generated from your own materials · Private',
     path: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
   },
   {
     title: 'Presentation Kit',
-    desc: 'Turn a topic, a Vault item, or an uploaded document into a PowerPoint (PPTX) ready to present.',
-    tag: 'Generated from your own materials · Ready to download',
+    desc: 'Turn a topic, a Vault item, or an uploaded document into a PowerPoint ready to present.',
+    tag: 'Generated from your materials · Ready to download',
     path: 'M3 4h18v13H3V4zM8 21h8M12 17v4M7 12l3-4 2.5 3L17 6',
   },
   {
-    title: 'Peer Tutors',
+    title: 'GPA Calculator',
+    desc: 'Track your GPA as results release, and test hypothetical grades for courses still pending.',
+    tag: 'Released vs. Projected GPA',
+    path: 'M3 3v18h18M8 17V10M13 17V6M18 17v-4',
+    badge: 'New',
+  },
+  {
+    title: 'Career Resources',
+    desc: 'AI CV Builder, Cover Letter Generator, Interview Coach, and LinkedIn Optimizer — build a stronger application in minutes.',
+    tag: 'Four AI tools · Tailored to your goals',
+    path: 'M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM9 7V5h6v2',
+  },
+  {
+    title: 'Distinction Mentors',
     desc: 'Get one-on-one help from a fellow student — book revision sessions with peer tutors and Distinction Programme facilitators.',
-    tag: 'Distinction Mentors · Book a session',
+    tag: 'Peer tutors & facilitators · Book a session',
     path: 'M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M11 3a4 4 0 110 8 4 4 0 010-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
   },
   {
-    title: 'Essentials',
-    desc: 'Mentors, jobs & opportunities, and your achievement portfolio — support beyond the study materials.',
-    tag: 'Scholarships · Internships · Achievement badges',
-    path: 'M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z',
+    title: 'Jobs & Opportunities',
+    desc: 'Scholarships, internships, graduate programmes, and jobs — verified for UPSA students.',
+    tag: 'Verified listings · Updated regularly',
+    path: 'M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z',
   },
   {
-    title: 'Private Study Vault',
-    desc: 'Encrypted personal space — AI quizzes, sessions, notes. Only you can see it.',
-    tag: 'Zero visibility to others · Fully private',
-    path: 'M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4',
+    title: 'Events & Sessions',
+    desc: 'Revision sessions, workshops, and career fairs — shown as a calendar you can actually plan around.',
+    tag: 'Includes Revision Summit · RSVP in one tap',
+    path: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
   },
   {
     title: 'Leaderboard & Badges',
     desc: 'Gold, Silver, and Bronze recognition for top past-paper contributors each semester.',
     tag: 'Resets each semester · All-time archive kept',
     path: 'M8 21V9M13 21V4M18 21v-6M3 21h18',
+  },
+  {
+    title: 'Private Study Vault',
+    desc: 'Encrypted personal space — AI quizzes, sessions, notes. Only you can see it.',
+    tag: 'Zero visibility to others · Fully private',
+    path: 'M3 11h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V11zM7 11V7a5 5 0 0110 0v4',
   },
 ];
 
@@ -124,7 +137,7 @@ export default function Features() {
               return (
                 <div
                   key={c.title}
-                  className="group relative flex-none w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] min-h-[300px] rounded-sm p-6 pb-5 flex flex-col border border-l-[3px] border-l-gold hover:border-l-navy transition-all duration-300 hover:-translate-y-1"
+                  className="group relative flex-none w-full sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] min-h-[300px] rounded-none p-6 pb-5 flex flex-col border border-l-[3px] border-l-gold hover:border-l-navy transition-all duration-300 hover:-translate-y-1"
                   style={{
                     background: tint.bg,
                     borderColor: tint.border,
@@ -138,7 +151,7 @@ export default function Features() {
                   }}
                 >
                   {c.badge && (
-                    <span className="absolute top-[22px] right-5 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] text-gold border border-gold px-[9px] py-[3px] rounded-sm">
+                    <span className="absolute top-[22px] right-5 font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] text-gold border border-gold px-[9px] py-[3px] rounded-none">
                       {c.badge}
                     </span>
                   )}
@@ -169,7 +182,7 @@ export default function Features() {
             <button
               aria-label="Previous"
               onClick={() => goTo(page - 1)}
-              className="w-[38px] h-[38px] rounded-sm border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
+              className="w-[38px] h-[38px] rounded-none border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
             >
               ‹
             </button>
@@ -179,7 +192,7 @@ export default function Features() {
                   key={i}
                   aria-label={`Go to slide ${i + 1}`}
                   onClick={() => goTo(i)}
-                  className={`h-[7px] rounded-full transition-all ${
+                  className={`h-[7px] rounded-none transition-all ${
                     i === page ? 'w-[22px] bg-gold' : 'w-[7px] bg-[#D8DCE8]'
                   }`}
                 />
@@ -188,7 +201,7 @@ export default function Features() {
             <button
               aria-label="Next"
               onClick={() => goTo(page + 1)}
-              className="w-[38px] h-[38px] rounded-sm border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
+              className="w-[38px] h-[38px] rounded-none border border-[#E2E6EF] flex items-center justify-center text-navy hover:border-gold transition-colors"
             >
               ›
             </button>
