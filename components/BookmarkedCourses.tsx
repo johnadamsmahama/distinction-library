@@ -28,7 +28,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
   };
 
   return (
-    <div className="bg-white border border-g100 rounded-2xl p-6">
+    <div className="bg-white border border-g100 rounded-none p-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="font-display font-bold text-lg text-navy">Your courses</h2>
         <Link href="/papers" className="font-condensed font-bold text-xs uppercase tracking-wide text-navy-mid hover:underline">
@@ -44,7 +44,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
           </p>
           <Link
             href="/papers"
-            className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg hover:bg-gold-light transition-colors"
+            className="inline-block bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:bg-gold-light transition-colors"
           >
             Browse courses
           </Link>
@@ -54,7 +54,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
           {list.map((c) => (
             <div
               key={c.course_id}
-              className="flex items-center justify-between border border-g100 rounded-xl px-4 py-3 hover:border-gold transition-colors"
+              className="flex items-center justify-between border border-g100 rounded-none px-4 py-3 hover:border-gold transition-colors"
             >
               <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
                 <div className="font-condensed font-bold text-sm text-navy truncate">
@@ -67,7 +67,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
               <button
                 onClick={() => removeBookmark(c.course_id)}
                 aria-label={`Remove bookmark for ${c.code}`}
-                className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                className="flex-shrink-0 ml-3 w-7 h-7 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
                 ✕
               </button>
