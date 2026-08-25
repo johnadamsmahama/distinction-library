@@ -68,7 +68,7 @@ export default function AboutPage() {
         <div className="max-w-[680px] mx-auto">
           <div className="eyebrow mb-4">The Founder</div>
           <div className="flex items-start gap-5">
-            <div className="w-16 h-16 flex-shrink-0 rounded-full bg-gold flex items-center justify-center font-display font-bold text-xl text-navy">
+            <div className="w-16 h-16 flex-shrink-0 rounded-none bg-gold flex items-center justify-center font-display font-bold text-xl text-navy">
               JM
             </div>
             <div>
@@ -97,7 +97,7 @@ export default function AboutPage() {
         <h2 className="font-display font-bold text-2xl text-navy mb-4">Ready to get started?</h2>
         <Link
           href="/signup"
-          className="inline-block bg-gold text-navy font-condensed font-bold text-sm px-7 py-3 rounded-lg hover:bg-gold-light transition-colors"
+          className="inline-block bg-gold text-navy font-condensed font-bold text-sm px-7 py-3 rounded-none hover:bg-gold-light transition-colors"
         >
           Create your account
         </Link>
