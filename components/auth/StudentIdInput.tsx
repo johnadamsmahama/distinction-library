@@ -17,7 +17,7 @@ export default function StudentIdInput({
         UPSA Student ID
       </label>
       <div
-        className={`flex items-center rounded-lg border bg-white overflow-hidden transition-colors ${
+        className={`flex items-center rounded-none border bg-white overflow-hidden transition-colors ${
           error ? 'border-red-400' : 'border-g100 focus-within:border-gold'
         }`}
       >
