@@ -69,7 +69,7 @@ function LoginForm() {
       }
     >
       {loggedOutForInactivity && (
-        <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 font-body text-xs text-amber-700">
+        <div className="mb-4 rounded-none bg-amber-50 border border-amber-200 px-4 py-3 font-body text-xs text-amber-700">
           You were logged out after a period of inactivity, for your security.
         </div>
       )}
@@ -93,7 +93,7 @@ function LoginForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-11 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+              className="w-full px-4 py-3 pr-11 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
               autoComplete="current-password"
             />
             <button
@@ -122,7 +122,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Logging in…' : 'Log in'}
         </button>
