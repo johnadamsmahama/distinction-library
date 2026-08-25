@@ -59,7 +59,7 @@ export default function RevisionSummitPage() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center px-6">
-        <div className="max-w-[340px] w-full bg-white rounded-xl border border-g100 p-8 text-center">
+        <div className="max-w-[340px] w-full bg-white rounded-none border border-g100 p-8 text-center">
           <p className="font-display font-bold text-xl text-navy mb-2">You&apos;re signed up</p>
           <p className="font-body text-sm text-g600 leading-relaxed">
             See you at the Revision Summit — {SESSION_DATE_LABEL}, {SESSION_TIME}, online.
@@ -72,7 +72,7 @@ export default function RevisionSummitPage() {
 
   return (
     <div className="min-h-screen bg-off-white flex items-center justify-center px-6 py-10">
-      <div className="max-w-[340px] w-full bg-white rounded-xl border border-g100 overflow-hidden">
+      <div className="max-w-[340px] w-full bg-white rounded-none border border-g100 overflow-hidden">
         <div className="bg-navy px-5 py-5 text-center">
           <p className="font-condensed text-[10px] tracking-wide text-white/90 font-semibold">
             J.A. MAHAMA DISTINCTION PROGRAMME
@@ -94,7 +94,7 @@ export default function RevisionSummitPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="e.g. J.A. Mahama"
-              className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm placeholder:text-g600/70"
+              className="w-full bg-mint-light border border-mint text-g800 rounded-none px-3 py-2.5 text-sm placeholder:text-g600/70"
             />
           </div>
 
@@ -105,7 +105,7 @@ export default function RevisionSummitPage() {
               value={courseLevel}
               onChange={(e) => setCourseLevel(e.target.value)}
               placeholder="e.g. Communication Studies, Level 100"
-              className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm placeholder:text-g600/70"
+              className="w-full bg-mint-light border border-mint text-g800 rounded-none px-3 py-2.5 text-sm placeholder:text-g600/70"
             />
           </div>
 
@@ -116,11 +116,11 @@ export default function RevisionSummitPage() {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="e.g. 024 000 0000"
-              className="w-full bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm placeholder:text-g600/70"
+              className="w-full bg-mint-light border border-mint text-g800 rounded-none px-3 py-2.5 text-sm placeholder:text-g600/70"
             />
           </div>
 
-          <label className="flex items-start gap-2.5 bg-mint-light border border-mint text-g800 rounded-md px-3 py-2.5 text-sm">
+          <label className="flex items-start gap-2.5 bg-mint-light border border-mint text-g800 rounded-none px-3 py-2.5 text-sm">
             <input
               type="checkbox"
               checked={wantsStipend}
@@ -135,7 +135,7 @@ export default function RevisionSummitPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gold text-navy-deep font-condensed font-bold text-sm py-3 rounded-md hover:bg-gold-light transition-colors disabled:opacity-60"
+            className="w-full bg-gold text-navy-deep font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
           >
             {submitting ? 'Submitting…' : 'Submit response'}
           </button>
