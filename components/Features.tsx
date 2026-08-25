@@ -3,6 +3,29 @@
 import { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
 
+// Nested corner-bracket ornament — gold (outer) / navy (mid) / mint (inner).
+// Sits in normal document flow (never absolutely positioned over text), so it
+// can't overlap the heading or cards at any viewport width. `flip` mirrors it
+// 180° for the bottom-right corner. Kept low (100px desktop / 70px mobile) so
+// it reads as a corner flourish, not a second header — card height is untouched.
+function LedgerCorner({ flip = false }: { flip?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 210 100"
+      fill="none"
+      aria-hidden="true"
+      className={`block w-[148px] h-[70px] sm:w-[210px] sm:h-[100px] ${flip ? 'rotate-180' : ''}`}
+    >
+      <path d="M8 8 L188 8" stroke="#C9A02C" strokeWidth={4} strokeLinecap="square" />
+      <path d="M8 8 L8 90" stroke="#C9A02C" strokeWidth={4} strokeLinecap="square" />
+      <path d="M34 26 L160 26" stroke="#0D2B5E" strokeWidth={3.5} strokeLinecap="square" />
+      <path d="M34 26 L34 76" stroke="#0D2B5E" strokeWidth={3.5} strokeLinecap="square" />
+      <path d="M58 42 L136 42" stroke="#4F8271" strokeWidth={3} strokeLinecap="square" />
+      <path d="M58 42 L58 62" stroke="#4F8271" strokeWidth={3} strokeLinecap="square" />
+    </svg>
+  );
+}
+
 const CARDS = [
   {
     title: 'Library',
@@ -120,6 +143,10 @@ export default function Features() {
   return (
     <section id="features" className="py-[70px] px-7 bg-off-white">
       <div className="max-w-content mx-auto">
+        <div className="flex justify-start -mb-1">
+          <LedgerCorner />
+        </div>
+
         <Reveal className="text-center max-w-[520px] mx-auto mb-11">
           <div className="eyebrow">Everything You Need</div>
           <h2 className="font-display font-bold text-[clamp(26px,4vw,36px)] text-navy mt-[10px]">
@@ -207,6 +234,10 @@ export default function Features() {
             </button>
           </div>
         </Reveal>
+
+        <div className="flex justify-end -mt-1">
+          <LedgerCorner flip />
+        </div>
       </div>
     </section>
   );
