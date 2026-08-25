@@ -26,7 +26,7 @@ export default async function UploadPage() {
           </span>
           <Link
             href="/papers/my-uploads"
-            className="ml-auto font-condensed font-bold text-[10px] uppercase text-gold border border-gold/40 rounded-full px-2.5 py-1 hover:bg-gold/10 transition-colors"
+            className="ml-auto font-condensed font-bold text-[10px] uppercase text-gold border border-gold/40 rounded-none px-2.5 py-1 hover:bg-gold/10 transition-colors"
           >
             My Uploads
           </Link>
