@@ -185,8 +185,8 @@ export default function GpaCalculatorPage() {
   return (
     <div className="max-w-content mx-auto p-4 space-y-6">
       {semesters.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-g100 bg-off-white p-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold/10">
+        <div className="rounded-none border border-dashed border-g100 bg-off-white p-8 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-none bg-gold/10">
             <span className="font-display text-xl text-gold">+</span>
           </div>
           <h2 className="font-condensed text-sm uppercase tracking-wide text-navy">
@@ -198,7 +198,7 @@ export default function GpaCalculatorPage() {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="rounded-full bg-navy px-6 py-2.5 font-condensed text-sm font-semibold text-off-white"
+            className="rounded-none bg-navy px-6 py-2.5 font-condensed text-sm font-semibold text-off-white"
           >
             + Add Your First Semester
           </button>
@@ -251,7 +251,7 @@ export default function GpaCalculatorPage() {
               <button
                 key={s.id}
                 onClick={() => setActiveSemesterId(s.id)}
-                className={`rounded-sm border px-3 py-1.5 font-condensed text-xs uppercase tracking-wide ${
+                className={`rounded-none border px-3 py-1.5 font-condensed text-xs uppercase tracking-wide ${
                   activeSemesterId === s.id
                     ? 'border-navy-deep bg-navy-deep text-off-white'
                     : 'border-g100 bg-off-white text-navy'
@@ -262,7 +262,7 @@ export default function GpaCalculatorPage() {
             ))}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-sm border border-dashed border-g500 px-3 py-1.5 font-condensed text-xs uppercase tracking-wide text-g600"
+              className="rounded-none border border-dashed border-g500 px-3 py-1.5 font-condensed text-xs uppercase tracking-wide text-g600"
             >
               + New Semester
             </button>
