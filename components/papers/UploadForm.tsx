@@ -38,10 +38,10 @@ function CatalogShell({
   className?: string;
 }) {
   return (
-    <div className={`relative bg-[#FBF6E8] rounded-[3px] shadow-[0_12px_28px_rgba(6,15,30,0.4)] ${className}`}>
+    <div className={`relative bg-[#FBF6E8] rounded-none shadow-[0_12px_28px_rgba(6,15,30,0.4)] ${className}`}>
       <div className="absolute top-[11px] left-[13px] w-[7px] h-[7px] rounded-full bg-g100 shadow-inner" />
       <div
-        className="absolute -top-[9px] right-4 text-white font-condensed font-bold text-[8.5px] tracking-wide uppercase px-2.5 pt-1 pb-[3px] rounded-t-[2px]"
+        className="absolute -top-[9px] right-4 text-white font-condensed font-bold text-[8.5px] tracking-wide uppercase px-2.5 pt-1 pb-[3px] rounded-none"
         style={{ backgroundColor: tabColor }}
       >
         {tabLabel}
@@ -106,7 +106,7 @@ export default function UploadForm({
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-navy text-white font-condensed font-bold text-xs uppercase px-4 py-2 rounded-[3px] hover:bg-navy-mid transition-colors"
+            className="bg-navy text-white font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:bg-navy-mid transition-colors"
           >
             Back to dashboard
           </button>
@@ -276,7 +276,7 @@ export default function UploadForm({
                 key={t}
                 type="button"
                 onClick={() => setTab(t)}
-                className={`flex-1 min-w-0 font-condensed font-bold text-[8.5px] uppercase text-center leading-tight rounded-[2px] py-[7px] px-[3px] border-[1.3px] transition-colors ${
+                className={`flex-1 min-w-0 font-condensed font-bold text-[8.5px] uppercase text-center leading-tight rounded-none py-[7px] px-[3px] border-[1.3px] transition-colors ${
                   tab === t ? 'bg-navy border-navy text-white' : 'bg-transparent border-navy text-navy'
                 }`}
               >
@@ -332,7 +332,7 @@ export default function UploadForm({
                       type="button"
                       onClick={toggleYearUnknown}
                       title="Mark year as unknown"
-                      className={`shrink-0 font-mono font-bold text-[10px] leading-none px-2 py-1 rounded-[2px] border-[1.3px] transition-colors ${
+                      className={`shrink-0 font-mono font-bold text-[10px] leading-none px-2 py-1 rounded-none border-[1.3px] transition-colors ${
                         yearUnknown ? 'bg-navy border-navy text-white' : 'bg-transparent border-[#C9BFA0] text-g600'
                       }`}
                     >
@@ -384,7 +384,7 @@ export default function UploadForm({
                 <label className={labelClass}>File</label>
                 <label
                   htmlFor="resource-file"
-                  className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
+                  className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
                 >
                   <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
                     {file ? file.name : 'Attach file'}
@@ -407,7 +407,7 @@ export default function UploadForm({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-[3px] shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-[7px] hover:brightness-105 transition-all"
+                className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-none shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-[7px] hover:brightness-105 transition-all"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <circle cx="12" cy="12" r="9" />
@@ -499,14 +499,14 @@ function BulkUploadPanel() {
               {totalFiles !== null ? `${cursor} / ${totalFiles} files` : 'Reading zip…'}
             </span>
           </div>
-          <div className="h-1.5 rounded-full bg-[#EAF5F0] overflow-hidden">
+          <div className="h-1.5 rounded-none bg-[#EAF5F0] overflow-hidden">
             <div className="h-full bg-[#4E9C7C] transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
         {results.length > 0 && (
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
             {results.map((r, i) => (
-              <div key={i} className="border border-[#C9BFA0] rounded-[3px] p-2 bg-white/50">
+              <div key={i} className="border border-[#C9BFA0] rounded-none p-2 bg-white/50">
                 <div className="font-mono font-bold text-[10px] text-navy break-all">{r.filename}</div>
                 <div className={`font-body text-[11px] mt-0.5 ${statusColor(r.status)}`}>{r.note}</div>
               </div>
@@ -516,7 +516,7 @@ function BulkUploadPanel() {
         {jobStatus === 'completed' && (
           <button
             onClick={() => { setJobId(null); setZipFile(null); setResults([]); setCursor(0); setTotalFiles(null); }}
-            className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-xs py-2.5 rounded-[3px] hover:brightness-105 transition-all"
+            className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-xs py-2.5 rounded-none hover:brightness-105 transition-all"
           >
             Upload another zip
           </button>
@@ -527,7 +527,7 @@ function BulkUploadPanel() {
 
   return (
     <div>
-      <div className="bg-[#4E9C7C]/8 rounded-[3px] p-3 mb-3">
+      <div className="bg-[#4E9C7C]/8 rounded-none p-3 mb-3">
         <p className="font-body text-xs text-g800 leading-relaxed">
           Upload a zip file containing multiple past papers or study materials — no need to sort
           them first. Each document is automatically read, matched to the right course, and
@@ -539,7 +539,7 @@ function BulkUploadPanel() {
       </div>
       <div className="mb-1">
         <label className={labelClass}>Zip File</label>
-        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-[3px] bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer">
+        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer">
           <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
             {zipFile ? zipFile.name : 'Attach zip file'}
           </span>
@@ -551,7 +551,7 @@ function BulkUploadPanel() {
         type="button"
         disabled={uploading}
         onClick={handleZipUpload}
-        className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-[3px] shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 hover:brightness-105 transition-all"
+        className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-none shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 hover:brightness-105 transition-all"
       >
         {uploading ? 'Uploading…' : 'Upload and Process'}
       </button>
