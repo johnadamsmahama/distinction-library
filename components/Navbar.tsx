@@ -18,7 +18,7 @@ export default function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-[100] h-[60px] bg-navy-deep border-b border-gold/10">
         <div className="max-w-content mx-auto h-full px-7 flex items-center justify-between">
           <a href="#" className="flex items-center gap-[9px]">
-            <div className="w-[30px] h-[30px] bg-gold rounded-[7px] flex items-center justify-center font-display font-black text-[15px] text-navy">
+            <div className="w-[30px] h-[30px] bg-gold rounded-none flex items-center justify-center font-display font-black text-[15px] text-navy">
               D
             </div>
             <div className="font-condensed font-bold text-[17px]">
@@ -39,7 +39,7 @@ export default function Navbar() {
             ))}
             <a
               href="/signup"
-              className="bg-gold text-navy font-condensed font-bold text-xs uppercase tracking-wide px-[18px] py-2 rounded-[7px] hover:bg-gold-light transition-colors"
+              className="bg-gold text-navy font-condensed font-bold text-xs uppercase tracking-wide px-[18px] py-2 rounded-none hover:bg-gold-light transition-colors"
             >
               Get Started Free
             </a>
