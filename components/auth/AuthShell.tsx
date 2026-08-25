@@ -25,7 +25,7 @@ export default function AuthShell({
         <div className="bg-white border border-navy-deep shadow-2xl">
           {/* Header bar — logo now lives inside the card */}
           <div className="bg-gradient-to-br from-navy to-navy-deep px-6 py-4 flex items-center gap-[9px]">
-            <div className="w-[26px] h-[26px] bg-gold rounded-[6px] flex items-center justify-center font-display font-black text-[14px] text-navy-deep flex-shrink-0">
+            <div className="w-[26px] h-[26px] bg-gold rounded-none flex items-center justify-center font-display font-black text-[14px] text-navy-deep flex-shrink-0">
               D
             </div>
             <div className="font-display text-[14px]">
