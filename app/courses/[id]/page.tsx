@@ -68,7 +68,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                   courseId={course.id}
                   courseCode={course.code}
                   title={`${course.code} — ${p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'} ${p.year}`}
-                  className="flex items-center justify-between bg-white border border-g100 rounded-lg px-4 py-3 hover:border-gold transition-colors"
+                  className="flex items-center justify-between bg-white border border-g100 rounded-none px-4 py-3 hover:border-gold transition-colors"
                 >
                   <span className="font-condensed font-semibold text-sm text-g800">
                     {p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'} {p.year}
@@ -95,7 +95,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                   courseId={course.id}
                   courseCode={course.code}
                   title={`${course.code} — ${m.title}`}
-                  className="flex items-center justify-between bg-white border border-g100 rounded-lg px-4 py-3 hover:border-gold transition-colors"
+                  className="flex items-center justify-between bg-white border border-g100 rounded-none px-4 py-3 hover:border-gold transition-colors"
                 >
                   <div className="min-w-0">
                     <div className="font-condensed font-semibold text-sm text-g800 truncate">{m.title}</div>
