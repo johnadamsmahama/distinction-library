@@ -32,13 +32,13 @@ function EmptyPodium({ message }: { message: string }) {
       <div className="flex items-end justify-center gap-2.5 mb-6">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex flex-col items-center">
-            <div className={`rounded-full border-2 border-dashed border-g100 flex items-center justify-center mb-2 ${i === 1 ? 'w-14 h-14' : 'w-11 h-11'}`}>
+            <div className={`rounded-none border-2 border-dashed border-g100 flex items-center justify-center mb-2 ${i === 1 ? 'w-14 h-14' : 'w-11 h-11'}`}>
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-g200">
                 <path d="M20 21a8 8 0 1 0-16 0" />
                 <circle cx="12" cy="8" r="4" />
               </svg>
             </div>
-            <div className={`w-[52px] rounded-t-lg bg-off border border-dashed border-g100 border-b-0 ${i === 0 ? 'h-8' : i === 1 ? 'h-13' : 'h-6'}`} />
+            <div className={`w-[52px] rounded-none bg-off border border-dashed border-g100 border-b-0 ${i === 0 ? 'h-8' : i === 1 ? 'h-13' : 'h-6'}`} />
           </div>
         ))}
       </div>
@@ -58,9 +58,9 @@ function Podium({ top3, currentUserId }: { top3: LeaderboardRow[]; currentUserId
       {order.map((row, idx) =>
         row ? (
           <div key={row.id} className="flex flex-col items-center flex-1 max-w-[110px]">
-            <div className={`relative rounded-full flex items-center justify-center font-display font-bold mb-2 shadow-md ${TIER_STYLE[styleFor[idx]].avatarBg} ${TIER_STYLE[styleFor[idx]].avatarText} ${TIER_STYLE[styleFor[idx]].size} ${row.id === currentUserId ? 'ring-2 ring-gold ring-offset-2 ring-offset-off' : ''}`}>
+            <div className={`relative rounded-none flex items-center justify-center font-display font-bold mb-2 shadow-md ${TIER_STYLE[styleFor[idx]].avatarBg} ${TIER_STYLE[styleFor[idx]].avatarText} ${TIER_STYLE[styleFor[idx]].size} ${row.id === currentUserId ? 'ring-2 ring-gold ring-offset-2 ring-offset-off' : ''}`}>
               {initial(row)}
-              <span className="absolute -bottom-1.5 -right-1 w-5 h-5 rounded-full bg-navy text-gold-light text-[10px] font-condensed font-extrabold flex items-center justify-center border-2 border-off">
+              <span className="absolute -bottom-1.5 -right-1 w-5 h-5 rounded-none bg-navy text-gold-light text-[10px] font-condensed font-extrabold flex items-center justify-center border-2 border-off">
                 {styleFor[idx] + 1}
               </span>
             </div>
@@ -68,7 +68,7 @@ function Podium({ top3, currentUserId }: { top3: LeaderboardRow[]; currentUserId
               {displayName(row)} {row.id === currentUserId && <span className="text-gold">(You)</span>}
             </div>
             <div className="font-condensed text-[11px] text-g600 mt-0.5">{row.upload_count} papers</div>
-            <div className={`w-full rounded-t-lg mt-2.5 ${TIER_STYLE[styleFor[idx]].barBg} ${TIER_STYLE[styleFor[idx]].barH}`} />
+            <div className={`w-full rounded-none mt-2.5 ${TIER_STYLE[styleFor[idx]].barBg} ${TIER_STYLE[styleFor[idx]].barH}`} />
             <div className="font-display font-extrabold text-xl text-navy-deep/70 pt-2">{styleFor[idx] + 1}</div>
           </div>
         ) : (
@@ -81,7 +81,7 @@ function Podium({ top3, currentUserId }: { top3: LeaderboardRow[]; currentUserId
 
 function RowList({ rows, currentUserId, startRank }: { rows: LeaderboardRow[]; currentUserId: string; startRank: number }) {
   return (
-    <div className="bg-white border border-g100 rounded-2xl overflow-hidden">
+    <div className="bg-white border border-g100 rounded-none overflow-hidden">
       {rows.map((row, i) => {
         const isMe = row.id === currentUserId;
         return (
