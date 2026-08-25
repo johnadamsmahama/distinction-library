@@ -186,7 +186,7 @@ function UploadRow({
   };
 
   return (
-    <div className="bg-white border border-g100 rounded-lg px-4 py-3">
+    <div className="bg-white border border-g100 rounded-none px-4 py-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
@@ -206,7 +206,7 @@ function UploadRow({
         {canResubmit && !isResubmitting && (
           <button
             onClick={onStartResubmit}
-            className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-gold text-navy hover:bg-gold/10 transition-colors flex-shrink-0"
+            className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-gold text-navy hover:bg-gold/10 transition-colors flex-shrink-0"
           >
             Fix &amp; resubmit
           </button>
@@ -226,7 +226,7 @@ function UploadRow({
             <button
               onClick={doResubmit}
               disabled={loading}
-              className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
+              className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-gold text-navy hover:bg-gold-light transition-colors disabled:opacity-60"
             >
               {loading ? 'Uploading…' : 'Submit replacement'}
             </button>
@@ -236,7 +236,7 @@ function UploadRow({
                 setError(null);
                 onCancelResubmit();
               }}
-              className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+              className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600"
             >
               Cancel
             </button>
