@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-content mx-auto">
         <div className="max-w-[420px] mx-auto">
           <div
-            className="relative border border-gold/60 rounded-sm px-4 pt-6 pb-4"
+            className="relative border border-gold/60 rounded-none px-4 pt-6 pb-4"
             style={{
               backgroundImage:
                 'repeating-linear-gradient(180deg, transparent 0 27px, rgba(212,175,55,0.08) 27px 28px)',
