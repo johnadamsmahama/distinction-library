@@ -44,7 +44,7 @@ export default function Footer() {
                 <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
               </div>
               <div className="flex items-baseline gap-1.5 py-[5.5px]">
-                <Link href="/support" className="hover:text-white transition-colors">
+                <Link href="/contact" className="hover:text-white transition-colors">
                   Contact and support
                 </Link>
                 <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
@@ -64,4 +64,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-}        
+}
