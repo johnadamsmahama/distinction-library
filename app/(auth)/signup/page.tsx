@@ -152,7 +152,7 @@ export default function SignupPage() {
           </span>
         </div>
 
-        <div className="mt-4 bg-gold/10 border border-gold/30 rounded-lg px-3.5 py-3">
+        <div className="mt-4 bg-gold/10 border border-gold/30 rounded-none px-3.5 py-3">
           <p className="font-body text-xs text-g600 leading-relaxed">
             <span className="font-condensed font-bold uppercase tracking-wide text-navy">
               Nothing after a few minutes?
@@ -212,7 +212,7 @@ export default function SignupPage() {
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+            className="w-full px-4 py-2 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
             placeholder="e.g. Ama Serwaa"
           />
         </div>
@@ -229,7 +229,7 @@ export default function SignupPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 pr-11 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+              className="w-full px-4 py-2 pr-11 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
               placeholder="At least 8 characters"
               autoComplete="new-password"
             />
@@ -248,7 +248,7 @@ export default function SignupPage() {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 pr-11 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
+              className="w-full px-4 py-2 pr-11 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors"
               autoComplete="new-password"
             />
             <EyeToggle shown={showConfirmPassword} onClick={() => setShowConfirmPassword((v) => !v)} />
@@ -260,12 +260,12 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-2 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-2 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Creating account…' : 'Create account'}
         </button>
 
-        <div className="text-center bg-gold/10 border border-gold/30 rounded-lg py-2 px-4">
+        <div className="text-center bg-gold/10 border border-gold/30 rounded-none py-2 px-4">
           <span className="font-body text-sm text-g800">
             Already have an account?{' '}
             <Link
