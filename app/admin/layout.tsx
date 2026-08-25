@@ -46,18 +46,31 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { count: pendingPapers },
     { count: pendingMaterials },
     { count: openTickets },
+    papersDownloads,
+    materialsDownloads,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('past_papers').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('study_materials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('resolved', false),
+    supabase.from('past_papers').select('download_count'),
+    supabase.from('study_materials').select('download_count'),
   ]);
+
+  // Same aggregation used by the public Stats section (components/Stats.tsx),
+  // so the two numbers never drift out of sync.
+  const totalDownloads =
+    (papersDownloads.data ?? []).reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0) +
+    (materialsDownloads.data ?? []).reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0);
 
   const stats = [
     { label: 'Total students', value: userCount ?? 0 },
-    { label: 'Papers pending review', value: pendingPapers ?? 0 },
-    { label: 'Materials pending review', value: pendingMaterials ?? 0 },
-    { label: 'Open support tickets', value: openTickets ?? 0 },
+    { label: 'Total downloads', value: totalDownloads },
+  ];
+
+  const pendingReview = [
+    { label: 'Materials pending', value: pendingMaterials ?? 0 },
+    { label: 'Papers pending', value: pendingPapers ?? 0 },
   ];
 
   return (
@@ -78,6 +91,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">{s.label}</div>
             </div>
           ))}
+
+          <div className="bg-white rounded-none p-3 border-l-[3px] border-gold flex">
+            {pendingReview.map((p, i) => (
+              <div key={p.label} className={i === 0 ? 'flex-1' : 'flex-1 border-l border-[#E2E6EF] pl-3 ml-3'}>
+                <div className="font-display font-bold text-2xl text-navy mb-0.5">{p.value}</div>
+                <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">{p.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
+            <div className="font-display font-bold text-2xl text-navy mb-0.5">{openTickets ?? 0}</div>
+            <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Open support tickets</div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2 mb-8">
