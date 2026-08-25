@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-[100] h-[60px] bg-navy-deep/90 backdrop-blur-[14px] border-b border-gold/10">
+      <nav className="fixed top-0 left-0 right-0 z-[100] h-[60px] bg-navy-deep border-b border-gold/10">
         <div className="max-w-content mx-auto h-full px-7 flex items-center justify-between">
           <a href="#" className="flex items-center gap-[9px]">
             <div className="w-[30px] h-[30px] bg-gold rounded-[7px] flex items-center justify-center font-display font-black text-[15px] text-navy">
@@ -67,7 +67,7 @@ export default function Navbar() {
       </nav>
 
       <div
-        className={`fixed top-[60px] left-0 right-0 z-[99] bg-navy-deep/97 backdrop-blur-[14px] overflow-hidden transition-[max-height] duration-300 ${
+        className={`fixed top-[60px] left-0 right-0 z-[99] bg-navy-deep overflow-hidden transition-[max-height] duration-300 ${
           open ? 'max-h-[320px]' : 'max-h-0'
         }`}
       >
