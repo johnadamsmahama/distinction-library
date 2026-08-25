@@ -89,7 +89,7 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
 
   if (items.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-2xl bg-navy px-6 py-6 text-center">
+      <div className="relative overflow-hidden rounded-none bg-navy px-6 py-6 text-center">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -109,8 +109,8 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
           </p>
 
           <div className="flex justify-center mb-4">
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-gold/50">
-              <div className="absolute inset-2 rounded-full border border-gold/25" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-none border border-gold/50">
+              <div className="absolute inset-2 rounded-none border border-gold/25" />
               <svg viewBox="0 0 24 24" fill="none" stroke="#E2BE5A" strokeWidth="1.4" className="h-6 w-6">
                 <rect x="5" y="11" width="14" height="10" rx="2" />
                 <path d="M8 11V7a4 4 0 0 1 8 0v4" />
@@ -127,13 +127,13 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
           <div className="mx-auto max-w-xs space-y-2">
             <Link
               href="/vault/quiz-generator"
-              className="block w-full rounded-xl bg-gradient-to-br from-gold-light to-gold px-4 py-2.5 text-center font-condensed font-bold text-sm uppercase tracking-wide text-navy shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
+              className="block w-full rounded-none bg-gradient-to-br from-gold-light to-gold px-4 py-2.5 text-center font-condensed font-bold text-sm uppercase tracking-wide text-navy shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
             >
               Generate a Quiz
             </Link>
             <Link
               href="/vault/companion"
-              className="block w-full rounded-xl border border-gold/35 px-4 py-2.5 text-center font-condensed font-semibold text-sm uppercase tracking-wide text-gold-light transition-colors hover:bg-gold/10"
+              className="block w-full rounded-none border border-gold/35 px-4 py-2.5 text-center font-condensed font-semibold text-sm uppercase tracking-wide text-gold-light transition-colors hover:bg-gold/10"
             >
               Open Study Companion
             </Link>
@@ -176,7 +176,7 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
 
       <div className="space-y-3">
         {filteredItems.map((item) => (
-          <div key={item.id} className="bg-white border border-g100 rounded-xl overflow-hidden">
+          <div key={item.id} className="bg-white border border-g100 rounded-none overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3.5 gap-2">
               <button
                 onClick={() => setOpenId(openId === item.id ? null : item.id)}
@@ -205,14 +205,14 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
               <div className="flex items-center flex-shrink-0">
                 <button
                   onClick={() => setOrganizingId(organizingId === item.id ? null : item.id)}
-                  className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg border border-g100 text-g600 hover:border-gold hover:text-navy transition-colors"
+                  className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-none border border-g100 text-g600 hover:border-gold hover:text-navy transition-colors"
                 >
                   Organize
                 </button>
                 <button
                   onClick={() => remove(item.id)}
                   aria-label="Delete"
-                  className="ml-2 w-7 h-7 flex items-center justify-center rounded-full text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="ml-2 w-7 h-7 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors"
                 >
                   ✕
                 </button>
@@ -272,7 +272,7 @@ function FilterPill({ active, onClick, children }: { active: boolean; onClick: (
   return (
     <button
       onClick={onClick}
-      className={`flex-shrink-0 font-condensed font-semibold text-xs uppercase tracking-wide px-3 py-2 rounded-full border transition-colors ${
+      className={`flex-shrink-0 font-condensed font-semibold text-xs uppercase tracking-wide px-3 py-2 rounded-none border transition-colors ${
         active ? 'border-gold bg-gold/10 text-navy' : 'border-g100 text-g600'
       }`}
     >
@@ -305,7 +305,7 @@ function OrganizePanel({
       <select
         value={courseId}
         onChange={(e) => setCourseId(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-3"
+        className="w-full px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-3"
       >
         <option value="">No course</option>
         {courses.map((c) => (
@@ -323,19 +323,19 @@ function OrganizePanel({
         value={folder}
         onChange={(e) => setFolder(e.target.value)}
         placeholder="e.g. Midterm Prep"
-        className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-3"
+        className="w-full px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors mb-3"
       />
 
       <div className="flex gap-2">
         <button
           onClick={() => onSave(courseId || null, folder || null)}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg bg-gold text-navy hover:bg-gold-light transition-colors"
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none bg-gold text-navy hover:bg-gold-light transition-colors"
         >
           Save
         </button>
         <button
           onClick={onCancel}
-          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+          className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600"
         >
           Cancel
         </button>
