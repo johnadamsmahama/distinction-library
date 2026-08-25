@@ -7,7 +7,7 @@ export default function FinalCTA() {
       className="relative overflow-hidden text-center bg-navy-deep py-[90px] px-7"
     >
       <div
-        className="absolute top-1/2 left-1/2 w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+        className="absolute top-1/2 left-1/2 w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 rounded-none pointer-events-none"
         style={{
           background: 'radial-gradient(circle, rgba(201,160,44,0.10), transparent 70%)',
         }}
