@@ -36,26 +36,18 @@ export default function Footer() {
                   Privacy policy
                 </Link>
                 <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
-                <span className="text-gold">→</span>
               </div>
               <div className="flex items-baseline gap-1.5 py-[5.5px]">
                 <Link href="/legal/terms" className="hover:text-white transition-colors">
                   Terms of use
                 </Link>
                 <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
-                <span className="text-gold">→</span>
-              </div>
-              <div className="flex items-baseline gap-1.5 py-[5.5px]">
-                <span>WhatsApp</span>
-                <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
-                <span>024 811 1310</span>
               </div>
               <div className="flex items-baseline gap-1.5 py-[5.5px]">
                 <Link href="/support" className="hover:text-white transition-colors">
-                  Contact &amp; support
+                  Contact and support
                 </Link>
                 <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
-                <span className="text-gold">→</span>
               </div>
             </div>
           </div>
@@ -72,4 +64,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-}
+}        
