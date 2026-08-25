@@ -46,7 +46,7 @@ export default async function CoursesPage() {
                     <Link
                       key={c.id}
                       href={`/courses/${c.id}`}
-                      className="bg-white border border-g100 rounded-xl px-4 py-3.5 hover:border-gold transition-colors"
+                      className="bg-white border border-g100 rounded-none px-4 py-3.5 hover:border-gold transition-colors"
                     >
                       <div className="font-condensed font-bold text-sm text-navy">{c.code}</div>
                       <div className="font-body text-xs text-g600 truncate">
