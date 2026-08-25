@@ -53,8 +53,8 @@ export default function BuyDataForm({
 
   if (done) {
     return (
-      <div className="bg-white border border-g100 rounded-2xl p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-3">
+      <div className="bg-white border border-g100 rounded-none p-6 text-center">
+        <div className="w-12 h-12 rounded-none bg-gold/15 flex items-center justify-center mx-auto mb-3">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C9A02C" strokeWidth="2.2">
             <path d="M20 6L9 17l-5-5" />
           </svg>
@@ -68,7 +68,7 @@ export default function BuyDataForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-2xl p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-none p-6 space-y-4">
       <div>
         <label className={labelClass}>Network</label>
         <div className="grid grid-cols-3 gap-2">
@@ -77,7 +77,7 @@ export default function BuyDataForm({
               type="button"
               key={n}
               onClick={() => setNetwork(n)}
-              className={`font-condensed font-bold text-xs uppercase tracking-wide py-3 rounded-lg border-2 transition-colors ${
+              className={`font-condensed font-bold text-xs uppercase tracking-wide py-3 rounded-none border-2 transition-colors ${
                 network === n
                   ? 'border-gold bg-gold/10 text-navy'
                   : 'border-g100 text-g600 hover:border-gold/40'
@@ -105,7 +105,7 @@ export default function BuyDataForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
       >
         {loading ? 'Joining…' : 'Notify me when it launches'}
       </button>
@@ -118,4 +118,4 @@ export default function BuyDataForm({
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
