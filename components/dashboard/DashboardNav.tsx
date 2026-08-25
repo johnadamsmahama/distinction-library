@@ -65,7 +65,7 @@ export default function DashboardNav({
     <nav className="sticky top-0 z-50 bg-navy-deep border-t-2 border-gold shadow-[0_4px_18px_rgba(6,15,30,.25)]">
       <div className="max-w-content mx-auto h-[64px] px-7 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-[9px]">
-          <div className="w-[32px] h-[32px] bg-gold rounded-[8px] flex items-center justify-center font-display font-black text-[15px] text-navy shadow-[0_2px_6px_rgba(201,160,44,.4)]">
+          <div className="w-[32px] h-[32px] bg-gold rounded-none flex items-center justify-center font-display font-black text-[15px] text-navy shadow-[0_2px_6px_rgba(201,160,44,.4)]">
             D
           </div>
           <div className="font-condensed font-bold text-[16px] hidden sm:block">
@@ -73,14 +73,14 @@ export default function DashboardNav({
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-[11px] overflow-x-auto max-w-[52vw]">
+        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-none overflow-x-auto max-w-[52vw]">
           {CORE_LINKS.map((link) => {
             const active = pathname === link.href || pathname?.startsWith(link.href + '/');
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-[15px] py-2 rounded-[8px] font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-[15px] py-2 rounded-none font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
                   active ? 'bg-gold text-navy' : 'text-white/65 hover:text-white hover:bg-white/[.07]'
                 }`}
               >
@@ -123,7 +123,7 @@ export default function DashboardNav({
 
           <Link
             href="/dashboard/notifications"
-            className="relative w-[34px] h-[34px] flex items-center justify-center rounded-[9px] hover:bg-white/[.08] transition-colors"
+            className="relative w-[34px] h-[34px] flex items-center justify-center rounded-none hover:bg-white/[.08] transition-colors"
             aria-label="Notifications"
           >
             <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-white/60 fill-none" strokeWidth={1.8}>
@@ -139,9 +139,9 @@ export default function DashboardNav({
 
           <Link
             href="/profile"
-            className="hidden sm:flex items-center gap-[9px] px-[10px] py-[5px] rounded-[10px] hover:bg-white/[.06] transition-colors"
+            className="hidden sm:flex items-center gap-[9px] px-[10px] py-[5px] rounded-none hover:bg-white/[.06] transition-colors"
           >
-            <div className="w-[30px] h-[30px] rounded-full bg-gold text-navy flex items-center justify-center font-condensed font-bold text-xs shadow-[0_0_0_2px_rgba(255,255,255,.15)]">
+            <div className="w-[30px] h-[30px] rounded-none bg-gold text-navy flex items-center justify-center font-condensed font-bold text-xs shadow-[0_0_0_2px_rgba(255,255,255,.15)]">
               {initials}
             </div>
             <span className="font-condensed font-semibold text-xs text-white">
@@ -160,7 +160,7 @@ export default function DashboardNav({
 
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-none hover:bg-white/5 transition-colors"
             aria-label="Open menu"
           >
             <svg viewBox="0 0 24 24" className="w-[20px] h-[20px] stroke-white fill-none" strokeWidth={1.8}>
