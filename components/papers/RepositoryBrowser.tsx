@@ -77,7 +77,7 @@ function FilterPill({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none cursor-pointer rounded-full pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
+        className="appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
         style={{
           fontSize: 10,
           background: active ? accent + '18' : '#ffffff',
@@ -126,7 +126,7 @@ function ResultCard({
 }) {
   return (
     <div
-      className="flex overflow-hidden rounded-[3px] relative group transition-transform hover:-translate-y-[1px]"
+      className="flex overflow-hidden rounded-none relative group transition-transform hover:-translate-y-[1px]"
       style={{
         background: '#FBF6E8',
         boxShadow: '0 4px 18px rgba(6,15,30,0.5)',
@@ -184,7 +184,7 @@ function ResultCard({
 
         <div className="flex gap-1.5 flex-wrap">
           <span
-            className="font-mono font-bold uppercase rounded-sm px-1.5 py-0.5"
+            className="font-mono font-bold uppercase rounded-none px-1.5 py-0.5"
             style={{
               fontSize: 7.5,
               letterSpacing: '0.06em',
@@ -196,7 +196,7 @@ function ResultCard({
             {type}
           </span>
           <span
-            className="font-mono font-bold uppercase rounded-sm px-1.5 py-0.5"
+            className="font-mono font-bold uppercase rounded-none px-1.5 py-0.5"
             style={{
               fontSize: 7.5,
               background: 'rgba(15,34,68,0.07)',
@@ -213,7 +213,7 @@ function ResultCard({
         {itemType === 'papers' && (
           <a
             href={`/papers/${itemId}/solutions`}
-            className="flex items-center gap-1 rounded-full px-2 py-1 transition-all hover:brightness-110"
+            className="flex items-center gap-1 rounded-none px-2 py-1 transition-all hover:brightness-110"
             style={{
               background: '#0F2244',
               border: '1px solid rgba(226,190,90,0.4)',
@@ -235,7 +235,7 @@ function ResultCard({
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackDownload(itemType, itemId)}
-          className="w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+          className="w-7 h-7 rounded-none flex items-center justify-center transition-all group-hover:scale-110"
           style={{
             background: accent + '18',
             border: `1px solid ${accent}44`,
@@ -263,12 +263,12 @@ function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
         ].map((b, i) => (
           <div
             key={i}
-            className="absolute bottom-0 rounded-t-sm"
+            className="absolute bottom-0 rounded-none"
             style={{ left: b.left, width: 20, height: b.height, background: b.color, border: `1px solid ${b.border}` }}
           />
         ))}
         <div
-          className="absolute rounded-sm"
+          className="absolute rounded-none"
           style={{ bottom: -1, left: -6, right: -6, height: 2, background: 'rgba(255,255,255,0.1)' }}
         />
       </div>
@@ -284,7 +284,7 @@ function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
 
       <a
         href="/papers/upload"
-        className="font-mono font-bold uppercase tracking-wide rounded-[3px] px-4 py-2 text-[10px] transition-all hover:brightness-110"
+        className="font-mono font-bold uppercase tracking-wide rounded-none px-4 py-2 text-[10px] transition-all hover:brightness-110"
         style={{
           background: accent,
           color: accent === '#E2BE5A' ? '#0F2244' : '#fff',
@@ -423,7 +423,7 @@ export default function RepositoryBrowser({
           </div>
           <a
             href="/papers/upload"
-            className="font-mono font-bold uppercase tracking-wide rounded-full border border-gold/35 text-gold hover:bg-gold/10 transition-colors flex-shrink-0 mt-1"
+            className="font-mono font-bold uppercase tracking-wide rounded-none border border-gold/35 text-gold hover:bg-gold/10 transition-colors flex-shrink-0 mt-1"
             style={{ fontSize: 8.5, padding: '5px 11px' }}
           >
             + Contribute
@@ -435,7 +435,7 @@ export default function RepositoryBrowser({
           {/* PAST PAPERS — left edge, aligns with search bar */}
           <button
             onClick={() => setTab('papers')}
-            className="font-mono font-bold uppercase tracking-wide rounded-[3px] transition-all"
+            className="font-mono font-bold uppercase tracking-wide rounded-none transition-all"
             style={{
               fontSize: 9,
               padding: '6px 14px',
@@ -453,7 +453,7 @@ export default function RepositoryBrowser({
           {/* STUDY MATERIALS — right edge, aligns with search bar */}
           <button
             onClick={() => setTab('materials')}
-            className="font-mono font-bold uppercase tracking-wide rounded-[3px] transition-all"
+            className="font-mono font-bold uppercase tracking-wide rounded-none transition-all"
             style={{
               fontSize: 9,
               padding: '6px 14px',
@@ -468,7 +468,7 @@ export default function RepositoryBrowser({
 
         {/* ── SEARCH ── */}
         <div
-          className="flex items-center gap-3 rounded-[4px] px-3.5 py-2.5 mb-3 transition-all"
+          className="flex items-center gap-3 rounded-none px-3.5 py-2.5 mb-3 transition-all"
           style={{
             background: 'rgba(255,255,255,0.06)',
             border: `1.5px solid ${accent}66`,
@@ -566,7 +566,7 @@ export default function RepositoryBrowser({
             }}
           >
             <div
-              className="flex items-center justify-center rounded-full"
+              className="flex items-center justify-center rounded-none"
               style={{
                 width: 20, height: 20,
                 background: 'rgba(255,255,255,0.1)',
@@ -599,7 +599,7 @@ export default function RepositoryBrowser({
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-[3px] h-[72px] animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
+              <div key={i} className="rounded-none h-[72px] animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
             ))}
           </div>
         ) : tab === 'papers' ? (
