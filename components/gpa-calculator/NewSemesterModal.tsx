@@ -47,10 +47,10 @@ export default function NewSemesterModal({ open, onClose, onCreate }: NewSemeste
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-md rounded-t-2xl bg-off-white p-5 pb-7"
+        className="w-full max-w-md rounded-none bg-off-white p-5 pb-7"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-4 h-1 w-9 rounded-full bg-g100" />
+        <div className="mx-auto mb-4 h-1 w-9 rounded-none bg-g100" />
 
         <h3 className="font-display text-xl text-navy">New Semester</h3>
         <p className="mt-1 mb-5 font-body text-sm text-g600">
@@ -68,7 +68,7 @@ export default function NewSemesterModal({ open, onClose, onCreate }: NewSemeste
             if (error) setError(null);
           }}
           placeholder='e.g. "Level 100, Semester 1"'
-          className={`w-full rounded-md border px-3 py-2.5 font-body text-sm text-g800 outline-none focus:border-gold ${
+          className={`w-full rounded-none border px-3 py-2.5 font-body text-sm text-g800 outline-none focus:border-gold ${
             error ? 'border-red-500' : 'border-g100'
           }`}
           autoFocus
@@ -84,7 +84,7 @@ export default function NewSemesterModal({ open, onClose, onCreate }: NewSemeste
                 setLabel(s);
                 setError(null);
               }}
-              className="rounded-full bg-g100 px-3 py-1 font-condensed text-xs text-g800"
+              className="rounded-none bg-g100 px-3 py-1 font-condensed text-xs text-g800"
             >
               {s}
             </button>
@@ -95,7 +95,7 @@ export default function NewSemesterModal({ open, onClose, onCreate }: NewSemeste
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 rounded-md border border-g100 py-2.5 font-condensed text-sm font-semibold text-g600"
+            className="flex-1 rounded-none border border-g100 py-2.5 font-condensed text-sm font-semibold text-g600"
           >
             Cancel
           </button>
@@ -103,7 +103,7 @@ export default function NewSemesterModal({ open, onClose, onCreate }: NewSemeste
             type="button"
             onClick={handleCreate}
             disabled={submitting}
-            className="flex-[1.4] rounded-md bg-navy py-2.5 font-condensed text-sm font-semibold text-off-white disabled:opacity-50"
+            className="flex-[1.4] rounded-none bg-navy py-2.5 font-condensed text-sm font-semibold text-off-white disabled:opacity-50"
           >
             {submitting ? 'Creating…' : 'Create Semester'}
           </button>
