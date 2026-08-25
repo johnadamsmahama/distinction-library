@@ -55,7 +55,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-none border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
       >
         <span className={selected ? '' : 'text-g600'}>{selected ? selected.label : placeholder}</span>
         <svg
@@ -68,7 +68,7 @@ export default function CustomSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-lg shadow-lg">
+        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-none shadow-lg">
           {searchable && (
             <div className="sticky top-0 bg-white border-b border-g100 p-1.5">
               <input
@@ -77,7 +77,7 @@ export default function CustomSelect({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a course code or name…"
-                className="w-full px-2.5 py-2 rounded-md border border-g100 font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
+                className="w-full px-2.5 py-2 rounded-none border border-g100 font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
               />
             </div>
           )}
