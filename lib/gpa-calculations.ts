@@ -7,11 +7,9 @@ import { GRADE_SCALE, CREDIT_HOURS, LetterGrade, DEGREE_CLASSIFICATIONS, DIPLOMA
 export function resolveGradeInput(input: string): LetterGrade | null {
   const trimmed = input.trim().toUpperCase();
 
-  // Direct letter match
   const directMatch = GRADE_SCALE.find((band) => band.grade === trimmed);
   if (directMatch) return directMatch.grade;
 
-  // Percentage match
   const asNumber = Number(trimmed);
   if (!Number.isNaN(asNumber) && asNumber >= 0 && asNumber <= 100) {
     const band = GRADE_SCALE.find(
@@ -34,21 +32,23 @@ export interface CourseEntry {
 }
 
 /**
- * Calculates GPA for a set of courses. Courses with a null grade
- * (i.e. genuinely un-filled, neither released nor hypothetical) are
- * excluded from both numerator and denominator, so a partially-completed
- * semester doesn't get diluted by phantom zeros.
+ * Calculates GPA for a set of courses, matching UPSA's official method:
+ * every course in the list contributes its credit hours to the denominator
+ * immediately — a course with grade = null (ungraded / no result yet) still
+ * counts its hours, it just contributes 0 grade points until a real or
+ * hypothetical grade is entered. This mirrors how the official transcript
+ * shows TCR including ungraded courses while TGP only reflects what's posted.
  */
 export function calculateGPA(courses: CourseEntry[]): number {
-  const gradedCourses = courses.filter((c) => c.grade !== null);
-  if (gradedCourses.length === 0) return 0;
+  if (courses.length === 0) return 0;
 
   let totalPoints = 0;
   let totalCreditHours = 0;
 
-  for (const course of gradedCourses) {
+  for (const course of courses) {
     const hours = course.creditHours ?? CREDIT_HOURS;
-    totalPoints += gradeToPoint(course.grade as LetterGrade) * hours;
+    const points = course.grade ? gradeToPoint(course.grade) * hours : 0;
+    totalPoints += points;
     totalCreditHours += hours;
   }
 
