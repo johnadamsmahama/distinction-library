@@ -55,15 +55,29 @@ function trackDownload(type: Tab, id: string) {
   });
 }
 
-// Supabase Storage URLs accept a `download` query param that forces
-// a specific filename in the browser, overriding whatever the
-// underlying storage path/ID is. We build a clean, human-readable
-// name from course/title data so downloads never show a raw
-// Supabase ID as the filename.
-function withDownloadName(url: string, filename: string) {
+// Cross-origin `download` attributes/query params are unreliable on
+// mobile Chrome — it falls back to showing the storage domain as the
+// filename. Fetching the file and saving it as a blob forces the
+// correct name on every browser, since the save then happens
+// same-origin against the in-memory blob rather than the remote URL.
+async function downloadFile(url: string, filename: string) {
   const safeName = filename.replace(/[\\/:*?"<>|]/g, '-'); // strip filesystem-unsafe chars
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}download=${encodeURIComponent(safeName)}`;
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = safeName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    // Fallback: if the fetch fails (e.g. CORS), just open the raw URL
+    // so the user can still get the file, even with the wrong name.
+    window.open(url, '_blank');
+  }
 }
 
 /* ── Pill select chip ── */
@@ -121,6 +135,7 @@ function ResultCard({
   tag,
   downloads,
   href,
+  downloadName,
   accent,
   itemType,
   itemId,
@@ -131,6 +146,7 @@ function ResultCard({
   tag: string;
   downloads: number;
   href: string;
+  downloadName: string;
   accent: string;
   itemType: Tab;
   itemId: string;
@@ -164,11 +180,13 @@ function ResultCard({
       {/* Download link — wraps content + downloads on click */}
       <a
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => trackDownload(itemType, itemId)}
+        onClick={(e) => {
+          e.preventDefault();
+          trackDownload(itemType, itemId);
+          downloadFile(href, downloadName);
+        }}
         className="px-3 py-2.5 flex-1 min-w-0"
-        style={{ textDecoration: 'none' }}
+        style={{ textDecoration: 'none', cursor: 'pointer' }}
       >
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <div className="min-w-0">
@@ -243,13 +261,16 @@ function ResultCard({
         )}
         <a
           href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackDownload(itemType, itemId)}
+          onClick={(e) => {
+            e.preventDefault();
+            trackDownload(itemType, itemId);
+            downloadFile(href, downloadName);
+          }}
           className="w-7 h-7 rounded-none flex items-center justify-center transition-all group-hover:scale-110"
           style={{
             background: accent + '18',
             border: `1px solid ${accent}44`,
+            cursor: 'pointer',
           }}
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5">
@@ -626,10 +647,8 @@ export default function RepositoryBrowser({
                   type={p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'}
                   tag={String(p.year)}
                   downloads={p.download_count}
-                  href={withDownloadName(
-                    p.watermarked_url ?? p.file_url,
-                    `${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'} ${p.year}.pdf`
-                  )}
+                  href={p.watermarked_url ?? p.file_url}
+                  downloadName={`${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'} ${p.year}.pdf`}
                   accent={accent}
                   itemType="papers"
                   itemId={p.id}
@@ -649,7 +668,8 @@ export default function RepositoryBrowser({
                 type={CONTENT_TYPE_LABEL[m.content_type]}
                 tag={m.week_number ? `Wk ${m.week_number}` : 'Material'}
                 downloads={m.download_count}
-                href={withDownloadName(m.file_url, `${m.courses.code} - ${m.title}.pdf`)}
+                href={m.file_url}
+                downloadName={`${m.courses.code} - ${m.title}.pdf`}
                 accent={accent}
                 itemType="materials"
                 itemId={m.id}
