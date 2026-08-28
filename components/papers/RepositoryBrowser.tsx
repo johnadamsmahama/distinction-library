@@ -55,6 +55,17 @@ function trackDownload(type: Tab, id: string) {
   });
 }
 
+// Supabase Storage URLs accept a `download` query param that forces
+// a specific filename in the browser, overriding whatever the
+// underlying storage path/ID is. We build a clean, human-readable
+// name from course/title data so downloads never show a raw
+// Supabase ID as the filename.
+function withDownloadName(url: string, filename: string) {
+  const safeName = filename.replace(/[\\/:*?"<>|]/g, '-'); // strip filesystem-unsafe chars
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}download=${encodeURIComponent(safeName)}`;
+}
+
 /* ── Pill select chip ── */
 function FilterPill({
   value,
@@ -615,7 +626,10 @@ export default function RepositoryBrowser({
                   type={p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'}
                   tag={String(p.year)}
                   downloads={p.download_count}
-                  href={p.watermarked_url ?? p.file_url}
+                  href={withDownloadName(
+                    p.watermarked_url ?? p.file_url,
+                    `${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'} ${p.year}.pdf`
+                  )}
                   accent={accent}
                   itemType="papers"
                   itemId={p.id}
@@ -635,7 +649,7 @@ export default function RepositoryBrowser({
                 type={CONTENT_TYPE_LABEL[m.content_type]}
                 tag={m.week_number ? `Wk ${m.week_number}` : 'Material'}
                 downloads={m.download_count}
-                href={m.file_url}
+                href={withDownloadName(m.file_url, `${m.courses.code} - ${m.title}.pdf`)}
                 accent={accent}
                 itemType="materials"
                 itemId={m.id}
