@@ -10,10 +10,17 @@ import { usePathname } from 'next/navigation';
 // shown, since repeating "Essentials" right next to itself is redundant.
 const SECTIONS: Record<string, { label: string; href: string }> = {
   essentials: { label: 'Essentials', href: '/essentials' },
-  papers: { label: 'Library', href: '/papers' },
+  papers: { label: 'Library', href: '/library' },
+  library: { label: 'Library', href: '/library' },
   vault: { label: 'Study Vault', href: '/vault' },
   'ai-tools': { label: 'AI Tools', href: '/ai-tools' },
 };
+
+// /papers is now always a dedicated destination reached through the
+// Library hub (Lecture Slides or Past Questions Bank), not a hub page
+// itself — so unlike /essentials or /library, it should show the
+// "Library" crumb even when it's the only segment in the path.
+const ALWAYS_SHOW_SECTION = ['papers'];
 
 // AI Tools sub-pages go one level deeper than the standard two-level
 // breadcrumb (Home / AI Tools / [Tool Name]).
@@ -44,7 +51,7 @@ export default function HomeButtonGate() {
   const segments = pathname.split('/').filter(Boolean); // e.g. ['essentials', 'mentors']
   const topSegment = segments[0];
   const section = SECTIONS[topSegment];
-  const showSectionCrumb = !!section && segments.length > 1;
+  const showSectionCrumb = !!section && (segments.length > 1 || ALWAYS_SHOW_SECTION.includes(topSegment));
 
   const isEssentialsAlias = ESSENTIALS_ALIASES.includes(topSegment);
 
