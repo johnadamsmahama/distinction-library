@@ -333,7 +333,8 @@ export default function RepositoryBrowser({
   courses,
   departments,
   initialCourseId,
-  initialTab,
+  mode,
+  title,
 }: {
   courses: CourseOption[];
   departments: string[];
