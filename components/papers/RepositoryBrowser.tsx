@@ -36,7 +36,6 @@ const CONTENT_TYPE_LABEL: Record<string, string> = {
 
 const LEVELS = ['100', '200', '300', '400'];
 const WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
-const YEARS = Array.from({ length: 8 }, (_, i) => String(new Date().getFullYear() - i));
 
 const GRAIN =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E\")";
@@ -98,17 +97,17 @@ function FilterPill({
     : '#555';
 
   return (
-    <div className="relative flex-shrink-0">
+    <div className="relative w-full">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
+        className="w-full appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
         style={{
           fontSize: 10,
           background: active ? accent + '18' : '#ffffff',
           border: `1.5px solid ${active ? accent : 'rgba(15,34,68,0.15)'}`,
           color: textColor,
-          minWidth: 90,
+          minWidth: 0,
         }}
       >
         {options.map((o) => (
@@ -331,13 +330,11 @@ function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
 /* ── Main component ── */
 export default function RepositoryBrowser({
   courses,
-  departments,
   initialCourseId,
   mode,
   title,
 }: {
   courses: CourseOption[];
-  departments: string[];
   initialCourseId?: string;
   mode: Tab;
   title: string;
@@ -347,8 +344,6 @@ export default function RepositoryBrowser({
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [courseId, setCourseId] = useState(initialCourseId ?? '');
   const [level, setLevel] = useState('');
-  const [department, setDepartment] = useState('');
-  const [year, setYear] = useState('');
   const [examType, setExamType] = useState('');
   const [week, setWeek] = useState('');
 
@@ -359,8 +354,8 @@ export default function RepositoryBrowser({
   const accent = tab === 'papers' ? '#E2BE5A' : '#4E9C7C';
 
   const filteredCourses = useMemo(
-    () => courses.filter((c) => (!level || c.level === level) && (!department || c.department === department)),
-    [courses, level, department]
+    () => courses.filter((c) => !level || c.level === level),
+    [courses, level]
   );
 
   useEffect(() => {
@@ -390,8 +385,6 @@ export default function RepositoryBrowser({
           .limit(100);
         if (courseId) query = query.eq('course_id', courseId);
         if (level) query = query.eq('courses.level', level);
-        if (department) query = query.eq('courses.department', department);
-        if (year) query = query.eq('year', Number(year));
         if (examType) query = query.eq('exam_type', examType);
         // Search course code/name directly in the query, rather than
         // filtering client-side after the fact — otherwise papers
@@ -411,7 +404,6 @@ export default function RepositoryBrowser({
           .limit(100);
         if (courseId) query = query.eq('course_id', courseId);
         if (level) query = query.eq('courses.level', level);
-        if (department) query = query.eq('courses.department', department);
         if (week) query = query.eq('week_number', Number(week));
         if (term) {
           query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
@@ -423,7 +415,7 @@ export default function RepositoryBrowser({
     }
     fetchResults();
     return () => { cancelled = true; };
-  }, [tab, courseId, level, department, year, examType, week, debouncedSearch]);
+  }, [tab, courseId, level, examType, week, debouncedSearch]);
 
   const visiblePapers = papers;
   const visibleMaterials = materials;
@@ -480,17 +472,7 @@ export default function RepositoryBrowser({
         </div>
 
         {/* ── FILTER CHIP STRIP ── */}
-        <div className="relative pb-0">
-          <div
-            className="flex gap-2 overflow-x-auto pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', paddingRight: 40 }}
-          >
-            <FilterPill
-              value={department}
-              onChange={setDepartment}
-              accent={accent}
-              options={[{ value: '', label: 'All Depts' }, ...departments.map((d) => ({ value: d, label: d }))]}
-            />
+        <div className="grid grid-cols-3 gap-2 pb-4">
             <FilterPill
               value={level}
               onChange={setLevel}
@@ -504,24 +486,16 @@ export default function RepositoryBrowser({
               options={[{ value: '', label: 'All Courses' }, ...filteredCourses.map((c) => ({ value: c.id, label: c.code }))]}
             />
             {tab === 'papers' ? (
-              <>
-                <FilterPill
-                  value={examType}
-                  onChange={setExamType}
-                  accent={accent}
-                  options={[
-                    { value: '', label: 'All Types' },
-                    { value: 'mid_semester', label: 'Mid-Sem' },
-                    { value: 'end_of_semester', label: 'End of Sem' },
-                  ]}
-                />
-                <FilterPill
-                  value={year}
-                  onChange={setYear}
-                  accent={accent}
-                  options={[{ value: '', label: 'Any Year' }, ...YEARS.map((y) => ({ value: y, label: y }))]}
-                />
-              </>
+              <FilterPill
+                value={examType}
+                onChange={setExamType}
+                accent={accent}
+                options={[
+                  { value: '', label: 'All Types' },
+                  { value: 'mid_semester', label: 'Mid-Sem' },
+                  { value: 'end_of_semester', label: 'End of Sem' },
+                ]}
+              />
             ) : (
               <FilterPill
                 value={week}
@@ -530,30 +504,6 @@ export default function RepositoryBrowser({
                 options={[{ value: '', label: 'All Weeks' }, ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))]}
               />
             )}
-          </div>
-
-          {/* Right-fade + › scroll indicator */}
-          <div
-            className="absolute right-0 top-0 pointer-events-none flex items-center justify-end pr-1"
-            style={{
-              width: 48,
-              height: 'calc(100% - 16px)',
-              background: 'linear-gradient(to right, transparent 0%, #0D2B5E 60%)',
-            }}
-          >
-            <div
-              className="flex items-center justify-center rounded-none"
-              style={{
-                width: 20, height: 20,
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.22)',
-              }}
-            >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="3">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </div>
-          </div>
         </div>
       </div>
 
