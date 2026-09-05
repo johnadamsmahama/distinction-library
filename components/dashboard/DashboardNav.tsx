@@ -19,7 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 // student is logged in — added here so it's actually reachable.
 const CORE_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/papers', label: 'Library' },
+  { href: '/library', label: 'Library' },
   { href: '/ai-tools', label: 'AI Tools' },
   { href: '/predictor', label: 'Exam Predictor' },
   { href: '/essentials', label: 'Essentials' },
