@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes that require a logged-in student.
-const PROTECTED_PREFIXES = ['/dashboard', '/vault', '/admin', '/moderate', '/papers', '/leaderboard', '/blog', '/support'];
+const PROTECTED_PREFIXES = ['/dashboard', '/vault', '/admin', '/moderate', '/papers', '/library', '/leaderboard', '/blog', '/support'];
 // Routes a logged-in student shouldn't see again (bounce to dashboard).
 const AUTH_ONLY_PREFIXES = ['/login', '/signup'];
 
