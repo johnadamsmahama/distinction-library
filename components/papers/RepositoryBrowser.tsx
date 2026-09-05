@@ -333,12 +333,14 @@ export default function RepositoryBrowser({
   courses,
   departments,
   initialCourseId,
+  initialTab,
 }: {
   courses: CourseOption[];
   departments: string[];
   initialCourseId?: string;
+  initialTab?: Tab;
 }) {
-  const [tab, setTab] = useState<Tab>('papers');
+  const [tab, setTab] = useState<Tab>(initialTab ?? 'papers');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [courseId, setCourseId] = useState(initialCourseId ?? '');
@@ -575,7 +577,6 @@ export default function RepositoryBrowser({
                     { value: '', label: 'All Types' },
                     { value: 'lecture_slides', label: 'Slides' },
                     { value: 'study_notes', label: 'Notes' },
-                    { value: 'study_guide', label: 'Guide' },
                   ]}
                 />
                 <FilterPill
