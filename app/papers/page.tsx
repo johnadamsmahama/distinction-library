@@ -11,7 +11,8 @@ export default async function PapersPage({
   const courses = await getCourseOptions(supabase);
   const departments = await getDepartmentOptions(courses);
 
-  const initialTab = searchParams.tab === 'materials' ? 'materials' : 'papers';
+  const mode = searchParams.tab === 'materials' ? 'materials' : 'papers';
+  const title = mode === 'materials' ? 'Lecture Slides' : 'Past Questions Bank';
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
@@ -19,7 +20,8 @@ export default async function PapersPage({
         courses={courses}
         departments={departments}
         initialCourseId={searchParams.course}
-        initialTab={initialTab}
+        mode={mode}
+        title={title}
       />
     </div>
   );
