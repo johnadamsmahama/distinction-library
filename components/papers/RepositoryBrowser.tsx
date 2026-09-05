@@ -155,7 +155,7 @@ function ResultCard({
     <div
       className="flex overflow-hidden rounded-none relative group transition-transform hover:-translate-y-[1px]"
       style={{
-        background: '#FBF6E8',
+        background: itemType === 'papers' ? '#FBF6E8' : '#EEF6F1',
         boxShadow: '0 4px 18px rgba(6,15,30,0.5)',
       }}
     >
@@ -351,7 +351,6 @@ export default function RepositoryBrowser({
   const [year, setYear] = useState('');
   const [examType, setExamType] = useState('');
   const [week, setWeek] = useState('');
-  const [contentType, setContentType] = useState('');
 
   const [papers, setPapers] = useState<PaperResult[]>([]);
   const [materials, setMaterials] = useState<MaterialResult[]>([]);
@@ -414,7 +413,6 @@ export default function RepositoryBrowser({
         if (level) query = query.eq('courses.level', level);
         if (department) query = query.eq('courses.department', department);
         if (week) query = query.eq('week_number', Number(week));
-        if (contentType) query = query.eq('content_type', contentType);
         if (term) {
           query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
         }
@@ -425,7 +423,7 @@ export default function RepositoryBrowser({
     }
     fetchResults();
     return () => { cancelled = true; };
-  }, [tab, courseId, level, department, year, examType, week, contentType, debouncedSearch]);
+  }, [tab, courseId, level, department, year, examType, week, debouncedSearch]);
 
   const visiblePapers = papers;
   const visibleMaterials = materials;
@@ -525,24 +523,12 @@ export default function RepositoryBrowser({
                 />
               </>
             ) : (
-              <>
-                <FilterPill
-                  value={contentType}
-                  onChange={setContentType}
-                  accent={accent}
-                  options={[
-                    { value: '', label: 'All Types' },
-                    { value: 'lecture_slides', label: 'Slides' },
-                    { value: 'study_notes', label: 'Notes' },
-                  ]}
-                />
-                <FilterPill
-                  value={week}
-                  onChange={setWeek}
-                  accent={accent}
-                  options={[{ value: '', label: 'All Weeks' }, ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))]}
-                />
-              </>
+              <FilterPill
+                value={week}
+                onChange={setWeek}
+                accent={accent}
+                options={[{ value: '', label: 'All Weeks' }, ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))]}
+              />
             )}
           </div>
 
