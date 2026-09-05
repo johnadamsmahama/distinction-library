@@ -338,9 +338,10 @@ export default function RepositoryBrowser({
   courses: CourseOption[];
   departments: string[];
   initialCourseId?: string;
-  initialTab?: Tab;
+  mode: Tab;
+  title: string;
 }) {
-  const [tab, setTab] = useState<Tab>(initialTab ?? 'papers');
+  const tab = mode;
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [courseId, setCourseId] = useState(initialCourseId ?? '');
@@ -446,58 +447,13 @@ export default function RepositoryBrowser({
       <div className="relative px-4 sm:px-6 lg:px-8 pt-10 pb-0">
 
         {/* Title row */}
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <div className="font-mono font-bold uppercase tracking-[0.14em] text-gold mb-1.5 opacity-80" style={{ fontSize: 9 }}>
-              Library
-            </div>
-            <h1 className="font-display font-bold text-white leading-tight" style={{ fontSize: 22 }}>
-              Past Questions &<br />Study Materials
-            </h1>
+        <div className="mb-5">
+          <div className="font-mono font-bold uppercase tracking-[0.14em] text-gold mb-1.5 opacity-80" style={{ fontSize: 9 }}>
+            Library
           </div>
-          <a
-            href="/papers/upload"
-            className="font-mono font-bold uppercase tracking-wide rounded-none border border-gold/35 text-gold hover:bg-gold/10 transition-colors flex-shrink-0 mt-1"
-            style={{ fontSize: 8.5, padding: '5px 11px' }}
-          >
-            + Contribute
-          </a>
-        </div>
-
-        {/* ── TAB BUTTONS — truly separate, no shared bar ── */}
-        <div className="flex items-center justify-between mb-2.5">
-          {/* PAST PAPERS — left edge, aligns with search bar */}
-          <button
-            onClick={() => setTab('papers')}
-            className="font-mono font-bold uppercase tracking-wide rounded-none transition-all"
-            style={{
-              fontSize: 9,
-              padding: '6px 14px',
-              background: tab === 'papers' ? '#E2BE5A' : '#ffffff',
-              border: tab === 'papers' ? 'none' : '1.5px solid rgba(226,190,90,0.35)',
-              color: tab === 'papers' ? '#0F2244' : 'rgba(226,190,90,0.6)',
-            }}
-          >
-            Past Papers
-          </button>
-
-          {/* Pure gap — naked navy, nothing connecting them */}
-          <div className="flex-1" />
-
-          {/* STUDY MATERIALS — right edge, aligns with search bar */}
-          <button
-            onClick={() => setTab('materials')}
-            className="font-mono font-bold uppercase tracking-wide rounded-none transition-all"
-            style={{
-              fontSize: 9,
-              padding: '6px 14px',
-              background: tab === 'materials' ? '#4E9C7C' : '#ffffff',
-              border: tab === 'materials' ? 'none' : '1.5px solid rgba(78,156,124,0.35)',
-              color: tab === 'materials' ? '#ffffff' : 'rgba(78,156,124,0.6)',
-            }}
-          >
-            Study Materials
-          </button>
+          <h1 className="font-display font-bold text-white leading-tight" style={{ fontSize: 22 }}>
+            {title}
+          </h1>
         </div>
 
         {/* ── SEARCH ── */}
