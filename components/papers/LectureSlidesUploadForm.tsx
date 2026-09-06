@@ -7,11 +7,11 @@ import type { CourseOption } from '@/lib/papers-data';
 
 type UploadMode = 'single' | 'bulk';
 
-const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#5A6478] mb-1 block';
+const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#8FA3C9] mb-1 block';
 const fieldRow = 'mb-4';
-const fieldUnderline = 'border-b-[1.5px] border-[#0D2B5E] pb-[5px]';
-const filledText = 'font-body text-[14px] font-medium text-navy';
-const placeholderText = 'font-body italic text-[13px] text-[#a09a86]';
+const fieldUnderline = 'border-b-[1.5px] border-gold pb-[5px]';
+const filledText = 'font-body text-[14px] font-semibold text-white';
+const placeholderText = 'font-body italic text-[13px] text-[#B7C0D4]';
 
 // Computes a SHA-256 hash of a File's contents in the browser, using the
 // built-in Web Crypto API — no extra library needed. Used to catch exact
@@ -26,7 +26,7 @@ async function hashFile(file: File): Promise<string> {
 
 // The four corner marks that give the bookplate its "certificate" framing.
 function CornerMarks() {
-  const base = 'absolute w-2.5 h-2.5 border-[#0D2B5E]';
+  const base = 'absolute w-2.5 h-2.5 border-gold';
   return (
     <>
       <span className={`${base} top-1.5 left-1.5 border-t-[1.5px] border-l-[1.5px]`} />
@@ -37,19 +37,18 @@ function CornerMarks() {
   );
 }
 
-// The bookplate frame itself: outer navy hairline, inner gold rule, corner
-// marks. Used for the form as well as the suspended/submitted states, so
-// every state of this page shares the same identity.
+// The bookplate frame itself: gold rule, corner marks, sitting directly on
+// the page's navy background (no separate card layer). Used for the form as
+// well as the suspended/submitted states, so every state of this page shares
+// the same identity.
 function Bookplate({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[#0D2B5E] p-[5px] rounded-none">
-      <div className="relative border border-gold px-[18px] pt-[18px] pb-4">
-        <CornerMarks />
-        <div className="text-center font-mono text-[9px] tracking-[0.14em] text-[#8A6A1C] mb-3">
-          EX LIBRIS · DISTINCTION LIBRARY
-        </div>
-        {children}
+    <div className="relative border border-gold px-[18px] pt-[18px] pb-4 rounded-none">
+      <CornerMarks />
+      <div className="text-center font-mono text-[9px] tracking-[0.14em] text-gold mb-3">
+        EX LIBRIS · DISTINCTION LIBRARY
       </div>
+      {children}
     </div>
   );
 }
@@ -166,8 +165,8 @@ export default function LectureSlidesUploadForm({
     return (
       <Bookplate>
         <div className="text-center py-4">
-          <h2 className="font-display font-bold text-base text-navy mb-1.5">Uploads suspended</h2>
-          <p className="font-body text-[13px] text-g600 leading-relaxed">
+          <h2 className="font-display font-bold text-base text-white mb-1.5">Uploads suspended</h2>
+          <p className="font-body text-[13px] text-[#B7C0D4] leading-relaxed">
             Your upload privileges are currently suspended after reaching 3 strikes. Contact support
             if you believe this is a mistake.
           </p>
@@ -180,14 +179,14 @@ export default function LectureSlidesUploadForm({
     return (
       <Bookplate>
         <div className="text-center py-4">
-          <h2 className="font-display font-bold text-base text-navy mb-1.5">Submitted for review</h2>
-          <p className="font-body text-[13px] text-g600 mb-4 leading-relaxed">
+          <h2 className="font-display font-bold text-base text-white mb-1.5">Submitted for review</h2>
+          <p className="font-body text-[13px] text-[#B7C0D4] mb-4 leading-relaxed">
             Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
             notification once it&apos;s approved or rejected.
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-navy text-white font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:bg-navy-mid transition-colors"
+            className="bg-gold text-navy font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:brightness-105 transition-all"
           >
             Back to dashboard
           </button>
@@ -285,14 +284,14 @@ export default function LectureSlidesUploadForm({
   return (
     <Bookplate>
       {/* Single / Bulk toggle */}
-      <div className="flex border border-navy mb-4">
+      <div className="flex border border-gold mb-4">
         {(['single', 'bulk'] as UploadMode[]).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMode(m)}
             className={`flex-1 font-mono font-bold text-[9.5px] uppercase tracking-wide py-2 transition-colors ${
-              mode === m ? 'bg-navy text-white' : 'bg-transparent text-navy'
+              mode === m ? 'bg-gold text-navy' : 'bg-transparent text-gold-light'
             }`}
           >
             {m === 'single' ? 'Single Upload' : 'Bulk Upload'}
@@ -312,7 +311,7 @@ export default function LectureSlidesUploadForm({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full bg-transparent outline-none ${fieldUnderline} ${title ? filledText : ''} placeholder:italic placeholder:text-[13px] placeholder:text-[#a09a86] placeholder:font-body ${title ? '' : 'font-body'}`}
+              className={`w-full bg-transparent outline-none ${fieldUnderline} ${title ? filledText : ''} placeholder:italic placeholder:text-[13px] placeholder:text-[#B7C0D4] placeholder:font-body ${title ? '' : 'font-body'}`}
               placeholder="e.g. Week 4 — Sampling Methods"
             />
           </div>
@@ -323,7 +322,7 @@ export default function LectureSlidesUploadForm({
               type="number"
               value={week}
               onChange={(e) => setWeek(e.target.value)}
-              className={`w-full bg-transparent outline-none ${fieldUnderline} ${week ? filledText : ''} placeholder:italic placeholder:text-[13px] placeholder:text-[#a09a86] placeholder:font-body ${week ? '' : 'font-body'}`}
+              className={`w-full bg-transparent outline-none ${fieldUnderline} ${week ? filledText : ''} placeholder:italic placeholder:text-[13px] placeholder:text-[#B7C0D4] placeholder:font-body ${week ? '' : 'font-body'}`}
               placeholder="Enter week 1 – 12"
               min={1}
               max={12}
@@ -333,12 +332,12 @@ export default function LectureSlidesUploadForm({
           <div className="mb-1 mt-2">
             <label
               htmlFor="lecture-slides-file"
-              className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
+              className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/10 py-[9px] px-2.5 text-center cursor-pointer"
             >
-              <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
+              <span className="block font-mono font-bold text-[10px] text-white underline mb-0.5 truncate">
                 {file ? file.name : 'Attach file'}
               </span>
-              <span className="block font-mono text-[9px] text-g600 tracking-wide">
+              <span className="block font-mono text-[9px] text-[#B7C0D4] tracking-wide">
                 PDF · WORD · POWERPOINT · JPG · PNG
               </span>
             </label>
@@ -351,7 +350,7 @@ export default function LectureSlidesUploadForm({
             />
           </div>
 
-          {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
+          {error && <p className="font-body text-xs text-red-400 mt-2.5">{error}</p>}
 
           <button
             type="submit"
@@ -373,12 +372,12 @@ export default function LectureSlidesUploadForm({
 type JobResult = { filename: string; status: string; note: string };
 
 function statusColor(status: string): string {
-  if (status === 'auto_approved') return 'text-green-600';
+  if (status === 'auto_approved') return 'text-green-400';
   if (status === 'queued_for_review') return 'text-gold';
-  if (status === 'skipped_duplicate') return 'text-g600';
-  if (status === 'needs_manual_review') return 'text-orange-500';
-  if (status === 'error') return 'text-red-500';
-  return 'text-g600';
+  if (status === 'skipped_duplicate') return 'text-[#B7C0D4]';
+  if (status === 'needs_manual_review') return 'text-orange-400';
+  if (status === 'error') return 'text-red-400';
+  return 'text-[#B7C0D4]';
 }
 
 function BulkUploadPanel() {
@@ -448,22 +447,22 @@ function BulkUploadPanel() {
       <div>
         <div className="mb-2.5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="font-condensed font-bold text-xs text-navy">
+            <span className="font-condensed font-bold text-xs text-white">
               {jobStatus === 'completed' ? 'Done' : jobStatus === 'failed' ? 'Something went wrong' : 'Processing…'}
             </span>
-            <span className="font-mono text-[9.5px] text-g600">
+            <span className="font-mono text-[9.5px] text-[#B7C0D4]">
               {totalFiles !== null ? `${cursor} / ${totalFiles} files` : 'Reading zip…'}
             </span>
           </div>
-          <div className="h-1.5 rounded-none bg-[#EAF5F0] overflow-hidden">
+          <div className="h-1.5 rounded-none bg-white/10 overflow-hidden">
             <div className="h-full bg-[#4E9C7C] transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
         {results.length > 0 && (
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
             {results.map((r, i) => (
-              <div key={i} className="border border-[#C9BFA0] rounded-none p-2 bg-white/50">
-                <div className="font-mono font-bold text-[10px] text-navy break-all">{r.filename}</div>
+              <div key={i} className="border border-gold/25 rounded-none p-2 bg-white/5">
+                <div className="font-mono font-bold text-[10px] text-white break-all">{r.filename}</div>
                 <div className={`font-body text-[11px] mt-0.5 ${statusColor(r.status)}`}>{r.note}</div>
               </div>
             ))}
@@ -483,8 +482,8 @@ function BulkUploadPanel() {
 
   return (
     <div>
-      <div className="bg-[#4E9C7C]/8 rounded-none p-3 mb-3">
-        <p className="font-body text-xs text-g800 leading-relaxed">
+      <div className="bg-[#4E9C7C]/15 rounded-none p-3 mb-3">
+        <p className="font-body text-xs text-[#D6E4DC] leading-relaxed">
           Upload a zip file containing multiple lecture slide files — no need to sort them
           first. Each file is automatically read, matched to the right course, and sorted by
           week. Confident matches go live immediately; anything uncertain is flagged for
@@ -494,14 +493,14 @@ function BulkUploadPanel() {
       </div>
       <div className="mb-1">
         <label className={labelClass}>Zip File</label>
-        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer">
-          <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
+        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/10 py-[9px] px-2.5 text-center cursor-pointer">
+          <span className="block font-mono font-bold text-[10px] text-white underline mb-0.5 truncate">
             {zipFile ? zipFile.name : 'Attach zip file'}
           </span>
         </label>
         <input id="zip-file" type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] ?? null)} className="hidden" />
       </div>
-      {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
+      {error && <p className="font-body text-xs text-red-400 mt-2.5">{error}</p>}
       <button
         type="button"
         disabled={uploading}
@@ -513,4 +512,3 @@ function BulkUploadPanel() {
     </div>
   );
 }
-
