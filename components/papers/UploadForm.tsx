@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
 import CustomSelect from '@/components/ui/CustomSelect';
 
-type Tab = 'paper' | 'material' | 'bulk';
+type UploadMode = 'single' | 'bulk';
 
 const LEVELS_WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
 
@@ -54,12 +54,14 @@ function CatalogShell({
 export default function UploadForm({
   courses,
   uploadSuspended,
+  kind,
 }: {
   courses: CourseOption[];
   uploadSuspended: boolean;
+  kind: 'paper' | 'material';
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>('paper');
+  const [mode, setMode] = useState<UploadMode>('single');
   const [courseId, setCourseId] = useState('');
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [yearUnknown, setYearUnknown] = useState(false);
@@ -121,8 +123,8 @@ export default function UploadForm({
 
     if (!courseId) return setError('Select a course.');
     if (!file) return setError('Choose a file to upload.');
-    if (tab === 'material' && !title.trim()) return setError('Give the material a title.');
-    if (tab === 'paper' && !yearUnknown && !year) return setError('Enter a year, or mark it unknown.');
+    if (kind === 'material' && !title.trim()) return setError('Give the material a title.');
+    if (kind === 'paper' && !yearUnknown && !year) return setError('Enter a year, or mark it unknown.');
 
     setLoading(true);
     const supabase = createClient();
@@ -151,7 +153,7 @@ export default function UploadForm({
       return;
     }
 
-    if (tab === 'paper') {
+    if (kind === 'paper') {
       // Unknown-year papers skip the same-course/year/exam-type duplicate
       // check — with no year to compare, that check can't meaningfully
       // apply, and the content-hash check above already caught exact
@@ -192,7 +194,7 @@ export default function UploadForm({
     const ext = file.name.split('.').pop();
     const path = `${user.id}/${courseId}/${Date.now()}.${ext}`;
 
-    if (tab === 'paper') {
+    if (kind === 'paper') {
       const { error: uploadErr } = await supabase.storage.from('past-papers').upload(path, file);
       if (uploadErr) { setLoading(false); setError(uploadErr.message); return; }
 
@@ -259,7 +261,7 @@ export default function UploadForm({
       {/* Card header row */}
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
         <span className="font-mono text-[10px] text-g600 tracking-wide">
-          UPSA / {tab === 'paper' && yearUnknown ? '----' : year}
+          UPSA / {kind === 'paper' && yearUnknown ? '----' : year}
         </span>
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
@@ -267,26 +269,26 @@ export default function UploadForm({
       {/* Card body — grows to fill card */}
       <div className="px-4 pt-3 pb-4 pl-8 flex-1 flex flex-col min-h-0">
 
-        {/* Resource type toggle */}
+        {/* Upload mode toggle */}
         <div className={`${ruledField} shrink-0`}>
-          <div className={labelClass}>Resource Type</div>
+          <div className={labelClass}>{kind === 'paper' ? 'Past Paper' : 'Study Material'}</div>
           <div className="flex gap-1">
-            {(['paper', 'material', 'bulk'] as Tab[]).map((t) => (
+            {(['single', 'bulk'] as UploadMode[]).map((m) => (
               <button
-                key={t}
+                key={m}
                 type="button"
-                onClick={() => setTab(t)}
+                onClick={() => setMode(m)}
                 className={`flex-1 min-w-0 font-condensed font-bold text-[8.5px] uppercase text-center leading-tight rounded-none py-[7px] px-[3px] border-[1.3px] transition-colors ${
-                  tab === t ? 'bg-navy border-navy text-white' : 'bg-transparent border-navy text-navy'
+                  mode === m ? 'bg-navy border-navy text-white' : 'bg-transparent border-navy text-navy'
                 }`}
               >
-                {t === 'paper' ? 'Past Paper' : t === 'material' ? 'Study Material' : 'Bulk Upload'}
+                {m === 'single' ? 'Single Upload' : 'Bulk Upload'}
               </button>
             ))}
           </div>
         </div>
 
-        {tab === 'bulk' ? (
+        {mode === 'bulk' ? (
           <BulkUploadPanel />
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
@@ -303,7 +305,7 @@ export default function UploadForm({
             </div>
 
             {/* Paper-specific or material-specific fields */}
-            {tab === 'paper' ? (
+            {kind === 'paper' ? (
               <div className={`flex gap-3.5 shrink-0 ${ruledField}`}>
                 <div className="flex-1">
                   <label className={labelClass}>Exam Type</label>
