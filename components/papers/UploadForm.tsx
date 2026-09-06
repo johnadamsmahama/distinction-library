@@ -8,7 +8,6 @@ import CustomSelect from '@/components/ui/CustomSelect';
 
 type UploadMode = 'single' | 'bulk';
 
-const LEVELS_WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
 
 const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#4E9C7C] mb-1 block';
 const ruledField = 'pb-1.5 mb-2.5 border-b border-dashed border-[#C9BFA0]';
@@ -66,7 +65,7 @@ export default function UploadForm({
   const [year, setYear] = useState('');
   const [examType, setExamType] = useState<'mid_semester' | 'end_of_semester'>('end_of_semester');
   const [title, setTitle] = useState('');
-  const [week, setWeek] = useState('1');
+  const [week, setWeek] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -113,6 +112,9 @@ export default function UploadForm({
     if (!courseId) return setError('Select a course.');
     if (!file) return setError('Choose a file to upload.');
     if (kind === 'material' && !title.trim()) return setError('Give the material a title.');
+    if (kind === 'material' && (!week || Number(week) < 1 || Number(week) > 12)) {
+      return setError('Enter a week between 1 and 12.');
+    }
 
     setLoading(true);
     const supabase = createClient();
@@ -247,10 +249,7 @@ export default function UploadForm({
   return (
     <CatalogShell tabLabel="Contribution" tabColor="#4E9C7C" className="flex flex-col flex-1 min-h-0">
       {/* Card header row */}
-      <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
-        <span className="font-mono text-[10px] text-g600 tracking-wide">
-          UPSA / {kind === 'paper' && !year ? '----' : year}
-        </span>
+      <div className="flex items-baseline px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
 
@@ -334,10 +333,14 @@ export default function UploadForm({
                 <div className={`flex gap-3.5 ${ruledField}`}>
                   <div className="flex-1">
                     <label className={labelClass}>Week</label>
-                    <CustomSelect
+                    <input
+                      type="number"
                       value={week}
-                      onChange={setWeek}
-                      options={LEVELS_WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))}
+                      onChange={(e) => setWeek(e.target.value)}
+                      className={inputClass}
+                      placeholder="Enter week 1 – 12"
+                      min={1}
+                      max={12}
                     />
                   </div>
                 </div>
