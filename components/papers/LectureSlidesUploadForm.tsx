@@ -8,7 +8,7 @@ import type { CourseOption } from '@/lib/papers-data';
 type UploadMode = 'single' | 'bulk';
 
 const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#8FA3C9] mb-1 block';
-const fieldRow = 'mb-4';
+const fieldRow = 'mb-5';
 const fieldUnderline = 'border-b-[1.5px] border-gold pb-[5px]';
 const filledText = 'font-body text-[14px] font-semibold text-white';
 const placeholderText = 'font-body italic text-[13px] text-[#B7C0D4]';
@@ -43,9 +43,9 @@ function CornerMarks() {
 // the same identity.
 function Bookplate({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative border border-gold px-[18px] pt-[18px] pb-4 rounded-none">
+    <div className="relative border border-gold px-5 pt-6 pb-5 rounded-none">
       <CornerMarks />
-      <div className="text-center font-mono text-[9px] tracking-[0.14em] text-gold mb-3">
+      <div className="text-center font-mono text-[9px] tracking-[0.14em] text-gold mb-4">
         EX LIBRIS · DISTINCTION LIBRARY
       </div>
       {children}
