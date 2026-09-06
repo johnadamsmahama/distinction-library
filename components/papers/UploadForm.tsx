@@ -63,25 +63,14 @@ export default function UploadForm({
   const router = useRouter();
   const [mode, setMode] = useState<UploadMode>('single');
   const [courseId, setCourseId] = useState('');
-  const [year, setYear] = useState(new Date().getFullYear().toString());
-  const [yearUnknown, setYearUnknown] = useState(false);
+  const [year, setYear] = useState('');
   const [examType, setExamType] = useState<'mid_semester' | 'end_of_semester'>('end_of_semester');
   const [title, setTitle] = useState('');
-  const [contentType, setContentType] = useState<'lecture_slides' | 'study_notes' | 'study_guide'>('lecture_slides');
   const [week, setWeek] = useState('1');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-
-  const toggleYearUnknown = () => {
-    setYearUnknown((prev) => {
-      const next = !prev;
-      if (next) setYear('');
-      else setYear(new Date().getFullYear().toString());
-      return next;
-    });
-  };
 
   if (uploadSuspended) {
     return (
@@ -124,7 +113,6 @@ export default function UploadForm({
     if (!courseId) return setError('Select a course.');
     if (!file) return setError('Choose a file to upload.');
     if (kind === 'material' && !title.trim()) return setError('Give the material a title.');
-    if (kind === 'paper' && !yearUnknown && !year) return setError('Enter a year, or mark it unknown.');
 
     setLoading(true);
     const supabase = createClient();
@@ -158,7 +146,7 @@ export default function UploadForm({
       // check — with no year to compare, that check can't meaningfully
       // apply, and the content-hash check above already caught exact
       // re-uploads.
-      if (!yearUnknown) {
+      if (year) {
         const { data: existing } = await supabase
           .from('past_papers')
           .select('id')
@@ -202,7 +190,7 @@ export default function UploadForm({
         .from('past_papers')
         .insert({
           course_id: courseId,
-          year: yearUnknown ? null : Number(year),
+          year: year ? Number(year) : null,
           exam_type: examType,
           file_url: path,
           file_hash: fileHash,
@@ -233,7 +221,7 @@ export default function UploadForm({
         .insert({
           course_id: courseId,
           title: title.trim(),
-          content_type: contentType,
+          content_type: 'lecture_slides',
           week_number: Number(week),
           file_url: publicUrlData.publicUrl,
           file_hash: fileHash,
@@ -261,7 +249,7 @@ export default function UploadForm({
       {/* Card header row */}
       <div className="flex items-baseline justify-between px-4 pt-4 pb-2 pl-8 border-b-[1.5px] border-[#C9BFA0] shrink-0">
         <span className="font-mono text-[10px] text-g600 tracking-wide">
-          UPSA / {kind === 'paper' && yearUnknown ? '----' : year}
+          UPSA / {kind === 'paper' && !year ? '----' : year}
         </span>
         <span className="font-display font-bold text-sm text-navy">New Entry</span>
       </div>
@@ -289,7 +277,7 @@ export default function UploadForm({
         </div>
 
         {mode === 'bulk' ? (
-          <BulkUploadPanel />
+          <BulkUploadPanel kind={kind} />
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
             {/* Course */}
@@ -319,28 +307,16 @@ export default function UploadForm({
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Year</label>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      disabled={yearUnknown}
-                      className={`${inputClass} disabled:opacity-40`}
-                      min={2000}
-                      max={2100}
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleYearUnknown}
-                      title="Mark year as unknown"
-                      className={`shrink-0 font-mono font-bold text-[10px] leading-none px-2 py-1 rounded-none border-[1.3px] transition-colors ${
-                        yearUnknown ? 'bg-navy border-navy text-white' : 'bg-transparent border-[#C9BFA0] text-g600'
-                      }`}
-                    >
-                      ----
-                    </button>
-                  </div>
+                  <label className={labelClass}>Year (optional)</label>
+                  <input
+                    type="number"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className={inputClass}
+                    placeholder="If known"
+                    min={2000}
+                    max={2100}
+                  />
                 </div>
               </div>
             ) : (
@@ -356,18 +332,6 @@ export default function UploadForm({
                   />
                 </div>
                 <div className={`flex gap-3.5 ${ruledField}`}>
-                  <div className="flex-1">
-                    <label className={labelClass}>Type</label>
-                    <CustomSelect
-                      value={contentType}
-                      onChange={(v) => setContentType(v as any)}
-                      options={[
-                        { value: 'lecture_slides', label: 'Lecture Slides' },
-                        { value: 'study_notes', label: 'Study Notes' },
-                        { value: 'study_guide', label: 'Study Guide' },
-                      ]}
-                    />
-                  </div>
                   <div className="flex-1">
                     <label className={labelClass}>Week</label>
                     <CustomSelect
@@ -427,7 +391,7 @@ export default function UploadForm({
 
 type JobResult = { filename: string; status: string; note: string };
 
-function BulkUploadPanel() {
+function BulkUploadPanel({ kind }: { kind: 'paper' | 'material' }) {
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -475,7 +439,7 @@ function BulkUploadPanel() {
     if (uploadErr) { setUploading(false); setError(uploadErr.message); return; }
     const { data: job, error: insertErr } = await supabase
       .from('bulk_upload_jobs')
-      .insert({ uploaded_by: user.id, zip_path: path })
+      .insert({ uploaded_by: user.id, zip_path: path, job_type: kind })
       .select('id')
       .single();
     setUploading(false);
@@ -531,12 +495,23 @@ function BulkUploadPanel() {
     <div>
       <div className="bg-[#4E9C7C]/8 rounded-none p-3 mb-3">
         <p className="font-body text-xs text-g800 leading-relaxed">
-          Upload a zip file containing multiple past papers or study materials — no need to sort
-          them first. Each document is automatically read, matched to the right course, and
-          categorized. Confident study material matches go live immediately; past papers always
-          go to the moderation queue for a quick final approval (to preserve watermarking). PDF,
-          Word, PowerPoint, and photo/scan (JPG, PNG) files can all be auto-processed — anything
-          else is flagged for manual review.
+          {kind === 'paper' ? (
+            <>
+              Upload a zip file containing multiple past papers — no need to sort them first.
+              Each document is automatically read and matched to the right course, exam type, and
+              year. Every past paper goes to the moderation queue for a quick final approval (to
+              preserve watermarking). PDF, Word, PowerPoint, and photo/scan (JPG, PNG) files can
+              all be auto-processed — anything else is flagged for manual review.
+            </>
+          ) : (
+            <>
+              Upload a zip file containing multiple lecture slide files — no need to sort them
+              first. Each file is automatically read, matched to the right course, and sorted by
+              week. Confident matches go live immediately; anything uncertain is flagged for
+              manual review. PDF, Word, PowerPoint, and photo/scan (JPG, PNG) files can all be
+              auto-processed.
+            </>
+          )}
         </p>
       </div>
       <div className="mb-1">
