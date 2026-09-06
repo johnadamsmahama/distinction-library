@@ -44,9 +44,15 @@ const CAREER_TOOLS: Record<string, string> = {
 // breadcrumb should still read "Home / Essentials" rather than just "Home".
 const ESSENTIALS_ALIASES = ['tutors'];
 
+// Pages with their own full-bleed design that builds Home/Library
+// navigation directly into the page itself — the global breadcrumb bar
+// would otherwise sit on top of it on the default light background.
+const SELF_NAV_PAGES = ['/papers/upload/lecture-slides'];
+
 export default function HomeButtonGate() {
   const pathname = usePathname();
   if (pathname === '/dashboard') return null;
+  if (SELF_NAV_PAGES.includes(pathname)) return null;
 
   const segments = pathname.split('/').filter(Boolean); // e.g. ['essentials', 'mentors']
   const topSegment = segments[0];
