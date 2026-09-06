@@ -2,7 +2,13 @@
 
 import { useLayoutEffect, useRef } from 'react';
 
-export default function FullBleedShell({ children }: { children: React.ReactNode }) {
+export default function FullBleedShell({
+  children,
+  background = 'bg-navy',
+}: {
+  children: React.ReactNode;
+  background?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -22,7 +28,7 @@ export default function FullBleedShell({ children }: { children: React.ReactNode
   return (
     <div
       ref={ref}
-      className="bg-navy -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8"
+      className={`${background} -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8`}
       style={{ minHeight: 'calc(100dvh - 3.5rem)' }}
     >
       {children}
