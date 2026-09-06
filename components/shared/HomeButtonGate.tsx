@@ -47,7 +47,7 @@ const ESSENTIALS_ALIASES = ['tutors'];
 // Pages with their own full-bleed design that builds Home/Library
 // navigation directly into the page itself — the global breadcrumb bar
 // would otherwise sit on top of it on the default light background.
-const SELF_NAV_PAGES = ['/papers/upload/lecture-slides'];
+const SELF_NAV_PAGES = ['/papers/upload/lecture-slides', '/papers/upload/past-papers'];
 
 export default function HomeButtonGate() {
   const pathname = usePathname();
