@@ -28,7 +28,10 @@ export default function FullBleedShell({
   return (
     <div
       ref={ref}
-      className={`${background} -mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8`}
+      // These negative margins must exactly cancel AppShell's <main> padding
+      // (px-5 sm:px-7 py-8) so the background bleeds fully to the edges of
+      // the shell with no gap showing around it.
+      className={`${background} -mx-5 sm:-mx-7 -my-8`}
       style={{ minHeight: 'calc(100dvh - 3.5rem)' }}
     >
       {children}
