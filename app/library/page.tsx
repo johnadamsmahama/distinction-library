@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import FullBleedShell from '@/components/papers/FullBleedShell';
+
+const mono = 'font-[family-name:var(--font-courier-prime)]';
 
 // Four resource types for now. Add a new entry here if a fifth type
 // (e.g. a video library) gets introduced later — the layout doesn't
@@ -8,13 +11,20 @@ import { createClient } from '@/lib/supabase/server';
 const RESOURCES = [
   {
     title: 'Lecture Slides',
+    catNo: '001',
+    catType: 'SLIDES',
     description: 'Weekly slides for every course',
     href: '/papers?tab=materials',
-    // Screen-with-stand — reads as "slides/presentation".
-    icon: <path d="M3 4h18v12H3z M8 20h8 M12 16v4" />,
+    // Stacked papers — reads as "documents/slides", consistent with the
+    // same icon used on the Contribute Lecture Slides picker card.
+    icon: (
+      <path d="M4 8h13v11a1 1 0 01-1 1H5a1 1 0 01-1-1z M7 8V6a1 1 0 011-1h11a1 1 0 011 1v9a1 1 0 01-1 1h-2 M8 12h7 M8 15.5h7" />
+    ),
   },
   {
     title: 'Past Questions Bank',
+    catNo: '002',
+    catType: 'EXAM',
     description: 'Browse past exam questions by course',
     href: '/papers?tab=papers',
     icon: (
@@ -23,12 +33,16 @@ const RESOURCES = [
   },
   {
     title: 'Revision Kit',
+    catNo: '003',
+    catType: 'KIT',
     description: 'All lecture weeks summarised into one exam-focused guide',
     href: '/library/revision-kit',
     icon: <path d="M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />,
   },
   {
     title: 'Audio-Slides',
+    catNo: '004',
+    catType: 'AUDIO',
     description: 'Professionally recorded course audio — study anytime, anywhere',
     href: '/library/audio-slides',
     icon: (
@@ -45,53 +59,69 @@ export default async function LibraryPage() {
   if (!user) redirect('/login');
 
   return (
-    <div>
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-none bg-gradient-to-br from-navy to-[#081527] px-6 py-8 mb-6">
-        <p className="relative font-body text-[11px] font-semibold tracking-[0.14em] uppercase text-gold mb-3">
-          Resources
-        </p>
-        <h1 className="relative font-display font-bold text-3xl text-white mb-2 max-w-xs">
-          Distinction Library
-        </h1>
-        <p className="relative font-body text-sm text-[#B7C0D4] max-w-sm leading-relaxed">
-          Your complete resource collection for every course.
-        </p>
-      </div>
+    <FullBleedShell background="bg-[#DDD4B8]">
+      <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
+        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy mb-6">
+          <span>←</span>
+          <Link href="/dashboard" className="hover:text-gold transition-colors">
+            Home
+          </Link>
+        </div>
 
-      {/* Resource cards */}
-      <div className="rounded-none bg-gradient-to-b from-[#FBF3E1] via-[#F3E4BE] to-[#FBF3E1] px-4 py-5 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* Ink Stamp Box — full width, matching the card container below */}
+        <div className="relative border-[3px] border-navy px-6 py-5 mb-3 text-center">
+          <span className="absolute top-[-5px] left-[-5px] w-2 h-2 border-t-2 border-l-2 border-navy" />
+          <span className="absolute top-[-5px] right-[-5px] w-2 h-2 border-t-2 border-r-2 border-navy" />
+          <span className="absolute bottom-[-5px] left-[-5px] w-2 h-2 border-b-2 border-l-2 border-navy" />
+          <span className="absolute bottom-[-5px] right-[-5px] w-2 h-2 border-b-2 border-r-2 border-navy" />
+          <div className={`${mono} font-bold text-[9px] tracking-[0.25em] text-gold mb-1`}>EX LIBRIS</div>
+          <div className="font-display font-extrabold text-[22px] tracking-[0.03em] uppercase text-navy-deep">
+            Distinction Library
+          </div>
+          <div className={`${mono} font-bold text-[9px] tracking-[0.18em] text-gold mt-1`}>EST. UPSA</div>
+        </div>
+
+        <div className="text-center mb-7">
+          <p className="font-display italic font-bold text-[16px] text-navy-deep mb-1.5">
+            Welcome — glad you&apos;re here.
+          </p>
+          <p className={`${mono} font-bold text-[11px] leading-relaxed text-[#5B5643] max-w-[32ch] mx-auto`}>
+            Select a card below to access your resources.
+          </p>
+        </div>
+
+        {/* Resource cards — navy, on the same cream page as the Contribute flow */}
+        <div className="flex flex-col gap-3.5">
           {RESOURCES.map((resource) => (
             <Link
               key={resource.title}
               href={resource.href}
-              className="block bg-white border border-g100 border-l-[3px] border-l-navy rounded-none p-5 hover:border-gold hover:border-l-navy transition-colors"
+              className="min-h-[104px] flex items-center bg-[#0D2B5E] border border-[#1B3E75] p-4 transition-transform hover:-translate-y-1"
+              style={{ boxShadow: '0 3px 0 #1B3E75, 0 4px 8px rgba(0,0,0,0.25)' }}
             >
-              <div className="w-9 h-9 shrink-0 overflow-hidden rounded-none bg-navy flex items-center justify-center mb-3">
-                <svg
-                  viewBox="0 0 24 24"
-                  width={18}
-                  height={18}
-                  className="w-[18px] h-[18px] shrink-0 stroke-[#E4C878]"
-                  fill="none"
-                  strokeWidth={1.8}
-                >
+              <div className="flex items-center gap-3 w-full">
+                <svg viewBox="0 0 24 24" width={22} height={22} className="w-[22px] h-[22px] shrink-0" fill="none" stroke="#E2BE5A" strokeWidth={1.6}>
                   {resource.icon}
                 </svg>
-              </div>
-              <h2 className="font-display font-bold text-lg text-navy mb-1.5">{resource.title}</h2>
-              <p className="font-body text-sm text-g600 leading-relaxed">{resource.description}</p>
-              <div className="mt-3.5 flex items-center gap-1.5 font-body text-[12.5px] font-semibold text-gold">
-                Open
-                <svg viewBox="0 0 24 24" width={12} height={12} className="w-3 h-3 shrink-0 stroke-gold" fill="none" strokeWidth={2}>
+                <div className="flex-1 min-w-0">
+                  <div className={`${mono} text-[9.5px] tracking-wide text-gold mb-1`}>
+                    CARD NO. {resource.catNo} — TYPE: {resource.catType}
+                  </div>
+                  <h2 className="font-display font-bold text-[17px] text-white mb-0.5">{resource.title}</h2>
+                  <p className="font-body text-[11.5px] leading-snug text-[#B7C0D4]">{resource.description}</p>
+                </div>
+                <svg viewBox="0 0 24 24" width={14} height={14} className="w-[14px] h-[14px] shrink-0 ml-2" fill="none" stroke="#C9A02C" strokeWidth={2}>
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </div>
             </Link>
           ))}
         </div>
+
+        <div className={`mt-6 text-center ${mono} text-[9px] text-[#8B826A] leading-relaxed`}>
+          — catalogued by the Distinction Library community —
+        </div>
       </div>
-    </div>
+    </FullBleedShell>
   );
 }
