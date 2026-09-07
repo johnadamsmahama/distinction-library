@@ -18,7 +18,7 @@ export default async function UploadPastPapersPage() {
   ]);
 
   return (
-    <FullBleedShell background="bg-[#D9C2BE]">
+    <FullBleedShell background="bg-[#DDD4B8]">
       <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
         {/* Home / Library — built into the cream design, since the global
             breadcrumb bar is suppressed on this page (see SELF_NAV_PAGES
