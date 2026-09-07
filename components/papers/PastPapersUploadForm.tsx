@@ -8,11 +8,12 @@ import type { CourseOption } from '@/lib/papers-data';
 type UploadMode = 'single' | 'bulk';
 type ExamType = 'mid_semester' | 'end_of_semester';
 
-const labelClass = 'font-mono text-[9px] uppercase tracking-wide text-[#5A6478] mb-1 block';
-const fieldRow = 'mb-5';
-const fieldUnderline = 'border-b-[1.5px] border-navy pb-[5px]';
-const filledText = 'font-body text-[14px] font-semibold text-navy';
-const placeholderText = 'font-body italic text-[13px] text-[#a09a86]';
+const mono = 'font-[family-name:var(--font-courier-prime)]';
+const labelClass = `${mono} text-[9.5px] uppercase tracking-wide text-[#8A6B67] mb-1.5 block`;
+const fieldRow = 'mb-[30px]';
+const fieldUnderline = 'border-b-[1.5px] border-[#D6B7B3] pb-2';
+const filledText = 'font-body text-[15px] font-semibold text-navy-deep';
+const placeholderText = 'font-display italic text-[15px] text-[#8A6B67]';
 
 // Computes a SHA-256 hash of a File's contents in the browser, using the
 // built-in Web Crypto API — no extra library needed. Used to catch exact
@@ -25,41 +26,29 @@ async function hashFile(file: File): Promise<string> {
     .join('');
 }
 
-// The four corner marks that give the bookplate its "certificate" framing.
-function CornerMarks() {
-  const base = 'absolute w-2.5 h-2.5 border-navy';
-  return (
-    <>
-      <span className={`${base} top-1.5 left-1.5 border-t-[1.5px] border-l-[1.5px]`} />
-      <span className={`${base} top-1.5 right-1.5 border-t-[1.5px] border-r-[1.5px]`} />
-      <span className={`${base} bottom-1.5 left-1.5 border-b-[1.5px] border-l-[1.5px]`} />
-      <span className={`${base} bottom-1.5 right-1.5 border-b-[1.5px] border-r-[1.5px]`} />
-    </>
-  );
-}
-
-// The bookplate frame: a cream card (slightly deeper tone than the page
-// background behind it) with a navy outer rule and a gold inner rule plus
-// corner marks. Used for the form as well as the suspended/submitted
+// The card itself: cream background, hairline edge, and the small "Ex
+// Libris" ledger tag up top — matches the index-card catalog on the parent
+// picker page, and the identical Bookplate used on the Lecture Slides
+// upload page. Used for the form as well as the suspended/submitted
 // states, so every state of this page shares the same identity.
 function Bookplate({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[#FBF6E8] border border-navy p-[5px] rounded-none">
-      <div className="relative border border-gold px-5 pt-6 pb-5">
-        <CornerMarks />
-        <div className="text-center font-mono text-[9px] tracking-[0.14em] text-[#8A6A1C] mb-4">
-          EX LIBRIS · DISTINCTION LIBRARY
-        </div>
-        {children}
+    <div
+      className="relative bg-[#F6EBEA] border border-[#E3C9C6] px-5 pt-6 pb-5"
+      style={{ boxShadow: '0 3px 0 #E3C9C6, 0 5px 10px rgba(0,0,0,0.14)' }}
+    >
+      <div className={`text-center ${mono} text-[10px] tracking-[0.1em] uppercase text-[#8A6B67] mb-4`}>
+        Ex Libris · Distinction Library
       </div>
+      {children}
     </div>
   );
 }
 
-// A course picker styled to match the bookplate's underline fields —
-// CustomSelect's boxed look doesn't fit here, so this is a lighter,
-// purpose-built dropdown with the same italic-placeholder / solid-when-set
-// behavior as the plain text fields beside it.
+// A course picker styled to match the ledger's underline fields — boxed
+// dropdowns don't fit here, so this is a lighter, purpose-built dropdown
+// with the same italic-placeholder / solid-when-set behavior as the plain
+// text fields beside it.
 function CourseField({
   courses,
   value,
@@ -105,21 +94,21 @@ function CourseField({
         <span className={selected ? filledText : placeholderText}>
           {selected ? `${selected.code} — ${selected.name}` : 'Select a course…'}
         </span>
-        <svg viewBox="0 0 24 24" width={14} height={14} className={`shrink-0 ml-2 stroke-gold transition-transform ${open ? 'rotate-180' : ''}`} fill="none" strokeWidth={2}>
+        <svg viewBox="0 0 24 24" width={14} height={14} className={`shrink-0 ml-2 stroke-navy transition-transform ${open ? 'rotate-180' : ''}`} fill="none" strokeWidth={2}>
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-none shadow-lg">
-          <div className="sticky top-0 bg-white border-b border-g100 p-1.5">
+        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-[#E3C9C6] rounded-none shadow-lg">
+          <div className="sticky top-0 bg-white border-b border-[#E3C9C6] p-1.5">
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a course code or name…"
-              className="w-full px-2.5 py-2 rounded-none border border-g100 font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
+              className="w-full px-2.5 py-2 rounded-none border border-[#E3C9C6] font-condensed font-medium text-[13px] text-g800 outline-none focus:border-navy transition-colors"
             />
           </div>
           {filtered.length === 0 ? (
@@ -133,8 +122,8 @@ function CourseField({
                   onChange(c.id);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-off-white ${
-                  c.id === value ? 'bg-gold/10 text-navy font-bold' : 'text-g800'
+                className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6EBEA] ${
+                  c.id === value ? 'bg-gold/10 text-navy-deep font-bold' : 'text-g800'
                 }`}
               >
                 {c.code} — {c.name}
@@ -175,13 +164,13 @@ function ExamTypeField({ value, onChange }: { value: ExamType; onChange: (v: Exa
         className={`w-full flex items-center justify-between text-left ${fieldUnderline}`}
       >
         <span className={filledText}>{EXAM_TYPE_LABEL[value]}</span>
-        <svg viewBox="0 0 24 24" width={14} height={14} className={`shrink-0 ml-2 stroke-gold transition-transform ${open ? 'rotate-180' : ''}`} fill="none" strokeWidth={2}>
+        <svg viewBox="0 0 24 24" width={14} height={14} className={`shrink-0 ml-2 stroke-navy transition-transform ${open ? 'rotate-180' : ''}`} fill="none" strokeWidth={2}>
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-white border border-g100 rounded-none shadow-lg">
+        <div className="absolute z-50 mt-1.5 w-full bg-white border border-[#E3C9C6] rounded-none shadow-lg">
           {(Object.keys(EXAM_TYPE_LABEL) as ExamType[]).map((t) => (
             <button
               key={t}
@@ -190,8 +179,8 @@ function ExamTypeField({ value, onChange }: { value: ExamType; onChange: (v: Exa
                 onChange(t);
                 setOpen(false);
               }}
-              className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-off-white ${
-                t === value ? 'bg-gold/10 text-navy font-bold' : 'text-g800'
+              className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6EBEA] ${
+                t === value ? 'bg-gold/10 text-navy-deep font-bold' : 'text-g800'
               }`}
             >
               {EXAM_TYPE_LABEL[t]}
@@ -224,8 +213,8 @@ export default function PastPapersUploadForm({
     return (
       <Bookplate>
         <div className="text-center py-4">
-          <h2 className="font-display font-bold text-base text-navy mb-1.5">Uploads suspended</h2>
-          <p className="font-body text-[13px] text-g600 leading-relaxed">
+          <h2 className="font-display font-bold text-base text-navy-deep mb-1.5">Uploads suspended</h2>
+          <p className="font-body text-[13px] text-[#5B5643] leading-relaxed">
             Your upload privileges are currently suspended after reaching 3 strikes. Contact support
             if you believe this is a mistake.
           </p>
@@ -238,14 +227,14 @@ export default function PastPapersUploadForm({
     return (
       <Bookplate>
         <div className="text-center py-4">
-          <h2 className="font-display font-bold text-base text-navy mb-1.5">Submitted for review</h2>
-          <p className="font-body text-[13px] text-g600 mb-4 leading-relaxed">
+          <h2 className="font-display font-bold text-base text-navy-deep mb-1.5">Submitted for review</h2>
+          <p className="font-body text-[13px] text-[#5B5643] mb-4 leading-relaxed">
             Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
             notification once it&apos;s approved or rejected.
           </p>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-navy text-white font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none hover:bg-navy-mid transition-colors"
+            className={`bg-gold text-navy-deep ${mono} font-bold text-xs uppercase px-4 py-2 rounded-none hover:brightness-105 transition-all`}
           >
             Back to dashboard
           </button>
@@ -342,14 +331,14 @@ export default function PastPapersUploadForm({
   return (
     <Bookplate>
       {/* Single / Bulk toggle */}
-      <div className="flex border border-navy mb-5">
+      <div className="flex border border-navy mb-6">
         {(['single', 'bulk'] as UploadMode[]).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`flex-1 font-mono font-bold text-[9.5px] uppercase tracking-wide py-2 transition-colors ${
-              mode === m ? 'bg-navy text-white' : 'bg-transparent text-navy'
+            className={`flex-1 ${mono} font-bold text-[11px] uppercase tracking-wide py-2.5 transition-colors ${
+              mode === m ? 'bg-gold text-navy-deep' : 'bg-transparent text-navy'
             }`}
           >
             {m === 'single' ? 'Single Upload' : 'Bulk Upload'}
@@ -370,7 +359,7 @@ export default function PastPapersUploadForm({
               type="number"
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className={`w-full bg-transparent outline-none ${fieldUnderline} ${year ? filledText : ''} placeholder:italic placeholder:text-[13px] placeholder:text-[#a09a86] placeholder:font-body ${year ? '' : 'font-body'}`}
+              className={`w-full bg-transparent outline-none ${fieldUnderline} ${year ? filledText : ''} placeholder:italic placeholder:font-display placeholder:text-[15px] placeholder:text-[#8A6B67] ${year ? '' : 'font-display'}`}
               placeholder="If known"
               min={2000}
               max={2100}
@@ -380,12 +369,12 @@ export default function PastPapersUploadForm({
           <div className="mb-1 mt-2">
             <label
               htmlFor="past-paper-file"
-              className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer"
+              className="block border-[1.5px] border-dashed border-[#C6A19C] bg-transparent py-4 px-3 text-center cursor-pointer"
             >
-              <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
+              <span className={`block ${mono} font-bold text-[12px] text-navy underline mb-1 truncate`}>
                 {file ? file.name : 'Attach file'}
               </span>
-              <span className="block font-mono text-[9px] text-g600 tracking-wide">
+              <span className={`block ${mono} text-[9px] uppercase tracking-wide text-[#8A6B67]`}>
                 PDF · WORD · POWERPOINT · JPG · PNG
               </span>
             </label>
@@ -398,16 +387,16 @@ export default function PastPapersUploadForm({
             />
           </div>
 
-          {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
+          {error && <p className="font-body text-xs text-[#B22222] mt-2.5">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-none shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 flex items-center justify-center gap-[7px] hover:brightness-105 transition-all"
+            className={`w-full mt-3 border-[1.5px] border-[#B22222] text-[#B22222] bg-transparent ${mono} font-bold text-[11px] uppercase tracking-wider py-2.5 disabled:opacity-60 flex items-center justify-center gap-1.5 hover:bg-[#B22222] hover:text-[#F6EBEA] transition-colors`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M9 12l2 2 4-4" />
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12l3 3 5-6" />
             </svg>
             {loading ? 'Uploading…' : 'Submit for Review'}
           </button>
@@ -420,12 +409,12 @@ export default function PastPapersUploadForm({
 type JobResult = { filename: string; status: string; note: string };
 
 function statusColor(status: string): string {
-  if (status === 'auto_approved') return 'text-green-600';
+  if (status === 'auto_approved') return 'text-mint-deep';
   if (status === 'queued_for_review') return 'text-gold';
-  if (status === 'skipped_duplicate') return 'text-g600';
-  if (status === 'needs_manual_review') return 'text-orange-500';
-  if (status === 'error') return 'text-red-500';
-  return 'text-g600';
+  if (status === 'skipped_duplicate') return 'text-[#8A6B67]';
+  if (status === 'needs_manual_review') return 'text-orange-600';
+  if (status === 'error') return 'text-[#B22222]';
+  return 'text-[#8A6B67]';
 }
 
 function BulkUploadPanel() {
@@ -495,22 +484,22 @@ function BulkUploadPanel() {
       <div>
         <div className="mb-2.5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="font-condensed font-bold text-xs text-navy">
+            <span className="font-condensed font-bold text-xs text-navy-deep">
               {jobStatus === 'completed' ? 'Done' : jobStatus === 'failed' ? 'Something went wrong' : 'Processing…'}
             </span>
-            <span className="font-mono text-[9.5px] text-g600">
+            <span className={`${mono} text-[9.5px] text-[#8A6B67]`}>
               {totalFiles !== null ? `${cursor} / ${totalFiles} files` : 'Reading zip…'}
             </span>
           </div>
-          <div className="h-1.5 rounded-none bg-[#EAF5F0] overflow-hidden">
-            <div className="h-full bg-[#4E9C7C] transition-all" style={{ width: `${percent}%` }} />
+          <div className="h-1.5 rounded-none bg-[#E3C9C6] overflow-hidden">
+            <div className="h-full bg-mint-deep transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
         {results.length > 0 && (
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
             {results.map((r, i) => (
-              <div key={i} className="border border-[#C9BFA0] rounded-none p-2 bg-white/50">
-                <div className="font-mono font-bold text-[10px] text-navy break-all">{r.filename}</div>
+              <div key={i} className="border border-[#E3C9C6] rounded-none p-2 bg-white">
+                <div className={`${mono} font-bold text-[10px] text-navy-deep break-all`}>{r.filename}</div>
                 <div className={`font-body text-[11px] mt-0.5 ${statusColor(r.status)}`}>{r.note}</div>
               </div>
             ))}
@@ -519,7 +508,7 @@ function BulkUploadPanel() {
         {jobStatus === 'completed' && (
           <button
             onClick={() => { setJobId(null); setZipFile(null); setResults([]); setCursor(0); setTotalFiles(null); }}
-            className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-xs py-2.5 rounded-none hover:brightness-105 transition-all"
+            className={`w-full mt-3 bg-mint-deep text-white ${mono} font-bold text-xs py-2.5 rounded-none hover:brightness-105 transition-all`}
           >
             Upload another zip
           </button>
@@ -530,8 +519,8 @@ function BulkUploadPanel() {
 
   return (
     <div>
-      <div className="bg-[#4E9C7C]/8 rounded-none p-3 mb-3">
-        <p className="font-body text-xs text-g800 leading-relaxed">
+      <div className="bg-mint-light/25 rounded-none p-3 mb-3">
+        <p className="font-body text-xs text-[#3F5B4E] leading-relaxed">
           Upload a zip file containing multiple past papers — no need to sort them first.
           Each document is automatically read and matched to the right course, exam type, and
           year. Every past paper goes to the moderation queue for a quick final approval (to
@@ -541,19 +530,19 @@ function BulkUploadPanel() {
       </div>
       <div className="mb-1">
         <label className={labelClass}>Zip File</label>
-        <label htmlFor="zip-file" className="block border border-dashed border-[#4E9C7C] rounded-none bg-[#4E9C7C]/5 py-[9px] px-2.5 text-center cursor-pointer">
-          <span className="block font-mono font-bold text-[10px] text-navy underline mb-0.5 truncate">
+        <label htmlFor="zip-file" className="block border-[1.5px] border-dashed border-mint-deep bg-mint-light/10 py-4 px-3 text-center cursor-pointer">
+          <span className={`block ${mono} font-bold text-[12px] text-navy-deep underline mb-0.5 truncate`}>
             {zipFile ? zipFile.name : 'Attach zip file'}
           </span>
         </label>
         <input id="zip-file" type="file" accept=".zip" onChange={(e) => setZipFile(e.target.files?.[0] ?? null)} className="hidden" />
       </div>
-      {error && <p className="font-body text-xs text-red-500 mt-2.5">{error}</p>}
+      {error && <p className="font-body text-xs text-[#B22222] mt-2.5">{error}</p>}
       <button
         type="button"
         disabled={uploading}
         onClick={handleZipUpload}
-        className="w-full mt-3 bg-[#4E9C7C] text-white font-condensed font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-none shadow-[0_3px_8px_rgba(78,156,124,0.35)] disabled:opacity-60 hover:brightness-105 transition-all"
+        className={`w-full mt-3 bg-mint-deep text-white ${mono} font-bold text-[12.5px] uppercase tracking-wide py-[11px] rounded-none disabled:opacity-60 hover:brightness-105 transition-all`}
       >
         {uploading ? 'Uploading…' : 'Upload and Process'}
       </button>
