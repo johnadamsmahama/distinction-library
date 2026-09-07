@@ -9,11 +9,11 @@ type UploadMode = 'single' | 'bulk';
 type ExamType = 'mid_semester' | 'end_of_semester';
 
 const mono = 'font-[family-name:var(--font-courier-prime)]';
-const labelClass = `${mono} text-[9.5px] uppercase tracking-wide text-[#8A6B67] mb-1.5 block`;
+const labelClass = `${mono} text-[9.5px] uppercase tracking-wide text-[#9A9270] mb-1.5 block`;
 const fieldRow = 'mb-[30px]';
-const fieldUnderline = 'border-b-[1.5px] border-[#D6B7B3] pb-2';
+const fieldUnderline = 'border-b-[1.5px] border-[#C9BE9E] pb-2';
 const filledText = 'font-body text-[15px] font-semibold text-navy-deep';
-const placeholderText = 'font-display italic text-[15px] text-[#8A6B67]';
+const placeholderText = 'font-display italic text-[15px] text-[#9A9270]';
 
 // Computes a SHA-256 hash of a File's contents in the browser, using the
 // built-in Web Crypto API — no extra library needed. Used to catch exact
@@ -34,10 +34,10 @@ async function hashFile(file: File): Promise<string> {
 function Bookplate({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative bg-[#F6EBEA] border border-[#E3C9C6] px-5 pt-6 pb-5"
-      style={{ boxShadow: '0 3px 0 #E3C9C6, 0 5px 10px rgba(0,0,0,0.14)' }}
+      className="relative bg-[#F6F1E3] border border-[#E4DBC2] px-5 pt-6 pb-5"
+      style={{ boxShadow: '0 3px 0 #E4DBC2, 0 5px 10px rgba(0,0,0,0.14)' }}
     >
-      <div className={`text-center ${mono} text-[10px] tracking-[0.1em] uppercase text-[#8A6B67] mb-4`}>
+      <div className={`text-center ${mono} text-[10px] tracking-[0.1em] uppercase text-[#9A9270] mb-4`}>
         Ex Libris · Distinction Library
       </div>
       {children}
@@ -100,15 +100,15 @@ function CourseField({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-[#E3C9C6] rounded-none shadow-lg">
-          <div className="sticky top-0 bg-white border-b border-[#E3C9C6] p-1.5">
+        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-[#E4DBC2] rounded-none shadow-lg">
+          <div className="sticky top-0 bg-white border-b border-[#E4DBC2] p-1.5">
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a course code or name…"
-              className="w-full px-2.5 py-2 rounded-none border border-[#E3C9C6] font-condensed font-medium text-[13px] text-g800 outline-none focus:border-navy transition-colors"
+              className="w-full px-2.5 py-2 rounded-none border border-[#E4DBC2] font-condensed font-medium text-[13px] text-g800 outline-none focus:border-navy transition-colors"
             />
           </div>
           {filtered.length === 0 ? (
@@ -122,7 +122,7 @@ function CourseField({
                   onChange(c.id);
                   setOpen(false);
                 }}
-                className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6EBEA] ${
+                className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6F1E3] ${
                   c.id === value ? 'bg-gold/10 text-navy-deep font-bold' : 'text-g800'
                 }`}
               >
@@ -170,7 +170,7 @@ function ExamTypeField({ value, onChange }: { value: ExamType; onChange: (v: Exa
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-white border border-[#E3C9C6] rounded-none shadow-lg">
+        <div className="absolute z-50 mt-1.5 w-full bg-white border border-[#E4DBC2] rounded-none shadow-lg">
           {(Object.keys(EXAM_TYPE_LABEL) as ExamType[]).map((t) => (
             <button
               key={t}
@@ -179,7 +179,7 @@ function ExamTypeField({ value, onChange }: { value: ExamType; onChange: (v: Exa
                 onChange(t);
                 setOpen(false);
               }}
-              className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6EBEA] ${
+              className={`w-full text-left px-3.5 py-2.5 font-condensed font-medium text-[13px] transition-colors hover:bg-[#F6F1E3] ${
                 t === value ? 'bg-gold/10 text-navy-deep font-bold' : 'text-g800'
               }`}
             >
@@ -359,7 +359,7 @@ export default function PastPapersUploadForm({
               type="number"
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className={`w-full bg-transparent outline-none ${fieldUnderline} ${year ? filledText : ''} placeholder:italic placeholder:font-display placeholder:text-[15px] placeholder:text-[#8A6B67] ${year ? '' : 'font-display'}`}
+              className={`w-full bg-transparent outline-none ${fieldUnderline} ${year ? filledText : ''} placeholder:italic placeholder:font-display placeholder:text-[15px] placeholder:text-[#9A9270] ${year ? '' : 'font-display'}`}
               placeholder="If known"
               min={2000}
               max={2100}
@@ -369,12 +369,12 @@ export default function PastPapersUploadForm({
           <div className="mb-1 mt-2">
             <label
               htmlFor="past-paper-file"
-              className="block border-[1.5px] border-dashed border-[#C6A19C] bg-transparent py-4 px-3 text-center cursor-pointer"
+              className="block border-[1.5px] border-dashed border-[#B0A57E] bg-transparent py-4 px-3 text-center cursor-pointer"
             >
               <span className={`block ${mono} font-bold text-[12px] text-navy underline mb-1 truncate`}>
                 {file ? file.name : 'Attach file'}
               </span>
-              <span className={`block ${mono} text-[9px] uppercase tracking-wide text-[#8A6B67]`}>
+              <span className={`block ${mono} text-[9px] uppercase tracking-wide text-[#9A9270]`}>
                 PDF · WORD · POWERPOINT · JPG · PNG
               </span>
             </label>
@@ -392,7 +392,7 @@ export default function PastPapersUploadForm({
           <button
             type="submit"
             disabled={loading}
-            className={`w-full mt-3 border-[1.5px] border-[#B22222] text-[#B22222] bg-transparent ${mono} font-bold text-[11px] uppercase tracking-wider py-2.5 disabled:opacity-60 flex items-center justify-center gap-1.5 hover:bg-[#B22222] hover:text-[#F6EBEA] transition-colors`}
+            className={`w-full mt-3 border-[1.5px] border-[#B22222] text-[#B22222] bg-transparent ${mono} font-bold text-[11px] uppercase tracking-wider py-2.5 disabled:opacity-60 flex items-center justify-center gap-1.5 hover:bg-[#B22222] hover:text-[#F6F1E3] transition-colors`}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
@@ -411,10 +411,10 @@ type JobResult = { filename: string; status: string; note: string };
 function statusColor(status: string): string {
   if (status === 'auto_approved') return 'text-mint-deep';
   if (status === 'queued_for_review') return 'text-gold';
-  if (status === 'skipped_duplicate') return 'text-[#8A6B67]';
+  if (status === 'skipped_duplicate') return 'text-[#9A9270]';
   if (status === 'needs_manual_review') return 'text-orange-600';
   if (status === 'error') return 'text-[#B22222]';
-  return 'text-[#8A6B67]';
+  return 'text-[#9A9270]';
 }
 
 function BulkUploadPanel() {
@@ -487,18 +487,18 @@ function BulkUploadPanel() {
             <span className="font-condensed font-bold text-xs text-navy-deep">
               {jobStatus === 'completed' ? 'Done' : jobStatus === 'failed' ? 'Something went wrong' : 'Processing…'}
             </span>
-            <span className={`${mono} text-[9.5px] text-[#8A6B67]`}>
+            <span className={`${mono} text-[9.5px] text-[#9A9270]`}>
               {totalFiles !== null ? `${cursor} / ${totalFiles} files` : 'Reading zip…'}
             </span>
           </div>
-          <div className="h-1.5 rounded-none bg-[#E3C9C6] overflow-hidden">
+          <div className="h-1.5 rounded-none bg-[#E4DBC2] overflow-hidden">
             <div className="h-full bg-mint-deep transition-all" style={{ width: `${percent}%` }} />
           </div>
         </div>
         {results.length > 0 && (
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
             {results.map((r, i) => (
-              <div key={i} className="border border-[#E3C9C6] rounded-none p-2 bg-white">
+              <div key={i} className="border border-[#E4DBC2] rounded-none p-2 bg-white">
                 <div className={`${mono} font-bold text-[10px] text-navy-deep break-all`}>{r.filename}</div>
                 <div className={`font-body text-[11px] mt-0.5 ${statusColor(r.status)}`}>{r.note}</div>
               </div>
