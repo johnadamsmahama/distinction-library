@@ -57,7 +57,24 @@ export default async function UploadPage() {
 
   return (
     <UploadPageWrapper>
-      <div className="relative z-10 w-full max-w-lg mx-auto flex flex-col flex-1 min-h-0 px-4 pt-8 pb-6 overflow-y-auto">
+      <div className="relative z-10 w-full max-w-lg mx-auto flex flex-col flex-1 min-h-0 px-4 pt-6 pb-6 overflow-y-auto">
+        {/* Breadcrumb — lives inside the cream area now, not the global white shell */}
+        <div className="flex items-center gap-2 mb-6 shrink-0">
+          <Link
+            href="/dashboard"
+            className="font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy hover:text-gold transition-colors"
+          >
+            ← Home
+          </Link>
+          <span className="text-[#B0A57E] text-[11px]">/</span>
+          <Link
+            href="/library"
+            className="font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy hover:text-gold transition-colors"
+          >
+            Library
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-6 shrink-0">
           <div className="w-9 h-9 mx-auto mb-3 rounded-full border-[1.5px] border-navy flex items-center justify-center">
