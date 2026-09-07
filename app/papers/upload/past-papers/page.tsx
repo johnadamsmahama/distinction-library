@@ -18,36 +18,34 @@ export default async function UploadPastPapersPage() {
   ]);
 
   return (
-    <FullBleedShell background="bg-[#F0EAD6]">
+    <FullBleedShell background="bg-[#D9C2BE]">
       <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
-        {/* Home / Library — built into the page design, since the global
-            breadcrumb bar is suppressed here (see SELF_NAV_PAGES in
-            HomeButtonGate). */}
-        <div className="flex items-center gap-2 font-condensed font-extrabold text-sm uppercase tracking-wide mb-7">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold flex-shrink-0">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          <Link href="/dashboard" className="text-gold hover:text-navy transition-colors">
+        {/* Home / Library — built into the cream design, since the global
+            breadcrumb bar is suppressed on this page (see SELF_NAV_PAGES
+            in HomeButtonGate). */}
+        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy mb-6">
+          <span>←</span>
+          <Link href="/dashboard" className="hover:text-gold transition-colors">
             Home
           </Link>
-          <span className="text-navy/25 normal-case font-normal">/</span>
-          <Link href="/library" className="text-gold hover:text-navy transition-colors">
+          <span className="text-[#B0A57E]">/</span>
+          <Link href="/library" className="hover:text-gold transition-colors">
             Library
           </Link>
         </div>
 
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <div className="font-condensed font-bold text-[10.5px] uppercase tracking-wide text-[#8A6A1C] mb-2">
+            <div className="font-[family-name:var(--font-courier-prime)] font-bold text-[10px] uppercase tracking-[0.08em] text-gold mb-2">
               Community Contribution
             </div>
-            <h1 className="font-display font-bold text-[22px] text-navy leading-snug">
+            <h1 className="font-display font-bold text-[24px] text-navy-deep leading-snug">
               Contribute a Past Paper
             </h1>
           </div>
           <Link
             href="/papers/my-uploads"
-            className="font-condensed font-bold text-[10px] uppercase text-[#8A6A1C] border border-[#C9A02C] rounded-none px-2.5 py-1 hover:bg-[#C9A02C]/10 transition-colors whitespace-nowrap mt-1"
+            className="font-[family-name:var(--font-courier-prime)] font-bold text-[10px] uppercase text-navy border border-navy px-2.5 py-1.5 hover:bg-navy/5 transition-colors whitespace-nowrap mt-1"
           >
             My Uploads
           </Link>
@@ -55,7 +53,7 @@ export default async function UploadPastPapersPage() {
 
         <PastPapersUploadForm courses={courses} uploadSuspended={profile?.upload_suspended ?? false} />
 
-        <div className="mt-7 text-center font-mono text-[9px] text-[#B9AE8C] leading-relaxed">
+        <div className="mt-6 text-center font-[family-name:var(--font-courier-prime)] text-[9px] text-[#8B826A] leading-relaxed">
           — catalogued by the Distinction Library community —
         </div>
       </div>
