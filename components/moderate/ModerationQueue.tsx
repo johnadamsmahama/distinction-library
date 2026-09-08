@@ -631,8 +631,6 @@ function MaterialEditPanel({
           <label className={editLabelClass}>Type</label>
           <select value={values.contentType} onChange={(e) => onChange({ contentType: e.target.value })} className={selectClass}>
             <option value="lecture_slides">Lecture Slides</option>
-            <option value="study_notes">Study Notes</option>
-            <option value="study_guide">Study Guide</option>
           </select>
         </div>
         <div>
