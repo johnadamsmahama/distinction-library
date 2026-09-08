@@ -22,7 +22,7 @@ export type ReviewInput = {
   // study_material fields
   title?: string | null;
   weekNumber?: number | null;
-  contentType?: 'lecture_slides' | null;
+  contentType?: 'lecture_slides' | 'study_notes' | 'revision_kit' | 'audio_slides' | null;
   // shared
   fileName: string;
   extractedText: string | null; // null if extraction failed/unsupported
