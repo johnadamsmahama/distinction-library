@@ -69,7 +69,7 @@ export default function HomeButtonGate() {
 
   return (
     <div className="relative mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
-      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-condensed font-extrabold text-sm sm:text-base uppercase tracking-wide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-[family-name:var(--font-courier-prime)] font-extrabold text-[13px] uppercase tracking-wide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold drop-shadow-sm flex-shrink-0">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
