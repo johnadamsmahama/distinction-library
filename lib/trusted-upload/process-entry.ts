@@ -210,7 +210,11 @@ export async function processStudyMaterialEntry(
     };
   }
 
-  const materialContentType = ext === 'pptx' ? 'lecture_slides' : 'study_notes';
+  // Only two content types are ever submittable — lecture_slides here and
+  // past_papers in the sibling function. study_notes/study_guide are no
+  // longer produced by any upload path; study_guide is admin-only (Revision
+  // Kit) and study_notes has been retired entirely.
+  const materialContentType = 'lecture_slides';
   const title = fileName.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim().toUpperCase();
 
   // Supabase storage-js defaults to 'text/plain;charset=UTF-8' when no
