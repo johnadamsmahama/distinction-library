@@ -41,7 +41,7 @@ type PendingMaterial = {
 const TYPE_LABELS: Record<string, string> = {
   past_paper: 'Past Paper',
   lecture_slides: 'Lecture Slides',
-  study_guide: 'Study Guide',
+  revision_kit: 'Revision Kit',
   other: 'Other',
 };
 
