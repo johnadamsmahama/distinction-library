@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     exam_type?: 'mid_semester' | 'end_of_semester' | null;
     title?: string | null;
     week_number?: number | null;
-    content_type?: 'lecture_slides' | 'study_notes' | 'study_guide' | null;
+    content_type?: 'lecture_slides' | 'study_notes' | 'revision_kit' | 'audio_slides' | null;
     courses: { code: string; name: string } | { code: string; name: string }[] | null;
   };
 
