@@ -35,7 +35,7 @@ async function hashFile(file: File): Promise<string> {
 }
 
 const labelClass = 'block font-condensed text-xs font-bold uppercase tracking-wide text-g600 mb-1';
-const inputClass = 'w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm bg-white';
+const inputClass = 'w-full border border-g200 rounded-none px-3 py-2 font-body text-sm bg-white';
 
 export default function LibraryContentForm({ courses }: { courses: CourseOption[] }) {
   const router = useRouter();
@@ -132,7 +132,7 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
 
   if (done) {
     return (
-      <div className="bg-white border border-g100 rounded-2xl p-6 text-center">
+      <div className="bg-white border border-g100 rounded-none p-6 text-center">
         <h2 className="font-display font-bold text-lg text-navy mb-1.5">Published</h2>
         <p className="font-body text-sm text-g600 mb-4">
           The {done} is live now — no review needed.
@@ -147,13 +147,13 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
               setPageCount('');
               setFile(null);
             }}
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g200 rounded-lg px-4 py-2 hover:bg-g50 transition-colors"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g200 rounded-none px-4 py-2 hover:bg-g50 transition-colors"
           >
             Add another
           </button>
           <button
             onClick={() => router.push('/admin')}
-            className="bg-navy text-white font-condensed font-bold text-xs uppercase tracking-wide rounded-lg px-4 py-2 hover:brightness-110 transition-all"
+            className="bg-navy text-white font-condensed font-bold text-xs uppercase tracking-wide rounded-none px-4 py-2 hover:brightness-110 transition-all"
           >
             Back to Admin
           </button>
@@ -163,7 +163,7 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 bg-white border border-g100 rounded-2xl p-6">
+    <form onSubmit={handleSubmit} className="space-y-5 bg-white border border-g100 rounded-none p-6">
       <div>
         <label className={labelClass}>Content Type *</label>
         <div className="flex gap-2">
@@ -172,7 +172,7 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
               key={k}
               type="button"
               onClick={() => resetForFileKind(k)}
-              className={`flex-1 rounded-lg border px-3 py-2 font-condensed font-bold text-xs uppercase tracking-wide transition-colors ${
+              className={`flex-1 rounded-none border px-3 py-2 font-condensed font-bold text-xs uppercase tracking-wide transition-colors ${
                 kind === k ? 'bg-navy text-white border-navy' : 'bg-white text-g600 border-g200 hover:border-navy'
               }`}
             >
@@ -257,7 +257,7 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
         </label>
         <label
           htmlFor="content-file"
-          className="block border-[1.5px] border-dashed border-g300 rounded-lg py-4 px-3 text-center cursor-pointer hover:border-navy transition-colors"
+          className="block border-[1.5px] border-dashed border-g300 rounded-none py-4 px-3 text-center cursor-pointer hover:border-navy transition-colors"
         >
           <span className="block font-condensed font-bold text-sm text-navy underline mb-1 truncate">
             {file ? file.name : 'Attach file'}
@@ -278,7 +278,7 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gold text-navy-deep font-condensed font-bold text-sm uppercase tracking-wide rounded-lg py-2.5 disabled:opacity-60 hover:brightness-105 transition-all"
+        className="w-full bg-gold text-navy-deep font-condensed font-bold text-sm uppercase tracking-wide rounded-none py-2.5 disabled:opacity-60 hover:brightness-105 transition-all"
       >
         {loading ? 'Publishing…' : `Publish ${meta.label}`}
       </button>
