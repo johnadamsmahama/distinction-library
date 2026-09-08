@@ -1,342 +1,308 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import type { CourseOption } from '@/lib/papers-data';
 
-type Kit = {
-  id: string;
-  title: string;
-  file_url: string;
-  download_count: number;
-  semester: '1' | '2' | null;
-  page_count: number | null;
-  created_at: string;
-  courses: { id: string; code: string; name: string; department: string; level: string };
+type ContentKind = 'revision_kit' | 'audio_slides';
+
+const KIND_META: Record<
+  ContentKind,
+  { label: string; accept: string; hint: string; maxSizeMb: number }
+> = {
+  revision_kit: {
+    label: 'Revision Kit',
+    accept: '.pdf,.doc,.docx',
+    hint: 'PDF or Word — the full-semester guide',
+    maxSizeMb: 25,
+  },
+  audio_slides: {
+    label: 'Audio-Slides',
+    accept: '.mp3,.m4a,.wav,.ogg,.mp4',
+    hint: 'MP3, M4A, WAV, or OGG — recorded course audio',
+    maxSizeMb: 200,
+  },
 };
 
-const mono = 'font-[family-name:var(--font-courier-prime)]';
-
-const AMB_BG = '#FBEBD9';
-const AMB_RUST = '#C1741F';
-const AMB_INK = '#3A2410';
-const AMB_INK_SOFT = '#6B4F35';
-const AMB_CARD = '#FFFFFF';
-
-const LEVELS = ['100', '200', '300', '400'];
-
-// Fire-and-forget: same pattern used by RepositoryBrowser — tells the
-// backend a download happened without blocking the file from opening.
-function trackDownload(id: string) {
-  fetch('/api/track-download', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'materials', id }),
-  }).catch(() => {
-    // Silently ignore — a failed tracking ping should never interrupt
-    // or error out the user's actual download.
-  });
+// Same SHA-256 duplicate check every other upload form in the app uses.
+async function hashFile(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
-// Cross-origin `download` attributes are unreliable on mobile Chrome, so
-// we fetch the file and save it as a blob to force the correct filename.
-async function downloadFile(url: string, filename: string) {
-  const safeName = filename.replace(/[\\/:*?"<>|]/g, '-');
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = safeName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(blobUrl);
-  } catch {
-    window.open(url, '_blank');
-  }
-}
+const labelClass = 'block font-condensed text-xs font-bold uppercase tracking-wide text-g600 mb-1';
+const inputClass = 'w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm bg-white';
 
-function FilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full appearance-none cursor-pointer rounded-none pl-2.5 pr-6 py-[5px] font-bold uppercase tracking-wide outline-none ${mono}`}
-        style={{ fontSize: 10, background: AMB_CARD, border: '1.5px solid rgba(58,36,16,0.15)', color: AMB_INK_SOFT }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div
-        className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ fontSize: 9, color: '#999' }}
-      >
-        ▾
-      </div>
-    </div>
-  );
-}
-
-function KitTile({ kit }: { kit: Kit }) {
-  const downloadName = `${kit.courses.code} - ${kit.title}.pdf`;
-  return (
-    <div
-      className="flex flex-col overflow-hidden"
-      style={{ aspectRatio: '1 / 1', background: AMB_CARD, border: '1.5px solid rgba(58,36,16,0.15)' }}
-    >
-      <div className="h-1 flex-shrink-0" style={{ background: AMB_RUST }} />
-      <a
-        href={kit.file_url}
-        onClick={(e) => {
-          e.preventDefault();
-          trackDownload(kit.id);
-          downloadFile(kit.file_url, downloadName);
-        }}
-        className="flex flex-1 min-h-0 flex-col justify-between p-3"
-        style={{ textDecoration: 'none', cursor: 'pointer' }}
-      >
-        <div>
-          <div className="flex items-start justify-between gap-1.5 mb-1.5">
-            <span className={`font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 8.5, color: AMB_RUST }}>
-              {kit.courses.code}
-            </span>
-            <span
-              className={`font-bold uppercase text-right flex-shrink-0 ${mono}`}
-              style={{ fontSize: 7, padding: '2px 4px', background: AMB_RUST + '18', color: '#8F5314', lineHeight: 1.3 }}
-            >
-              {kit.semester ? `SEM ${kit.semester}` : 'KIT'}
-            </span>
-          </div>
-          <div
-            className="font-display font-bold overflow-hidden"
-            style={{
-              fontSize: 12.5,
-              lineHeight: 1.25,
-              color: AMB_INK,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-            }}
-          >
-            {kit.title}
-          </div>
-        </div>
-        <div>
-          <div className={`flex items-center justify-between mb-2 ${mono}`} style={{ fontSize: 8.5, color: AMB_INK_SOFT }}>
-            <span>{kit.page_count ? `${kit.page_count}p guide` : 'Study guide'}</span>
-            <span>
-              <b style={{ color: AMB_INK }}>{kit.download_count}</b> DL
-            </span>
-          </div>
-          <div
-            className={`w-full flex items-center justify-center gap-1 py-1.5 font-bold uppercase tracking-wide ${mono}`}
-            style={{ background: AMB_RUST, color: '#fff', fontSize: 8.5 }}
-          >
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-            Download
-          </div>
-        </div>
-      </a>
-    </div>
-  );
-}
-
-function EmptyState({ noneAtAll }: { noneAtAll: boolean }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
-      <div className={`uppercase tracking-wide ${mono}`} style={{ fontSize: 9, color: AMB_RUST }}>
-        Library
-      </div>
-      <div className="font-display font-bold" style={{ fontSize: 16, color: AMB_INK }}>
-        {noneAtAll ? 'Coming soon, course by course' : 'No kits match these filters'}
-      </div>
-      <div className="max-w-[280px]" style={{ fontSize: 12.5, color: AMB_INK_SOFT }}>
-        {noneAtAll
-          ? "Each Revision Kit brings together a full semester of lecture slides into one exam-focused study guide. We're rolling these out course by course — check back as your courses are added."
-          : 'Try a different course, level, or semester.'}
-      </div>
-    </div>
-  );
-}
-
-export default function RevisionKitBrowser() {
-  const [kits, setKits] = useState<Kit[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [level, setLevel] = useState('');
+export default function LibraryContentForm({ courses }: { courses: CourseOption[] }) {
+  const router = useRouter();
+  const [kind, setKind] = useState<ContentKind>('revision_kit');
   const [courseId, setCourseId] = useState('');
+  const [title, setTitle] = useState('');
   const [semester, setSemester] = useState('');
+  const [pageCount, setPageCount] = useState('');
+  const [week, setWeek] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 300);
-    return () => clearTimeout(t);
-  }, [search]);
+  const meta = KIND_META[kind];
 
-  useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
-    async function load() {
-      const { data } = await supabase
-        .from('study_materials')
-        .select(
-          'id, title, file_url, download_count, semester, page_count, created_at, courses!inner(id, code, name, department, level)'
-        )
-        .eq('status', 'approved')
-        .eq('content_type', 'study_guide')
-        .order('created_at', { ascending: false });
-      if (!cancelled) {
-        setKits((data as unknown as Kit[]) ?? []);
-        setLoading(false);
-      }
+  const resetForFileKind = (next: ContentKind) => {
+    setKind(next);
+    setFile(null);
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!courseId) return setError('Select a course.');
+    if (!title.trim()) return setError('Give it a title.');
+    if (!file) return setError('Attach a file.');
+    if (file.size > meta.maxSizeMb * 1024 * 1024) {
+      return setError(`That file is over the ${meta.maxSizeMb}MB limit for ${meta.label}.`);
     }
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (kind === 'revision_kit' && pageCount && Number(pageCount) <= 0) {
+      return setError('Page count must be a positive number.');
+    }
+    if (kind === 'audio_slides' && week && (Number(week) < 1 || Number(week) > 12)) {
+      return setError('Week must be between 1 and 12.');
+    }
 
-  // Only surface courses that actually have a kit — with a handful of
-  // kits live at a time, a full course-list dropdown would be mostly
-  // dead ends.
-  const courseOptions = useMemo(() => {
-    const map = new Map<string, { id: string; code: string; level: string }>();
-    kits.forEach((k) => map.set(k.courses.id, k.courses));
-    return Array.from(map.values()).sort((a, b) => a.code.localeCompare(b.code));
-  }, [kits]);
+    setLoading(true);
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const filteredCourseOptions = useMemo(
-    () => courseOptions.filter((c) => !level || c.level === level),
-    [courseOptions, level]
-  );
+    if (!user) {
+      setLoading(false);
+      setError('Your session expired — please log in again.');
+      return;
+    }
 
-  useEffect(() => {
-    if (courseId && !filteredCourseOptions.some((c) => c.id === courseId)) setCourseId('');
-  }, [filteredCourseOptions, courseId]);
+    const fileHash = await hashFile(file);
+    const { data: existingByHash } = await supabase
+      .from('study_materials')
+      .select('id')
+      .eq('file_hash', fileHash)
+      .limit(1)
+      .maybeSingle();
 
-  const visibleKits = useMemo(() => {
-    return kits.filter((k) => {
-      if (level && k.courses.level !== level) return false;
-      if (courseId && k.courses.id !== courseId) return false;
-      if (semester && k.semester !== semester) return false;
-      if (debouncedSearch) {
-        const haystack = `${k.courses.code} ${k.courses.name} ${k.title}`.toLowerCase();
-        if (!haystack.includes(debouncedSearch)) return false;
-      }
-      return true;
+    if (existingByHash) {
+      setLoading(false);
+      setError('This exact file has already been uploaded to the library.');
+      return;
+    }
+
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/${courseId}/${Date.now()}.${ext}`;
+
+    const { error: uploadErr } = await supabase.storage.from('study-materials').upload(path, file);
+    if (uploadErr) {
+      setLoading(false);
+      setError(uploadErr.message);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('study-materials').getPublicUrl(path);
+
+    const { error: insertErr } = await supabase.from('study_materials').insert({
+      course_id: courseId,
+      title: title.trim(),
+      content_type: kind,
+      status: 'approved',
+      file_url: publicUrlData.publicUrl,
+      file_hash: fileHash,
+      uploaded_by: user.id,
+      semester: kind === 'revision_kit' && semester ? semester : null,
+      page_count: kind === 'revision_kit' && pageCount ? Number(pageCount) : null,
+      week_number: kind === 'audio_slides' && week ? Number(week) : null,
     });
-  }, [kits, level, courseId, semester, debouncedSearch]);
+
+    setLoading(false);
+    if (insertErr) {
+      setError(insertErr.message);
+      return;
+    }
+
+    setDone(meta.label);
+  };
+
+  if (done) {
+    return (
+      <div className="bg-white border border-g100 rounded-2xl p-6 text-center">
+        <h2 className="font-display font-bold text-lg text-navy mb-1.5">Published</h2>
+        <p className="font-body text-sm text-g600 mb-4">
+          The {done} is live now — no review needed.
+        </p>
+        <div className="flex items-center justify-center gap-2.5">
+          <button
+            onClick={() => {
+              setDone(null);
+              setCourseId('');
+              setTitle('');
+              setSemester('');
+              setPageCount('');
+              setWeek('');
+              setFile(null);
+            }}
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g200 rounded-lg px-4 py-2 hover:bg-g50 transition-colors"
+          >
+            Add another
+          </button>
+          <button
+            onClick={() => router.push('/admin')}
+            className="bg-navy text-white font-condensed font-bold text-xs uppercase tracking-wide rounded-lg px-4 py-2 hover:brightness-110 transition-all"
+          >
+            Back to Admin
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="relative"
-      style={{
-        backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(193,116,31,0.13) 0%, transparent 55%), ${AMB_BG}`,
-        minHeight: '100%',
-      }}
-    >
-      <div className="max-w-[480px] mx-auto px-4 pt-10 pb-10">
-        <div className={`uppercase tracking-[0.14em] font-bold mb-1.5 ${mono}`} style={{ fontSize: 9, color: AMB_RUST }}>
-          Library
-        </div>
-        <h1 className="font-display font-bold leading-tight" style={{ fontSize: 22, color: AMB_INK }}>
-          Revision Kit
-        </h1>
-        <p className="italic" style={{ fontSize: 12.5, color: AMB_INK_SOFT, margin: '4px 0 16px' }}>
-          One exam-focused guide per course — a full semester, distilled.
-        </p>
-
-        <div
-          className="flex items-center gap-3 px-3.5 py-2.5 mb-3"
-          style={{ background: AMB_CARD, border: `1.5px solid ${AMB_RUST}59`, boxShadow: '0 2px 8px rgba(58,36,16,0.06)' }}
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={AMB_RUST} strokeWidth="2.5" className="flex-shrink-0">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search by course code or name…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`flex-1 bg-transparent outline-none ${mono}`}
-            style={{ fontSize: 11, color: AMB_INK }}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="transition-colors text-xs" style={{ color: 'rgba(58,36,16,0.4)' }}>
-              ✕
+    <form onSubmit={handleSubmit} className="space-y-5 bg-white border border-g100 rounded-2xl p-6">
+      <div>
+        <label className={labelClass}>Content Type *</label>
+        <div className="flex gap-2">
+          {(Object.keys(KIND_META) as ContentKind[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => resetForFileKind(k)}
+              className={`flex-1 rounded-lg border px-3 py-2 font-condensed font-bold text-xs uppercase tracking-wide transition-colors ${
+                kind === k ? 'bg-navy text-white border-navy' : 'bg-white text-g600 border-g200 hover:border-navy'
+              }`}
+            >
+              {KIND_META[k].label}
             </button>
-          )}
+          ))}
         </div>
-
-        <div className="grid grid-cols-3 gap-2 pb-4">
-          <FilterSelect
-            value={level}
-            onChange={setLevel}
-            options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
-          />
-          <FilterSelect
-            value={courseId}
-            onChange={setCourseId}
-            options={[{ value: '', label: 'All Courses' }, ...filteredCourseOptions.map((c) => ({ value: c.id, label: c.code }))]}
-          />
-          <FilterSelect
-            value={semester}
-            onChange={setSemester}
-            options={[
-              { value: '', label: 'All Semesters' },
-              { value: '1', label: 'Semester 1' },
-              { value: '2', label: 'Semester 2' },
-            ]}
-          />
-        </div>
-
-        {!loading && (
-          <div className="flex items-center justify-between mb-3">
-            <span className={`uppercase tracking-wide ${mono}`} style={{ fontSize: 9, color: 'rgba(58,36,16,0.4)' }}>
-              {visibleKits.length} {visibleKits.length === 1 ? 'kit' : 'kits'}
-            </span>
-            <span className={`uppercase tracking-wide cursor-pointer ${mono}`} style={{ fontSize: 9, color: AMB_RUST + 'aa' }}>
-              Sort ↕
-            </span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="animate-pulse"
-                style={{ aspectRatio: '1 / 1', background: 'rgba(58,36,16,0.06)' }}
-              />
-            ))}
-          </div>
-        ) : visibleKits.length === 0 ? (
-          <EmptyState noneAtAll={kits.length === 0} />
-        ) : (
-          <div className="grid grid-cols-2 gap-2.5">
-            {visibleKits.map((k) => (
-              <KitTile key={k.id} kit={k} />
-            ))}
-          </div>
-        )}
       </div>
-    </div>
+
+      <div>
+        <label htmlFor="course" className={labelClass}>
+          Course *
+        </label>
+        <select
+          id="course"
+          value={courseId}
+          onChange={(e) => setCourseId(e.target.value)}
+          required
+          className={inputClass}
+        >
+          <option value="" disabled>
+            Select a course…
+          </option>
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.code} — {c.name} (Level {c.level})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="title" className={labelClass}>
+          Title *
+        </label>
+        <input
+          id="title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          placeholder={kind === 'revision_kit' ? 'e.g. Principles of Marketing — Full Semester Guide' : 'e.g. Week 4 — Consumer Behaviour (Audio)'}
+          className={inputClass}
+        />
+      </div>
+
+      {kind === 'revision_kit' && (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="semester" className={labelClass}>
+              Semester
+            </label>
+            <select id="semester" value={semester} onChange={(e) => setSemester(e.target.value)} className={inputClass}>
+              <option value="">Not set</option>
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="pageCount" className={labelClass}>
+              Page Count
+            </label>
+            <input
+              id="pageCount"
+              type="number"
+              min={1}
+              value={pageCount}
+              onChange={(e) => setPageCount(e.target.value)}
+              placeholder="e.g. 42"
+              className={inputClass}
+            />
+          </div>
+        </div>
+      )}
+
+      {kind === 'audio_slides' && (
+        <div>
+          <label htmlFor="week" className={labelClass}>
+            Week (optional)
+          </label>
+          <input
+            id="week"
+            type="number"
+            min={1}
+            max={12}
+            value={week}
+            onChange={(e) => setWeek(e.target.value)}
+            placeholder="1 – 12, if this covers a specific week"
+            className={inputClass}
+          />
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="content-file" className={labelClass}>
+          File *
+        </label>
+        <label
+          htmlFor="content-file"
+          className="block border-[1.5px] border-dashed border-g300 rounded-lg py-4 px-3 text-center cursor-pointer hover:border-navy transition-colors"
+        >
+          <span className="block font-condensed font-bold text-sm text-navy underline mb-1 truncate">
+            {file ? file.name : 'Attach file'}
+          </span>
+          <span className="block font-condensed text-[11px] uppercase tracking-wide text-g500">{meta.hint}</span>
+        </label>
+        <input
+          id="content-file"
+          type="file"
+          accept={meta.accept}
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="hidden"
+        />
+      </div>
+
+      {error && <p className="font-body text-xs text-red-600">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-gold text-navy-deep font-condensed font-bold text-sm uppercase tracking-wide rounded-lg py-2.5 disabled:opacity-60 hover:brightness-105 transition-all"
+      >
+        {loading ? 'Publishing…' : `Publish ${meta.label}`}
+      </button>
+    </form>
   );
 }
