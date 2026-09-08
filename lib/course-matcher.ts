@@ -12,7 +12,7 @@ export type ClassificationResult = {
   examType: 'mid_semester' | 'end_of_semester' | null;
   title: string | null;
   weekNumber: number | null;
-  contentType: 'lecture_slides' | 'study_notes' | 'study_guide' | null;
+  contentType: 'lecture_slides' | null;
   notes: string;
 };
 
@@ -33,14 +33,16 @@ Respond with ONLY a JSON object, no other text, no markdown fences:
   "examType": "mid_semester" | "end_of_semester" | null,
   "title": "<short descriptive title>" | null,
   "weekNumber": <number 1-14> | null,
-  "contentType": "lecture_slides" | "study_notes" | "study_guide" | null,
+  "contentType": "lecture_slides" | null,
   "notes": "<one short sentence a moderator can read at a glance>"
 }
 
 Guidance:
 - "past_paper": contains exam questions, marking schemes, or is clearly framed as a past
   exam/test.
-- "study_material": lecture slides, notes, or a study guide — not exam questions.
+- "study_material": lecture slides or notes — not exam questions. contentType should be
+  "lecture_slides" whenever kind is "study_material" — that is the only content type a
+  bulk upload can produce; leave it null only if you are also unsure of the kind itself.
 - "unknown": you genuinely cannot tell which of the two this is.
 - courseCode MUST be one of the codes provided to you, or null. Never invent a code that
   wasn't in the list.
