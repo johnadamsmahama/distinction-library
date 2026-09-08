@@ -792,10 +792,10 @@ export default function RepositoryBrowser({
                 key={p.id}
                 code={p.courses.code}
                 name={p.courses.name}
-                tag={p.exam_type === 'mid_semester' ? 'Mid-Sem' : `${p.year}`}
+                tag={p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End of Sem'}
                 downloads={p.download_count}
                 href={p.watermarked_url ?? p.file_url}
-                downloadName={`${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'} ${p.year}.pdf`}
+                downloadName={`${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'}${p.year ? ` ${p.year}` : ''}.pdf`}
                 itemId={p.id}
               />
             ))}
