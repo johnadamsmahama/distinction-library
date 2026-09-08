@@ -20,7 +20,7 @@ type PaperResult = {
 type MaterialResult = {
   id: string;
   title: string;
-  content_type: 'lecture_slides' | 'study_notes' | 'study_guide';
+  content_type: 'lecture_slides';
   week_number: number | null;
   file_url: string;
   download_count: number;
@@ -28,8 +28,15 @@ type MaterialResult = {
   courses: { id: string; code: string; name: string; department: string; level: string };
 };
 
+const CONTENT_TYPE_LABEL: Record<string, string> = {
+  lecture_slides: 'Lecture Slides',
+};
+
 const LEVELS = ['100', '200', '300', '400'];
 const WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
+
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E\")";
 
 // Fire-and-forget: tells the backend "a download happened" without
 // blocking or delaying the actual file from opening. We deliberately
@@ -70,10 +77,212 @@ async function downloadFile(url: string, filename: string) {
   }
 }
 
+/* ── Pill select chip ── */
+function FilterPill({
+  value,
+  onChange,
+  options,
+  accent,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  accent: string;
+}) {
+  const active = value !== '';
+  const textColor = active
+    ? accent === '#E2BE5A' ? '#7A6010' : '#2E6B52'
+    : '#555';
+
+  return (
+    <div className="relative w-full">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
+        style={{
+          fontSize: 10,
+          background: active ? accent + '18' : '#ffffff',
+          border: `1.5px solid ${active ? accent : 'rgba(15,34,68,0.15)'}`,
+          color: textColor,
+          minWidth: 0,
+        }}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <div
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[9px]"
+        style={{ color: active ? accent : '#aaa' }}
+      >
+        ▾
+      </div>
+    </div>
+  );
+}
+
+/* ── Cream catalog card ── */
+function ResultCard({
+  code,
+  name,
+  type,
+  tag,
+  downloads,
+  href,
+  downloadName,
+  accent,
+  itemType,
+  itemId,
+}: {
+  code: string;
+  name: string;
+  type: string;
+  tag: string;
+  downloads: number;
+  href: string;
+  downloadName: string;
+  accent: string;
+  itemType: Tab;
+  itemId: string;
+}) {
+  return (
+    <div
+      className="flex overflow-hidden rounded-none relative group transition-transform hover:-translate-y-[1px]"
+      style={{
+        background: itemType === 'papers' ? '#FBF6E8' : '#EEF6F1',
+        boxShadow: '0 4px 18px rgba(6,15,30,0.5)',
+      }}
+    >
+      {/* Watermark stamp */}
+      <div
+        className="absolute right-3 top-1/2 pointer-events-none select-none"
+        style={{
+          transform: 'translateY(-50%) rotate(-18deg)',
+          fontSize: 30,
+          fontWeight: 900,
+          fontFamily: 'monospace',
+          color: accent === '#E2BE5A' ? 'rgba(226,190,90,0.08)' : 'rgba(78,156,124,0.08)',
+          lineHeight: 1,
+        }}
+      >
+        {code}
+      </div>
+
+      {/* Left accent rail */}
+      <div className="w-[3px] flex-shrink-0" style={{ background: accent }} />
+
+      {/* Download link — wraps content + downloads on click */}
+      <a
+        href={href}
+        onClick={(e) => {
+          e.preventDefault();
+          trackDownload(itemType, itemId);
+          downloadFile(href, downloadName);
+        }}
+        className="px-3 py-2.5 flex-1 min-w-0"
+        style={{ textDecoration: 'none', cursor: 'pointer' }}
+      >
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <div className="min-w-0">
+            <div
+              className="font-mono font-bold uppercase tracking-wider mb-0.5"
+              style={{
+                fontSize: 8.5,
+                color: accent === '#E2BE5A' ? '#9A7B1A' : '#2E6B52',
+              }}
+            >
+              {code}
+            </div>
+            <div className="font-display font-bold text-navy truncate" style={{ fontSize: 13, lineHeight: 1.25 }}>
+              {name}
+            </div>
+          </div>
+          <div className="text-center flex-shrink-0 pt-0.5">
+            <div className="font-condensed font-bold text-navy" style={{ fontSize: 15, lineHeight: 1 }}>
+              {downloads}
+            </div>
+            <div className="font-mono text-[7px] text-g600 tracking-wide">DL</div>
+          </div>
+        </div>
+
+        <div className="flex gap-1.5 flex-wrap">
+          <span
+            className="font-mono font-bold uppercase rounded-none px-1.5 py-0.5"
+            style={{
+              fontSize: 7.5,
+              letterSpacing: '0.06em',
+              background: accent + '18',
+              border: `1px solid ${accent}55`,
+              color: accent === '#E2BE5A' ? '#7A6010' : '#2E6B52',
+            }}
+          >
+            {type}
+          </span>
+          <span
+            className="font-mono font-bold uppercase rounded-none px-1.5 py-0.5"
+            style={{
+              fontSize: 7.5,
+              background: 'rgba(15,34,68,0.07)',
+              color: '#777',
+            }}
+          >
+            {tag}
+          </span>
+        </div>
+      </a>
+
+      {/* Right-side actions: Solve (papers only) + Download arrow */}
+      <div className="flex items-center gap-1.5 pr-3 flex-shrink-0">
+        {itemType === 'papers' && (
+          <a
+            href={`/papers/${itemId}/solutions`}
+            className="flex items-center gap-1 rounded-none px-2 py-1 transition-all hover:brightness-110"
+            style={{
+              background: '#0F2244',
+              border: '1px solid rgba(226,190,90,0.4)',
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E2BE5A" strokeWidth="2.5">
+              <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
+            <span
+              className="font-mono font-bold uppercase tracking-wide"
+              style={{ fontSize: 7.5, color: '#E2BE5A' }}
+            >
+              Solve
+            </span>
+          </a>
+        )}
+        <a
+          href={href}
+          onClick={(e) => {
+            e.preventDefault();
+            trackDownload(itemType, itemId);
+            downloadFile(href, downloadName);
+          }}
+          className="w-7 h-7 rounded-none flex items-center justify-center transition-all group-hover:scale-110"
+          style={{
+            background: accent + '18',
+            border: `1px solid ${accent}44`,
+            cursor: 'pointer',
+          }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5">
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  );
+}
 
 /* ══════════════════════════════════════════════════════════
-   Lecture Slides — cream/paper theme, sharp corners,
-   horizontal bordered cards.
+   Lecture Slides redesign (materials mode only) — cream/paper
+   theme, sharp corners, horizontal cards. Past Papers mode is
+   untouched and keeps the components above.
    ══════════════════════════════════════════════════════════ */
 
 const MAT_INK = '#17233F';
@@ -82,16 +291,6 @@ const MAT_RUST = '#B1502F';
 const MAT_GOLD = '#C69A3D';
 const MAT_CARD = '#FBF7ED';
 const MAT_BG = '#F1E9D8';
-
-/* Past Questions Bank palette — blush page, white cards, rust rail (Set 1) */
-const PAP_INK = '#3A2A24';
-const PAP_INK_SOFT = '#6B5A52';
-const PAP_RUST = '#B1633F';
-const PAP_RUST_DEEP = '#8C4A34';
-const PAP_CARD = '#FFFFFF';
-const PAP_BG = '#F4E1DA';
-const PAP_CHIP = '#F4E1DA';
-const PAP_BORDER = 'rgba(58,42,36,0.16)';
 
 /* ── Cream filter select ── */
 function MaterialFilterSelect({
@@ -155,7 +354,7 @@ function MaterialCard({
   return (
     <div
       className="flex rounded-none overflow-hidden"
-      style={{ background: '#FFFFFF', border: '1.5px solid rgba(23,35,63,0.16)' }}
+      style={{ background: MAT_CARD, boxShadow: '0 2px 10px rgba(23,35,63,0.08)' }}
     >
       {/* Sharp left rust rail — no rounded corners anywhere on this card */}
       <div className="w-1 flex-shrink-0 rounded-none" style={{ background: MAT_RUST }} />
@@ -192,17 +391,7 @@ function MaterialCard({
 
         <div
           className="font-display font-bold"
-          style={{
-            fontSize: 14.5,
-            lineHeight: 1.28,
-            color: MAT_INK,
-            marginBottom: 9,
-            minHeight: 14.5 * 1.28 * 2,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
+          style={{ fontSize: 14.5, lineHeight: 1.28, color: MAT_INK, marginBottom: 9 }}
         >
           {name}
         </div>
@@ -284,177 +473,16 @@ function MaterialEmptyState() {
   );
 }
 
-/* ── Past Questions Bank filter select — blush/rust theme ── */
-function PaperFilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  const active = value !== '';
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
-        style={{
-          fontSize: 10,
-          background: active ? PAP_RUST + '18' : PAP_CARD,
-          border: `1.5px solid ${active ? PAP_RUST : PAP_BORDER}`,
-          color: active ? PAP_RUST_DEEP : PAP_INK_SOFT,
-          minWidth: 0,
-        }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[9px]"
-        style={{ color: active ? PAP_RUST : '#999' }}
-      >
-        ▾
-      </div>
-    </div>
-  );
-}
-
-/* ── Past Questions Bank card — white card, rust rail, fixed height ── */
-function PaperCard({
-  code,
-  name,
-  tag,
-  downloads,
-  href,
-  downloadName,
-  itemId,
-}: {
-  code: string;
-  name: string;
-  tag: string;
-  downloads: number;
-  href: string;
-  downloadName: string;
-  itemId: string;
-}) {
-  return (
-    <div
-      className="flex rounded-none overflow-hidden"
-      style={{ background: PAP_CARD, border: `1.5px solid ${PAP_BORDER}` }}
-    >
-      <div className="w-1 flex-shrink-0 rounded-none" style={{ background: PAP_RUST }} />
-
-      <a
-        href={href}
-        onClick={(e) => {
-          e.preventDefault();
-          trackDownload('papers', itemId);
-          downloadFile(href, downloadName);
-        }}
-        className="flex-1 min-w-0 px-3 py-[11px]"
-        style={{ textDecoration: 'none', cursor: 'pointer' }}
-      >
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <span
-            className="font-mono font-bold uppercase tracking-wide"
-            style={{ fontSize: 9, color: PAP_RUST }}
-          >
-            {code}
-          </span>
-          <span
-            className="font-mono font-bold uppercase rounded-none px-1.5 py-0.5 flex-shrink-0"
-            style={{ fontSize: 8, background: PAP_CHIP, color: PAP_RUST_DEEP }}
-          >
-            {tag}
-          </span>
-        </div>
-
-        <div
-          className="font-display font-bold"
-          style={{
-            fontSize: 14.5,
-            lineHeight: 1.28,
-            color: PAP_INK,
-            marginBottom: 9,
-            minHeight: 14.5 * 1.28 * 2,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {name}
-        </div>
-
-        <div
-          className="flex items-center justify-between pt-2"
-          style={{ borderTop: `1px solid ${PAP_BORDER}` }}
-        >
-          <span className="font-mono" style={{ fontSize: 9.5, color: PAP_INK_SOFT }}>
-            <b style={{ color: PAP_INK, fontWeight: 700 }}>{downloads}</b>{' '}
-            {downloads === 1 ? 'download' : 'downloads'}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <a
-              href={`/papers/${itemId}/solutions`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 rounded-none"
-              style={{
-                border: `1px solid ${PAP_RUST}`,
-                color: PAP_RUST_DEEP,
-                fontFamily: 'inherit',
-                fontWeight: 700,
-                fontSize: 9,
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-                padding: '4px 8px',
-              }}
-            >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={PAP_RUST_DEEP} strokeWidth="2.5">
-                <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-              </svg>
-              Solve
-            </a>
-            <span
-              className="flex items-center gap-1 rounded-none"
-              style={{
-                background: PAP_RUST,
-                color: PAP_CARD,
-                fontFamily: 'inherit',
-                fontWeight: 700,
-                fontSize: 9,
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-                padding: '4px 8px',
-              }}
-            >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={PAP_CARD} strokeWidth="2.5">
-                <path d="M12 5v14M5 12l7 7 7-7" />
-              </svg>
-              Download
-            </span>
-          </span>
-        </div>
-      </a>
-    </div>
-  );
-}
-
-/* ── Empty state — blush/rust theme for Past Questions Bank ── */
-function PaperEmptyState() {
+/* ── Empty state ── */
+function EmptyState({ tab, accent }: { tab: Tab; accent: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-5">
+      {/* Shelf illustration */}
       <div className="relative" style={{ width: 88, height: 56 }}>
         {[
-          { left: 0, height: 38, color: 'rgba(177,99,63,0.15)', border: 'rgba(177,99,63,0.3)' },
-          { left: 26, height: 48, color: 'rgba(140,74,52,0.18)', border: 'rgba(140,74,52,0.3)' },
-          { left: 52, height: 30, color: 'rgba(177,99,63,0.1)', border: 'rgba(177,99,63,0.2)' },
+          { left: 0, height: 38, color: 'rgba(226,190,90,0.15)', border: 'rgba(226,190,90,0.3)' },
+          { left: 26, height: 48, color: 'rgba(78,156,124,0.15)', border: 'rgba(78,156,124,0.3)' },
+          { left: 52, height: 30, color: 'rgba(226,190,90,0.1)', border: 'rgba(226,190,90,0.2)' },
         ].map((b, i) => (
           <div
             key={i}
@@ -464,26 +492,26 @@ function PaperEmptyState() {
         ))}
         <div
           className="absolute rounded-none"
-          style={{ bottom: -1, left: -6, right: -6, height: 2, background: 'rgba(58,42,36,0.1)' }}
+          style={{ bottom: -1, left: -6, right: -6, height: 2, background: 'rgba(255,255,255,0.1)' }}
         />
       </div>
 
       <div className="text-center">
-        <div className="font-display font-bold text-sm mb-1" style={{ color: 'rgba(58,42,36,0.7)' }}>
+        <div className="font-display font-bold text-white/60 text-sm mb-1">
           Nothing on these shelves yet
         </div>
-        <div
-          className="font-mono text-[10px] tracking-wide uppercase"
-          style={{ color: 'rgba(107,90,82,0.7)' }}
-        >
-          Be the first to contribute a past paper
+        <div className="font-mono text-[10px] text-white/30 tracking-wide uppercase">
+          Be the first to contribute{tab === 'papers' ? ' a past paper' : ' study materials'}
         </div>
       </div>
 
       <a
         href="/papers/upload"
         className="font-mono font-bold uppercase tracking-wide rounded-none px-4 py-2 text-[10px] transition-all hover:brightness-110"
-        style={{ background: PAP_RUST, color: PAP_CARD }}
+        style={{
+          background: accent,
+          color: accent === '#E2BE5A' ? '#0F2244' : '#fff',
+        }}
       >
         Upload a resource
       </a>
@@ -514,6 +542,8 @@ export default function RepositoryBrowser({
   const [papers, setPapers] = useState<PaperResult[]>([]);
   const [materials, setMaterials] = useState<MaterialResult[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const accent = tab === 'papers' ? '#E2BE5A' : '#4E9C7C';
 
   const filteredCourses = useMemo(
     () => courses.filter((c) => !level || c.level === level),
@@ -562,6 +592,7 @@ export default function RepositoryBrowser({
           .from('study_materials')
           .select('id, title, content_type, week_number, file_url, download_count, created_at, courses!inner(id, code, name, department, level)')
           .eq('status', 'approved')
+          .eq('content_type', 'lecture_slides')
           .order('created_at', { ascending: false })
           .limit(100);
         if (courseId) query = query.eq('course_id', courseId);
@@ -693,38 +724,42 @@ export default function RepositoryBrowser({
     );
   }
 
-  /* ── Past Questions Bank (papers mode) — blush/rust redesign (Set 1) ── */
+  /* ── Past Papers (papers mode) — original navy design, unchanged ── */
   return (
     <div
-      className="relative"
       style={{
-        backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(177,99,63,0.12) 0%, transparent 55%), ${PAP_BG}`,
+        backgroundImage: 'radial-gradient(120% 60% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
         minHeight: '100%',
       }}
     >
+      {/* Grain overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.2]"
+        style={{ backgroundImage: GRAIN, mixBlendMode: 'overlay' }}
+      />
+
       {/* ── HERO ── */}
       <div className="relative px-4 sm:px-6 lg:px-8 pt-10 pb-0">
-        <div className="mb-1">
-          <div
-            className="font-mono font-bold uppercase tracking-[0.14em] mb-1.5"
-            style={{ fontSize: 9, color: PAP_RUST }}
-          >
+
+        {/* Title row */}
+        <div className="mb-5">
+          <div className="font-mono font-bold uppercase tracking-[0.14em] text-gold mb-1.5 opacity-80" style={{ fontSize: 9 }}>
             Library
           </div>
-          <h1 className="font-display font-bold leading-tight" style={{ fontSize: 22, color: PAP_INK }}>
+          <h1 className="font-display font-bold text-white leading-tight" style={{ fontSize: 22 }}>
             {title}
           </h1>
-          <p className="italic" style={{ fontSize: 12.5, color: PAP_INK_SOFT, marginTop: 4, marginBottom: 16 }}>
-            Search past papers and download with a tap.
-          </p>
         </div>
 
         {/* ── SEARCH ── */}
         <div
-          className="flex items-center gap-3 rounded-none px-3.5 py-2.5 mb-3"
-          style={{ background: PAP_CARD, border: `1.5px solid ${PAP_RUST}`, boxShadow: '0 2px 8px rgba(58,42,36,0.06)' }}
+          className="flex items-center gap-3 rounded-none px-3.5 py-2.5 mb-3 transition-all"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            border: `1.5px solid ${accent}66`,
+          }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={PAP_RUST} strokeWidth="2.5" className="flex-shrink-0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2.5" className="flex-shrink-0">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           <input
@@ -732,46 +767,60 @@ export default function RepositoryBrowser({
             placeholder="Search by course code or name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent outline-none font-mono"
-            style={{ fontSize: 11, color: PAP_INK }}
+            className="flex-1 bg-transparent outline-none font-mono text-white placeholder:text-white/35"
+            style={{ fontSize: 11 }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="transition-colors text-xs" style={{ color: 'rgba(58,42,36,0.4)' }}>✕</button>
+            <button onClick={() => setSearch('')} className="text-white/40 hover:text-white/70 transition-colors text-xs">✕</button>
           )}
         </div>
 
-        {/* ── FILTER STRIP ── */}
+        {/* ── FILTER CHIP STRIP ── */}
         <div className="grid grid-cols-3 gap-2 pb-4">
-          <PaperFilterSelect
-            value={level}
-            onChange={setLevel}
-            options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
-          />
-          <PaperFilterSelect
-            value={courseId}
-            onChange={setCourseId}
-            options={[{ value: '', label: 'All Courses' }, ...filteredCourses.map((c) => ({ value: c.id, label: c.code }))]}
-          />
-          <PaperFilterSelect
-            value={examType}
-            onChange={setExamType}
-            options={[
-              { value: '', label: 'All Types' },
-              { value: 'mid_semester', label: 'Mid-Sem' },
-              { value: 'end_of_semester', label: 'End of Sem' },
-            ]}
-          />
+            <FilterPill
+              value={level}
+              onChange={setLevel}
+              accent={accent}
+              options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+            />
+            <FilterPill
+              value={courseId}
+              onChange={setCourseId}
+              accent={accent}
+              options={[{ value: '', label: 'All Courses' }, ...filteredCourses.map((c) => ({ value: c.id, label: c.code }))]}
+            />
+            {tab === 'papers' ? (
+              <FilterPill
+                value={examType}
+                onChange={setExamType}
+                accent={accent}
+                options={[
+                  { value: '', label: 'All Types' },
+                  { value: 'mid_semester', label: 'Mid-Sem' },
+                  { value: 'end_of_semester', label: 'End of Sem' },
+                ]}
+              />
+            ) : (
+              <FilterPill
+                value={week}
+                onChange={setWeek}
+                accent={accent}
+                options={[{ value: '', label: 'All Weeks' }, ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))]}
+              />
+            )}
         </div>
       </div>
 
       {/* ── RESULTS ── */}
       <div className="relative px-4 sm:px-6 lg:px-8 pb-10 pt-2">
+
+        {/* Count + sort row */}
         {!loading && (
           <div className="flex items-center justify-between mb-3">
-            <span className="font-mono uppercase tracking-wide" style={{ fontSize: 9, color: 'rgba(58,42,36,0.4)' }}>
+            <span className="font-mono uppercase tracking-wide text-white/30" style={{ fontSize: 9 }}>
               {resultCount} {resultCount === 1 ? 'result' : 'results'}
             </span>
-            <span className="font-mono uppercase tracking-wide cursor-pointer" style={{ fontSize: 9, color: PAP_RUST + 'aa' }}>
+            <span className="font-mono uppercase tracking-wide cursor-pointer" style={{ fontSize: 9, color: accent + 'aa' }}>
               Sort ↕
             </span>
           </div>
@@ -780,23 +829,48 @@ export default function RepositoryBrowser({
         {loading ? (
           <div className="flex flex-col gap-2.5">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-none h-[72px] animate-pulse" style={{ background: 'rgba(58,42,36,0.06)' }} />
+              <div key={i} className="rounded-none h-[72px] animate-pulse" style={{ background: 'rgba(255,255,255,0.05)' }} />
             ))}
           </div>
-        ) : visiblePapers.length === 0 ? (
-          <PaperEmptyState />
+        ) : tab === 'papers' ? (
+          visiblePapers.length === 0 ? (
+            <EmptyState tab={tab} accent={accent} />
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {visiblePapers.map((p) => (
+                <ResultCard
+                  key={p.id}
+                  code={p.courses.code}
+                  name={p.courses.name}
+                  type={p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'}
+                  tag={String(p.year)}
+                  downloads={p.download_count}
+                  href={p.watermarked_url ?? p.file_url}
+                  downloadName={`${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'} ${p.year}.pdf`}
+                  accent={accent}
+                  itemType="papers"
+                  itemId={p.id}
+                />
+              ))}
+            </div>
+          )
+        ) : visibleMaterials.length === 0 ? (
+          <EmptyState tab={tab} accent={accent} />
         ) : (
           <div className="flex flex-col gap-2.5">
-            {visiblePapers.map((p) => (
-              <PaperCard
-                key={p.id}
-                code={p.courses.code}
-                name={p.courses.name}
-                tag={p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End of Sem'}
-                downloads={p.download_count}
-                href={p.watermarked_url ?? p.file_url}
-                downloadName={`${p.courses.code} ${p.exam_type === 'mid_semester' ? 'Mid-Sem' : 'End-of-Sem'}${p.year ? ` ${p.year}` : ''}.pdf`}
-                itemId={p.id}
+            {visibleMaterials.map((m) => (
+              <ResultCard
+                key={m.id}
+                code={m.courses.code}
+                name={m.title}
+                type={CONTENT_TYPE_LABEL[m.content_type]}
+                tag={m.week_number ? `Wk ${m.week_number}` : 'Material'}
+                downloads={m.download_count}
+                href={m.file_url}
+                downloadName={`${m.courses.code} - ${m.title}.pdf`}
+                accent={accent}
+                itemType="materials"
+                itemId={m.id}
               />
             ))}
           </div>
