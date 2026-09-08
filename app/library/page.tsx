@@ -90,27 +90,28 @@ export default async function LibraryPage() {
           </p>
         </div>
 
-        {/* Resource cards — navy, on the same cream page as the Contribute flow */}
+        {/* Resource cards — deep mint, blended close to the cream page rather
+            than a stark navy block, on the same page as the Contribute flow */}
         <div className="flex flex-col gap-3.5">
           {RESOURCES.map((resource) => (
             <Link
               key={resource.title}
               href={resource.href}
-              className="min-h-[104px] flex items-center bg-[#0D2B5E] border border-[#1B3E75] p-4 transition-transform hover:-translate-y-1"
-              style={{ boxShadow: '0 3px 0 #1B3E75, 0 4px 8px rgba(0,0,0,0.25)' }}
+              className="min-h-[104px] flex items-center bg-[#CFE0C8] border border-[#AFC8A6] p-4 transition-transform hover:-translate-y-1"
+              style={{ boxShadow: '0 3px 0 #AFC8A6, 0 4px 8px rgba(0,0,0,0.14)' }}
             >
               <div className="flex items-center gap-3 w-full">
-                <svg viewBox="0 0 24 24" width={22} height={22} className="w-[22px] h-[22px] shrink-0" fill="none" stroke="#E2BE5A" strokeWidth={1.6}>
+                <svg viewBox="0 0 24 24" width={22} height={22} className="w-[22px] h-[22px] shrink-0" fill="none" stroke="#3E6B4A" strokeWidth={1.6}>
                   {resource.icon}
                 </svg>
                 <div className="flex-1 min-w-0">
-                  <div className={`${mono} text-[9.5px] tracking-wide text-gold mb-1`}>
+                  <div className={`${mono} text-[9.5px] tracking-wide text-[#5E7A57] mb-1`}>
                     CARD NO. {resource.catNo} — TYPE: {resource.catType}
                   </div>
-                  <h2 className="font-display font-bold text-[17px] text-white mb-0.5">{resource.title}</h2>
-                  <p className="font-body text-[11.5px] leading-snug text-[#B7C0D4]">{resource.description}</p>
+                  <h2 className="font-display font-bold text-[17px] text-navy-deep mb-0.5">{resource.title}</h2>
+                  <p className="font-body text-[11.5px] leading-snug text-[#4A5D45]">{resource.description}</p>
                 </div>
-                <svg viewBox="0 0 24 24" width={14} height={14} className="w-[14px] h-[14px] shrink-0 ml-2" fill="none" stroke="#C9A02C" strokeWidth={2}>
+                <svg viewBox="0 0 24 24" width={14} height={14} className="w-[14px] h-[14px] shrink-0 ml-2" fill="none" stroke="#5E7A57" strokeWidth={2}>
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </div>
