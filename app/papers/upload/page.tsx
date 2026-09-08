@@ -62,17 +62,14 @@ export default async function UploadPage() {
         <div className="flex items-center gap-2 mb-6 shrink-0">
           <Link
             href="/dashboard"
-            className="font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy hover:text-gold transition-colors"
+            className="font-[family-name:var(--font-courier-prime)] font-extrabold text-[13px] uppercase tracking-wide text-navy hover:text-gold transition-colors"
           >
             ← Home
           </Link>
-          <span className="text-[#B0A57E] text-[11px]">/</span>
-          <Link
-            href="/library"
-            className="font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy hover:text-gold transition-colors"
-          >
-            Library
-          </Link>
+          <span className="text-[#B0A57E] text-[13px]">/</span>
+          <span className="font-[family-name:var(--font-courier-prime)] font-extrabold text-[13px] uppercase tracking-wide text-navy">
+            Contribute
+          </span>
         </div>
 
         {/* Header */}
