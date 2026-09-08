@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import ComingSoon from '@/components/dashboard/ComingSoon';
+import RevisionKitBrowser from '@/components/library/RevisionKitBrowser';
 
 export default async function RevisionKitPage() {
   const supabase = createClient();
@@ -10,10 +10,8 @@ export default async function RevisionKitPage() {
   if (!user) redirect('/login');
 
   return (
-    <ComingSoon
-      stage="Revision Kit"
-      title="Coming soon, course by course"
-      description="Each Revision Kit brings together a full semester of lecture slides into one exam-focused study guide. We're rolling these out course by course — check back as your courses are added."
-    />
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
+      <RevisionKitBrowser />
+    </div>
   );
 }
