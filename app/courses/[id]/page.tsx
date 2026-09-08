@@ -5,8 +5,6 @@ import TrackedResourceLink from '@/components/papers/TrackedResourceLink';
 
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   lecture_slides: 'Lecture Slides',
-  study_notes: 'Study Notes',
-  study_guide: 'Study Guide',
 };
 
 export default async function CourseDetailPage({ params }: { params: { id: string } }) {
@@ -37,6 +35,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
       .select('id, title, content_type, week_number, file_url, created_at')
       .eq('course_id', course.id)
       .eq('status', 'approved')
+      .eq('content_type', 'lecture_slides')
       .order('week_number', { ascending: true, nullsFirst: false }),
   ]);
 
