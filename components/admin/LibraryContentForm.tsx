@@ -44,7 +44,6 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
   const [title, setTitle] = useState('');
   const [semester, setSemester] = useState('');
   const [pageCount, setPageCount] = useState('');
-  const [week, setWeek] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,9 +69,6 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
     }
     if (kind === 'revision_kit' && pageCount && Number(pageCount) <= 0) {
       return setError('Page count must be a positive number.');
-    }
-    if (kind === 'audio_slides' && week && (Number(week) < 1 || Number(week) > 12)) {
-      return setError('Week must be between 1 and 12.');
     }
 
     setLoading(true);
@@ -121,9 +117,8 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
       file_url: publicUrlData.publicUrl,
       file_hash: fileHash,
       uploaded_by: user.id,
-      semester: kind === 'revision_kit' && semester ? semester : null,
+      semester: semester ? semester : null,
       page_count: kind === 'revision_kit' && pageCount ? Number(pageCount) : null,
-      week_number: kind === 'audio_slides' && week ? Number(week) : null,
     });
 
     setLoading(false);
@@ -150,7 +145,6 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
               setTitle('');
               setSemester('');
               setPageCount('');
-              setWeek('');
               setFile(null);
             }}
             className="font-condensed font-bold text-xs uppercase tracking-wide text-navy border border-g200 rounded-lg px-4 py-2 hover:bg-g50 transition-colors"
@@ -220,23 +214,26 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          placeholder={kind === 'revision_kit' ? 'e.g. Principles of Marketing — Full Semester Guide' : 'e.g. Week 4 — Consumer Behaviour (Audio)'}
+          placeholder={kind === 'revision_kit' ? 'e.g. Principles of Marketing — Full Semester Guide' : 'e.g. Principles of Marketing — Audio Guide'}
           className={inputClass}
         />
       </div>
 
-      {kind === 'revision_kit' && (
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="semester" className={labelClass}>
-              Semester
-            </label>
-            <select id="semester" value={semester} onChange={(e) => setSemester(e.target.value)} className={inputClass}>
-              <option value="">Not set</option>
-              <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
-            </select>
-          </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="semester" className={labelClass}>
+            Semester
+          </label>
+          <select id="semester" value={semester} onChange={(e) => setSemester(e.target.value)} className={inputClass}>
+            <option value="">Not set</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+          {kind === 'audio_slides' && (
+            <p className="font-body text-[11px] text-g500 mt-1">Matches the Revision Kit this was recorded from.</p>
+          )}
+        </div>
+        {kind === 'revision_kit' && (
           <div>
             <label htmlFor="pageCount" className={labelClass}>
               Page Count
@@ -251,26 +248,8 @@ export default function LibraryContentForm({ courses }: { courses: CourseOption[
               className={inputClass}
             />
           </div>
-        </div>
-      )}
-
-      {kind === 'audio_slides' && (
-        <div>
-          <label htmlFor="week" className={labelClass}>
-            Week (optional)
-          </label>
-          <input
-            id="week"
-            type="number"
-            min={1}
-            max={12}
-            value={week}
-            onChange={(e) => setWeek(e.target.value)}
-            placeholder="1 – 12, if this covers a specific week"
-            className={inputClass}
-          />
-        </div>
-      )}
+        )}
+      </div>
 
       <div>
         <label htmlFor="content-file" className={labelClass}>
