@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import ComingSoon from '@/components/dashboard/ComingSoon';
+import AudioSlidesBrowser from '@/components/library/AudioSlidesBrowser';
 
 export default async function AudioSlidesPage() {
   const supabase = createClient();
@@ -10,10 +10,8 @@ export default async function AudioSlidesPage() {
   if (!user) redirect('/login');
 
   return (
-    <ComingSoon
-      stage="Audio-Slides"
-      title="Coming soon, course by course"
-      description="Professionally recorded course audio, so you can study on the go. We're starting with core courses and expanding from there — check back as your courses are added."
-    />
+    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
+      <AudioSlidesBrowser />
+    </div>
   );
 }
