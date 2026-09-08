@@ -297,7 +297,10 @@ export async function POST(req: NextRequest) {
         // same ALL CAPS convention enforced on the manual-approval path.
         const title = (classification.title || fileName.replace(/\.[^.]+$/, '')).toUpperCase();
         const weekNumber = classification.weekNumber ?? 1;
-        const contentType = classification.contentType ?? 'study_notes';
+        // lecture_slides is the only content type a bulk upload can ever
+        // produce now — study_notes is retired and study_guide is admin-only
+        // (Revision Kit), so the classifier is never asked for either.
+        const contentType = 'lecture_slides';
 
         const { data: existing } = await admin
           .from('study_materials')
