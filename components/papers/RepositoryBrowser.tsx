@@ -356,7 +356,7 @@ function MaterialCard({
   return (
     <div
       className="flex rounded-none overflow-hidden"
-      style={{ background: MAT_CARD, boxShadow: '0 2px 10px rgba(23,35,63,0.08)' }}
+      style={{ background: '#FFFFFF', border: '1.5px solid rgba(23,35,63,0.16)' }}
     >
       {/* Sharp left rust rail — no rounded corners anywhere on this card */}
       <div className="w-1 flex-shrink-0 rounded-none" style={{ background: MAT_RUST }} />
@@ -393,7 +393,17 @@ function MaterialCard({
 
         <div
           className="font-display font-bold"
-          style={{ fontSize: 14.5, lineHeight: 1.28, color: MAT_INK, marginBottom: 9 }}
+          style={{
+            fontSize: 14.5,
+            lineHeight: 1.28,
+            color: MAT_INK,
+            marginBottom: 9,
+            minHeight: 14.5 * 1.28 * 2,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
         >
           {name}
         </div>
