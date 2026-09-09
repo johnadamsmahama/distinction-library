@@ -14,7 +14,7 @@ function LedgerCorner({ flip = false }: { flip?: boolean }) {
       viewBox="0 0 210 100"
       fill="none"
       aria-hidden="true"
-      className={`block w-[148px] h-[70px] sm:w-[210px] sm:h-[100px] ${flip ? 'rotate-180' : ''}`}
+      className={`block w-[110px] h-[52px] sm:w-[156px] sm:h-[74px] ${flip ? 'rotate-180' : ''}`}
     >
       <path d="M8 8 L188 8" stroke="#C9A02C" strokeWidth={4} strokeLinecap="square" />
       <path d="M8 8 L8 90" stroke="#C9A02C" strokeWidth={4} strokeLinecap="square" />
@@ -147,7 +147,7 @@ export default function Features() {
           <LedgerCorner />
         </div>
 
-        <Reveal className="text-center max-w-[520px] mx-auto mb-11">
+        <Reveal className="text-center max-w-[520px] mx-auto mb-6">
           <div className="eyebrow">Everything You Need</div>
           <h2 className="font-display font-bold text-[clamp(26px,4vw,36px)] text-navy mt-[10px]">
             One platform. Every academic resource.
