@@ -4,7 +4,7 @@ export default function FinalCTA() {
   return (
     <section
       id="cta"
-      className="relative overflow-hidden text-center bg-navy-deep py-[90px] px-7"
+      className="relative overflow-hidden text-center bg-navy-deep py-[94px] px-7"
     >
       <div
         className="absolute top-1/2 left-1/2 w-[600px] h-[600px] -translate-x-1/2 -translate-y-1/2 rounded-none pointer-events-none"
