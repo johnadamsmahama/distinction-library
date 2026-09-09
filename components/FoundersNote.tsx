@@ -2,12 +2,12 @@ import Reveal from './Reveal';
 
 export default function FoundersNote() {
   return (
-    <section id="founders-note" className="py-[70px] px-7 bg-navy-mid">
+    <section id="founders-note" className="py-[74px] px-7 bg-navy-mid">
       <div className="max-w-[460px] mx-auto">
         <Reveal>
           <div className="eyebrow mb-3">A Note From The Founder</div>
 
-          <div className="relative bg-[#F7F3E8] pl-[22px] pr-6 pt-5 pb-[18px] shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+          <div className="relative bg-[#F7F3E8] pl-[22px] pr-6 pt-[24px] pb-[22px] shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
             <span className="absolute left-[13px] top-3 w-[7px] h-[7px] rounded-full bg-navy-mid shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]" />
             <span className="absolute left-[13px] bottom-3 w-[7px] h-[7px] rounded-full bg-navy-mid shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]" />
 
