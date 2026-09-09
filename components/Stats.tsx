@@ -28,7 +28,7 @@ export default async function Stats() {
   ];
 
   return (
-    <section className="relative bg-navy py-28 px-7 overflow-hidden">
+    <section className="relative bg-navy py-32 px-7 overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
