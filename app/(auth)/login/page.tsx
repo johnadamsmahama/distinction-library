@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { studentIdError, studentIdToEmail } from '@/lib/validation';
+import { getRememberedStudentId, setRememberedStudentId, setDeviceTrusted } from '@/lib/device-trust';
 import AuthShell from '@/components/auth/AuthShell';
 import StudentIdInput from '@/components/auth/StudentIdInput';
 
@@ -25,9 +26,18 @@ function LoginForm() {
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(false);
   const [idErr, setIdErr] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Prefill from a previous login on this device — done in an effect
+  // (not a useState initializer) so the server-rendered and first client
+  // render both start blank, avoiding a hydration mismatch.
+  useEffect(() => {
+    const remembered = getRememberedStudentId();
+    if (remembered) setStudentId(remembered);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +59,9 @@ function LoginForm() {
       setFormError('Incorrect student ID or password.');
       return;
     }
+
+    setRememberedStudentId(studentId);
+    setDeviceTrusted(trustDevice);
 
     router.push(nextPath);
     router.refresh();
@@ -116,6 +129,19 @@ function LoginForm() {
             </button>
           </div>
         </div>
+
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={trustDevice}
+            onChange={(e) => setTrustDevice(e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-gold cursor-pointer"
+          />
+          <span className="font-body text-xs text-g600 leading-snug">
+            Trust this device for 30 days — stay signed in through longer idle periods.
+            Leave unchecked on shared or public computers.
+          </span>
+        </label>
 
         {formError && <p className="font-body text-sm text-red-500">{formError}</p>}
 
