@@ -34,12 +34,12 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-[70px] px-7 bg-[#E4E0D3]">
+    <section id="faq" className="py-[74px] px-7 bg-[#E4E0D3]">
       <div className="max-w-content mx-auto">
         <Reveal>
           <div className="max-w-[640px] mx-auto">
             <div
-              className="relative bg-[#FBF9F2] border border-[#D8D2C0] py-[34px] pr-[30px] pl-[56px] shadow-[0_6px_0_-3px_#D8D2C0]"
+              className="relative bg-[#FBF9F2] border border-[#D8D2C0] py-[38px] pr-[30px] pl-[56px] shadow-[0_6px_0_-3px_#D8D2C0]"
               style={{ fontFamily: 'var(--font-courier-prime), monospace', color: '#1B1E24' }}
             >
               <div className="absolute top-0 bottom-0 left-10 w-px bg-[#A23B2E] opacity-55" />
