@@ -141,7 +141,7 @@ export default function Features() {
   };
 
   return (
-    <section id="features" className="py-[70px] px-7 bg-off-white">
+    <section id="features" className="py-[48px] px-7 bg-off-white">
       <div className="max-w-content mx-auto">
         <div className="flex justify-start -mb-1">
           <LedgerCorner />
