@@ -7,7 +7,7 @@ export default function FoundersNote() {
         <Reveal>
           <div className="eyebrow mb-3">A Note From The Founder</div>
 
-          <div className="relative bg-[#F7F3E8] pl-[22px] pr-6 pt-[24px] pb-[22px] shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
+          <div className="relative bg-[#F7F3E8] pl-[22px] pr-6 pt-[28px] pb-[26px] shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
             <span className="absolute left-[13px] top-3 w-[7px] h-[7px] rounded-full bg-navy-mid shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]" />
             <span className="absolute left-[13px] bottom-3 w-[7px] h-[7px] rounded-full bg-navy-mid shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]" />
 
@@ -26,12 +26,12 @@ export default function FoundersNote() {
               </div>
             </div>
 
-            <p className="font-display font-bold italic text-[16.5px] leading-[1.4] text-navy border-l-[3px] border-gold pl-[14px] mb-3">
+            <p className="font-display font-bold italic text-[16.5px] leading-[1.4] text-navy border-l-[3px] border-gold pl-[14px] mb-3 text-justify">
               &ldquo;I built this because I watched students struggle, not from lack of ability,
               but from lack of access.&rdquo;
             </p>
 
-            <div className="font-body text-[12.5px] leading-[1.52] text-g800 space-y-2">
+            <div className="font-body text-[12.5px] leading-[1.52] text-g800 space-y-2 text-justify">
               <p>
                 Even in my first semester, I saw the same pattern &mdash; students scrambling for
                 past papers days before exams, notes passed around on WhatsApp in poor quality.
