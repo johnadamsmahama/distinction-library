@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 type Recording = {
@@ -341,17 +340,6 @@ export default function AudioSlidesBrowser() {
         @keyframes audioPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
       `}</style>
       <div className="max-w-[480px] mx-auto px-4 pt-10 pb-10">
-        <Link
-          href="/library"
-          className={`inline-flex items-center gap-1 mb-3 font-bold uppercase tracking-wide ${mono}`}
-          style={{ fontSize: 9, color: GLD_INK_SOFT }}
-        >
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={GLD_INK_SOFT} strokeWidth="2.5">
-            <path d="M15 19l-7-7 7-7" />
-          </svg>
-          Library
-        </Link>
-
         <div className={`uppercase tracking-[0.14em] font-bold mb-1.5 ${mono}`} style={{ fontSize: 9, color: GLD_ACCENT }}>
           Library
         </div>
