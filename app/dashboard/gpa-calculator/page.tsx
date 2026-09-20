@@ -349,17 +349,18 @@ export default function GpaCalculatorPage() {
             <>
               {/* ---- Course grid ---- */}
               <div>
-                <div className="grid grid-cols-[22px_1fr_60px_92px] gap-2 bg-navy-deep px-2 py-2 font-condensed text-[10px] uppercase tracking-[0.12em] text-off-white">
+                <div className="grid grid-cols-[22px_1fr_60px_92px_26px] gap-2 bg-navy-deep px-2 py-2 font-condensed text-[10px] uppercase tracking-[0.12em] text-off-white">
                   <span>Q.</span>
                   <span>Course</span>
                   <span className="text-right">Status</span>
                   <span className="text-right">Grade</span>
+                  <span></span>
                 </div>
 
                 {rows.map((row, i) => (
                   <div
                     key={row.id}
-                    className="grid grid-cols-[22px_1fr_60px_92px] items-center gap-2 border border-t-0 border-navy-deep px-2 py-2.5"
+                    className="grid grid-cols-[22px_1fr_60px_92px_26px] items-center gap-2 border border-t-0 border-navy-deep px-2 py-2.5"
                   >
                     <span className="font-display text-[13px] text-g500">
                       {String(i + 1).padStart(2, '0')}
@@ -384,7 +385,7 @@ export default function GpaCalculatorPage() {
                     <select
                       value={row.status}
                       onChange={(e) => updateRowStatus(row.id, e.target.value as 'pending' | 'released')}
-                      className={`justify-self-end rounded px-1.5 py-1 font-condensed text-[9.5px] font-bold uppercase tracking-wide ${
+                      className={`justify-self-end rounded-none px-1.5 py-1 font-condensed text-[9.5px] font-bold uppercase tracking-wide ${
                         row.status === 'released'
                           ? 'bg-green-50 text-green-700'
                           : 'bg-red-50 text-red-700'
@@ -417,6 +418,14 @@ export default function GpaCalculatorPage() {
                         ✓
                       </button>
                     </div>
+
+                    <button
+                      onClick={() => removeRow(row.id)}
+                      aria-label={`Remove ${row.courses?.code ?? row.manual_course_name ?? 'course'}`}
+                      className="flex h-6 w-6 items-center justify-center justify-self-end border border-g100 font-display text-xs font-bold text-g500 hover:border-red-700 hover:text-red-700 transition-colors"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
