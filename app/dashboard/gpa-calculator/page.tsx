@@ -130,6 +130,31 @@ export default function GpaCalculatorPage() {
     return false;
   }
 
+  async function removeSemester(semesterId: string, label: string) {
+    const confirmed = window.confirm(
+      `Delete "${label}"? This removes every course and grade saved in this semester — this can't be undone.`
+    );
+    if (!confirmed) return;
+
+    const remaining = semesters.filter((s) => s.id !== semesterId);
+    setSemesters(remaining);
+
+    if (activeSemesterId === semesterId) {
+      const nextId = remaining[0]?.id ?? null;
+      setActiveSemesterId(nextId);
+      if (nextId) {
+        loadRows(nextId);
+      } else {
+        setRows([]);
+        setDrafts({});
+      }
+    }
+
+    // gpa_semester_courses.semester_id cascades on delete, so its rows
+    // for this semester are cleaned up automatically — no manual step needed.
+    await supabase.from('gpa_semesters').delete().eq('id', semesterId);
+  }
+
   async function addCourse(course: Course | null, manualName?: string) {
     if (!activeSemesterId) return;
 
@@ -325,17 +350,32 @@ export default function GpaCalculatorPage() {
           {/* ---- Semester tabs ---- */}
           <div className="flex flex-wrap items-center gap-2">
             {semesters.map((s) => (
-              <button
+              <div
                 key={s.id}
-                onClick={() => setActiveSemesterId(s.id)}
-                className={`rounded-none border px-3 py-1.5 font-condensed text-xs uppercase tracking-wide ${
+                className={`flex items-center gap-1.5 border px-1 py-1 ${
                   activeSemesterId === s.id
                     ? 'border-navy-deep bg-navy-deep text-off-white'
                     : 'border-g100 bg-off-white text-navy'
                 }`}
               >
-                {s.label}
-              </button>
+                <button
+                  onClick={() => setActiveSemesterId(s.id)}
+                  className="px-2 py-0.5 font-condensed text-xs uppercase tracking-wide"
+                >
+                  {s.label}
+                </button>
+                <button
+                  onClick={() => removeSemester(s.id, s.label)}
+                  aria-label={`Delete ${s.label}`}
+                  className={`flex h-4 w-4 items-center justify-center font-display text-[10px] font-bold transition-colors ${
+                    activeSemesterId === s.id
+                      ? 'text-off-white/60 hover:text-red-300'
+                      : 'text-g500 hover:text-red-700'
+                  }`}
+                >
+                  ×
+                </button>
+              </div>
             ))}
             <button
               onClick={() => setIsModalOpen(true)}
