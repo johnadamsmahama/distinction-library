@@ -367,10 +367,10 @@ export default function GpaCalculatorPage() {
                 <button
                   onClick={() => removeSemester(s.id, s.label)}
                   aria-label={`Delete ${s.label}`}
-                  className={`flex h-4 w-4 items-center justify-center font-display text-[10px] font-bold transition-colors ${
+                  className={`flex h-4 w-4 items-center justify-center font-display text-[11px] font-extrabold transition-colors ${
                     activeSemesterId === s.id
-                      ? 'text-off-white/60 hover:text-red-300'
-                      : 'text-g500 hover:text-red-700'
+                      ? 'text-off-white hover:text-red-300'
+                      : 'text-navy-deep hover:text-red-700'
                   }`}
                 >
                   ×
