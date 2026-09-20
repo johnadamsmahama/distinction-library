@@ -61,9 +61,9 @@ export default async function LibraryPage() {
   return (
     <FullBleedShell background="bg-[#D8E4D3]">
       <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
-        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy mb-6">
+        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-navy mb-6">
           <span>←</span>
-          <Link href="/dashboard" className="hover:text-gold transition-colors">
+          <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
             Home
           </Link>
         </div>
