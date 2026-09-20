@@ -69,19 +69,17 @@ export default function HomeButtonGate() {
 
   return (
     <div className="relative mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
-      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-[family-name:var(--font-courier-prime)] font-extrabold text-[13px] uppercase tracking-wide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-gold drop-shadow-sm flex-shrink-0">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
+      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-navy [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <span className="flex-shrink-0">←</span>
 
-        <Link href="/dashboard" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+        <Link href="/dashboard" className="hover:opacity-70 transition-opacity flex-shrink-0">
           Home
         </Link>
 
         {showSectionCrumb && (
           <>
-            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
-            <Link href={section.href} className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <Link href={section.href} className="hover:opacity-70 transition-opacity flex-shrink-0">
               {section.label}
             </Link>
           </>
@@ -89,8 +87,8 @@ export default function HomeButtonGate() {
 
         {isEssentialsAlias && (
           <>
-            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
-            <Link href="/essentials" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <Link href="/essentials" className="hover:opacity-70 transition-opacity flex-shrink-0">
               Essentials
             </Link>
           </>
@@ -98,19 +96,19 @@ export default function HomeButtonGate() {
 
         {isCareerTool && careerToolLabel && (
           <>
-            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
-            <Link href="/essentials/career" className="text-gold hover:text-gold-light drop-shadow-sm flex-shrink-0">
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <Link href="/essentials/career" className="hover:opacity-70 transition-opacity flex-shrink-0">
               Career Resources
             </Link>
-            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
-            <span className="text-gold-light flex-shrink-0">{careerToolLabel}</span>
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <span className="flex-shrink-0">{careerToolLabel}</span>
           </>
         )}
 
         {isAiTool && aiToolLabel && (
           <>
-            <span className="text-g600/50 normal-case font-normal flex-shrink-0">/</span>
-            <span className="text-gold flex-shrink-0">{aiToolLabel}</span>
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <span className="flex-shrink-0">{aiToolLabel}</span>
           </>
         )}
       </div>
