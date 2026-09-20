@@ -20,17 +20,18 @@ export default async function UploadLectureSlidesPage() {
   return (
     <FullBleedShell background="bg-[#DDD4B8]">
       <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
-        {/* Home / Library — built into the cream design, since the global
+        {/* Home / Contribute — built into the cream design, since the global
             breadcrumb bar is suppressed on this page (see SELF_NAV_PAGES
-            in HomeButtonGate). */}
-        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[11px] uppercase tracking-wide text-navy mb-6">
+            in HomeButtonGate). "Contribute" points back to the upload hub
+            (/papers/upload) that this sub-page was opened from. */}
+        <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-navy mb-6">
           <span>←</span>
-          <Link href="/dashboard" className="hover:text-gold transition-colors">
+          <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
             Home
           </Link>
           <span className="text-[#B0A57E]">/</span>
-          <Link href="/library" className="hover:text-gold transition-colors">
-            Library
+          <Link href="/papers/upload" className="hover:opacity-70 transition-opacity">
+            Contribute
           </Link>
         </div>
 
