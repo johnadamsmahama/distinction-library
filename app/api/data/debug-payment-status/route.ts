@@ -17,10 +17,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(`${NOTIFY_BASE_URL}/api/reseller/payment-status/${reference}`, {
-      method: "POST",
+      method: "GET",
       headers: {
         "x-api-key": apiKey,
-        "Content-Type": "application/json",
         Accept: "application/json",
       },
     });
