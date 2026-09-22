@@ -9,6 +9,14 @@ const NETWORKS = [
   { key: "AT", label: "AirtelTigo", img: "/airteltigo.jpg.jpeg", color: "#1d3a8a", checkColor: "#fff" },
 ];
 
+// Maps this page's network keys (used for display + data_orders) to Notify's
+// own format (used for /api/data/plans and the data_markup_rules table).
+const NOTIFY_NETWORK: Record<string, string> = {
+  MTN: "MTN",
+  Telecel: "TELECEL",
+  AT: "AT",
+};
+
 type Plan = {
   package_id: number;
   gig_size: string;
@@ -37,12 +45,25 @@ export default function BuyDataPage() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [markups, setMarkups] = useState<Record<string, number>>({});
+
+  // Fetch each network's markup once, so displayed totals match what will
+  // actually be charged server-side.
+  useEffect(() => {
+    fetch("/api/data/markup")
+      .then((res) => res.json())
+      .then((json) => setMarkups(json.markups || {}))
+      .catch(() => {
+        // Non-fatal: totals will just show wholesale price until this loads.
+      });
+  }, []);
 
   useEffect(() => {
     if (!network) return;
     setPlansLoading(true);
     setSelectedPlan(null);
-    fetch(`/api/data/plans?network=${network.toLowerCase()}`)
+    const notifyNetwork = NOTIFY_NETWORK[network];
+    fetch(`/api/data/plans?network=${notifyNetwork.toLowerCase()}`)
       .then((res) => res.json())
       .then((json) => {
         const list: Plan[] = Array.isArray(json.data) ? json.data : json.data ? [json.data] : [];
@@ -54,18 +75,26 @@ export default function BuyDataPage() {
 
   const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
+  function displayPrice(plan: Plan): number {
+    if (!network) return parseFloat(plan.price);
+    const notifyNetwork = NOTIFY_NETWORK[network];
+    const markup = markups[notifyNetwork] ?? 0;
+    return parseFloat(plan.price) + markup;
+  }
+
   async function handlePay() {
     if (!canSubmit || !selectedPlan || !network) return;
     setLoading(true);
     setError(null);
 
     try {
+      const notifyNetwork = NOTIFY_NETWORK[network];
       const res = await fetch("/api/data/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phoneNumber: phone.trim(),
-          network: network.toLowerCase(),
+          network: notifyNetwork.toLowerCase(),
           planId: selectedPlan.package_id,
         }),
       });
@@ -204,7 +233,7 @@ export default function BuyDataPage() {
                     >
                       <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}</div>
                       <div style={{ fontSize: 11, color: "#8fa0c8" }}>
-                        {plan.validity ? `${plan.validity} · ` : ""}GH₵{parseFloat(plan.price).toFixed(2)}
+                        {plan.validity ? `${plan.validity} · ` : ""}GH₵{displayPrice(plan).toFixed(2)}
                       </div>
                     </button>
                   );
@@ -288,7 +317,7 @@ export default function BuyDataPage() {
             >
               <span style={{ fontSize: 12, color: "#5a6f9a", textTransform: "uppercase", letterSpacing: 1.5 }}>Total</span>
               <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                GH₵{parseFloat(selectedPlan.price).toFixed(2)}
+                GH₵{displayPrice(selectedPlan).toFixed(2)}
               </span>
             </div>
           )}
