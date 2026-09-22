@@ -29,11 +29,24 @@ export async function GET(request: Request) {
       cache: "no-store",
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      data = null;
+    }
 
     if (!response.ok) {
+      // TEMPORARY: return the real upstream error so we can see what's wrong.
       return NextResponse.json(
-        { status: "error", message: "Could not fetch data plans." },
+        {
+          status: "error",
+          message: "Could not fetch data plans.",
+          debug_upstream_status: response.status,
+          debug_upstream_body: data ?? rawText,
+          debug_key_prefix: apiKey.slice(0, 8), // just enough to confirm sandbox vs live, never the full key
+        },
         { status: response.status }
       );
     }
