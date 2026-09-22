@@ -10,7 +10,12 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase.from("data_markup_rules").select("network, markup");
 
   if (error || !data) {
-    return NextResponse.json({ error: "Could not fetch markup rules" }, { status: 500 });
+    // TEMPORARY DEBUG — remove once we confirm the root cause
+    console.error("data_markup_rules fetch failed:", JSON.stringify(error));
+    return NextResponse.json(
+      { error: "Could not fetch markup rules", debug: error },
+      { status: 500 }
+    );
   }
 
   const markups: Record<string, number> = {};
