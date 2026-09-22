@@ -8,6 +8,9 @@ const NETWORK_MAP: Record<string, string> = {
   at: 'AT',
 };
 
+const NOTIFY_BASE_URL = 'https://onlinesmsnotifygh.com';
+const MARKUP = 0.4; // flat GHS 0.40 markup per plan
+
 export async function POST(request: Request) {
   const supabase = createClient();
   const {
@@ -57,7 +60,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Plan not found' }, { status: 400 });
   }
 
-  const amount = parseFloat(plan.price); // cedis, e.g. 39.00
+  const wholesalePrice = parseFloat(plan.price); // cedis, e.g. 39.00
+  const clientPrice = Number((wholesalePrice + MARKUP).toFixed(2)); // what the buyer actually pays
   const planLabel = `${plan.gig_size}GB${plan.validity ? ` (${plan.validity})` : ''}`;
 
   // Create the pending order row FIRST
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
       phone_number: phoneNumber,
       plan_id: String(planId),
       plan_label: planLabel,
-      amount,
+      amount: clientPrice,
       status: 'pending',
     })
     .select()
@@ -79,45 +83,68 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not create order' }, { status: 500 });
   }
 
-  // Initialize Paystack transaction
-  const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: user.email,
-      amount: Math.round(amount * 100), // cedis -> pesewas
-      reference: `dl-${order.id}`,
-      callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/buy-data/verify?reference=${`dl-${order.id}`}`,
-      metadata: {
-        order_id: order.id,
-        phone_number: phoneNumber,
-        network: vendorNetwork,
-      },
-    }),
-  });
+  // Hand off to Notify's Pay & Order flow. Notify — not us — talks to Paystack,
+  // handles the webhook, fulfills the order, and routes our profit share to
+  // the Paystack subaccount already registered against our reseller account.
+  // We never touch a Paystack key here.
+  const apiKey = process.env.NOTIFY_API_KEY;
+  const userId = process.env.NOTIFY_USER_ID; // numeric Reseller User ID (763)
 
-  const paystackData = await paystackRes.json();
-
-  if (!paystackData.status) {
+  if (!apiKey || !userId) {
     await supabase
       .from('data_orders')
-      .update({ status: 'failed', error_message: paystackData.message })
+      .update({ status: 'failed', error_message: 'Server misconfigured: missing Notify credentials' })
       .eq('id', order.id);
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
 
+  let notifyData: any;
+  try {
+    const notifyRes = await fetch(`${NOTIFY_BASE_URL}/api/reseller/initialize-payment`, {
+      method: 'POST',
+      headers: {
+        // This Notify endpoint uses Bearer auth, unlike /plans which uses x-api-key.
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        email: user.email,
+        package_id: Number(planId),
+        phone_number: phoneNumber,
+        network: vendorNetwork,
+        client_price: clientPrice,
+        user_id: Number(userId),
+        type: 'inline', // popup on-site, no page redirect
+      }),
+    });
+
+    notifyData = await notifyRes.json();
+
+    if (!notifyRes.ok || notifyData.status !== true) {
+      await supabase
+        .from('data_orders')
+        .update({ status: 'failed', error_message: notifyData.message ?? 'Notify initialize-payment failed' })
+        .eq('id', order.id);
+
+      return NextResponse.json({ error: 'Payment initialization failed' }, { status: 502 });
+    }
+  } catch (err) {
+    await supabase
+      .from('data_orders')
+      .update({ status: 'failed', error_message: 'Could not reach Notify Data API' })
+      .eq('id', order.id);
     return NextResponse.json({ error: 'Payment initialization failed' }, { status: 502 });
   }
 
   await supabase
     .from('data_orders')
-    .update({ paystack_reference: paystackData.data.reference })
+    .update({ paystack_reference: notifyData.reference })
     .eq('id', order.id);
 
   return NextResponse.json({
     orderId: order.id,
-    authorizationUrl: paystackData.data.authorization_url,
-    reference: paystackData.data.reference,
+    authorizationUrl: notifyData.authorization_url,
+    reference: notifyData.reference,
   });
 }
