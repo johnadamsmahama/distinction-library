@@ -1,15 +1,23 @@
-// app/api/data/initialize/route.ts
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
+// Notify Data's own format (used for their API calls and the data_markup_rules table)
 const NETWORK_MAP: Record<string, string> = {
   mtn: 'MTN',
   telecel: 'TELECEL',
   at: 'AT',
 };
 
+// data_orders' check constraint expects these exact capitalizations —
+// different from Notify's own format above.
+const DATA_ORDERS_NETWORK: Record<string, string> = {
+  MTN: 'MTN',
+  TELECEL: 'Telecel',
+  AT: 'AirtelTigo',
+};
+
 const NOTIFY_BASE_URL = 'https://onlinesmsnotifygh.com';
-const MARKUP = 0.4; // flat GHS 0.40 markup per plan
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -44,32 +52,65 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid Ghana phone number' }, { status: 400 });
   }
 
-  // Re-fetch plans server-side — never trust a client-sent price
-  const plansRes = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL}/api/data/plans?network=${network}`
-  );
-  if (!plansRes.ok) {
+  const apiKey = process.env.NOTIFY_API_KEY;
+  const notifyUserId = process.env.NOTIFY_USER_ID;
+
+  if (!apiKey || !notifyUserId) {
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
+
+  const adminSupabase = createAdminClient();
+
+  // 1. Fetch the real wholesale price directly from Notify — never trust a
+  //    client-sent price.
+  const plansUrl = new URL(`${NOTIFY_BASE_URL}/api/reseller/plans`);
+  plansUrl.searchParams.set('network', network.toLowerCase());
+
+  const plansRes = await fetch(plansUrl.toString(), {
+    headers: { 'x-api-key': apiKey, Accept: 'application/json' },
+    cache: 'no-store',
+  });
+  const plansData = await plansRes.json();
+
+  if (!plansRes.ok || plansData.status !== 'success') {
     return NextResponse.json(
       { error: 'Could not verify plan — vendor plans lookup failed' },
       { status: 502 }
     );
   }
-  const plansData = await plansRes.json();
+
   const plan = plansData.data?.find((p: any) => String(p.package_id) === String(planId));
   if (!plan) {
     return NextResponse.json({ error: 'Plan not found' }, { status: 400 });
   }
 
-  const wholesalePrice = parseFloat(plan.price); // cedis, e.g. 39.00
-  const clientPrice = Number((wholesalePrice + MARKUP).toFixed(2)); // what the buyer actually pays
+  const wholesalePrice = parseFloat(plan.price);
   const planLabel = `${plan.gig_size}GB${plan.validity ? ` (${plan.validity})` : ''}`;
 
-  // Create the pending order row FIRST
+  // 2. Look up this network's markup from Supabase — editable any time from
+  //    the data_markup_rules table, no code change or redeploy needed.
+  const { data: markupRow, error: markupError } = await adminSupabase
+    .from('data_markup_rules')
+    .select('markup')
+    .eq('network', vendorNetwork)
+    .single();
+
+  if (markupError || !markupRow) {
+    return NextResponse.json(
+      { error: 'No markup rule configured for this network' },
+      { status: 500 }
+    );
+  }
+
+  const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
+
+  // 3. Create the pending order row FIRST, before calling Notify.
   const { data: order, error: orderError } = await supabase
     .from('data_orders')
     .insert({
       user_id: user.id,
-      network: vendorNetwork,
+      email: user.email,
+      network: DATA_ORDERS_NETWORK[vendorNetwork],
       phone_number: phoneNumber,
       plan_id: String(planId),
       plan_label: planLabel,
@@ -80,31 +121,24 @@ export async function POST(request: Request) {
     .single();
 
   if (orderError || !order) {
+    console.error('Could not create data_orders row:', orderError);
     return NextResponse.json({ error: 'Could not create order' }, { status: 500 });
   }
 
-  // Hand off to Notify's Pay & Order flow. Notify — not us — talks to Paystack,
-  // handles the webhook, fulfills the order, and routes our profit share to
-  // the Paystack subaccount already registered against our reseller account.
-  // We never touch a Paystack key here.
-  const apiKey = process.env.NOTIFY_API_KEY;
-  const userId = process.env.NOTIFY_USER_ID; // numeric Reseller User ID (763)
-
-  if (!apiKey || !userId) {
-    await supabase
-      .from('data_orders')
-      .update({ status: 'failed', error_message: 'Server misconfigured: missing Notify credentials' })
-      .eq('id', order.id);
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
-  }
-
+  // 4. Hand off to Notify's Pay & Order flow. Notify — not us — talks to
+  //    Paystack, handles the webhook, fulfills the order, and routes our
+  //    profit share to the Paystack subaccount already registered against
+  //    our reseller account. We never touch a Paystack key here.
+  //
+  //    Only the fields in Notify's documented schema — confirmed via live
+  //    testing that this endpoint uses x-api-key (not Bearer), and that an
+  //    unrecognized "type" field breaks the request.
   let notifyData: any;
   try {
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}/api/reseller/initialize-payment`, {
       method: 'POST',
       headers: {
-        // This Notify endpoint uses Bearer auth, unlike /plans which uses x-api-key.
-        Authorization: `Bearer ${apiKey}`,
+        'x-api-key': apiKey,
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
@@ -114,8 +148,7 @@ export async function POST(request: Request) {
         phone_number: phoneNumber,
         network: vendorNetwork,
         client_price: clientPrice,
-        user_id: Number(userId),
-        type: 'inline', // popup on-site, no page redirect
+        user_id: Number(notifyUserId),
       }),
     });
 
@@ -125,15 +158,16 @@ export async function POST(request: Request) {
       console.error('Notify initialize-payment rejected:', notifyRes.status, JSON.stringify(notifyData));
       await supabase
         .from('data_orders')
-        .update({ status: 'failed', error_message: notifyData.message ?? 'Notify initialize-payment failed' })
+        .update({ status: 'failed', vendor_response: notifyData })
         .eq('id', order.id);
 
       return NextResponse.json({ error: 'Payment initialization failed' }, { status: 502 });
     }
   } catch (err) {
+    console.error('Could not reach Notify Data API:', err);
     await supabase
       .from('data_orders')
-      .update({ status: 'failed', error_message: 'Could not reach Notify Data API' })
+      .update({ status: 'failed' })
       .eq('id', order.id);
     return NextResponse.json({ error: 'Payment initialization failed' }, { status: 502 });
   }
@@ -145,6 +179,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     orderId: order.id,
+    clientPrice,
     authorizationUrl: notifyData.authorization_url,
     reference: notifyData.reference,
   });
