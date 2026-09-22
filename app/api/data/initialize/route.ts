@@ -101,9 +101,29 @@ export async function POST(req: NextRequest) {
 
     const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
 
+    // TEMPORARY DEBUG — remove once we confirm the price issue
+    console.log("DEBUG price calc:", {
+      wholesalePrice,
+      markupRaw: markupRow.markup,
+      clientPrice,
+      packageId,
+      network,
+    });
+
     // 3. Initialize payment with Notify Data's Pay & Order flow.
-    //    Only the fields in their documented schema — no extra "type" field,
-    //    which isn't part of the request (it only appears in their response).
+    //    Only the fields in their documented schema.
+    const notifyRequestBody = {
+      email,
+      package_id: packageId,
+      phone_number: phone,
+      network,
+      client_price: clientPrice,
+      user_id: Number(userId),
+    };
+
+    // TEMPORARY DEBUG — remove once we confirm the price issue
+    console.log("DEBUG notify request body:", notifyRequestBody);
+
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}${INITIALIZE_PAYMENT_PATH}`, {
       method: "POST",
       headers: {
@@ -111,17 +131,13 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({
-        email,
-        package_id: packageId,
-        phone_number: phone,
-        network,
-        client_price: clientPrice,
-        user_id: Number(userId),
-      }),
+      body: JSON.stringify(notifyRequestBody),
     });
 
     const data = await notifyRes.json();
+
+    // TEMPORARY DEBUG — remove once we confirm the price issue
+    console.log("DEBUG notify response:", { ok: notifyRes.ok, status: notifyRes.status, data });
 
     if (!notifyRes.ok || data.status !== true) {
       return NextResponse.json(
