@@ -122,6 +122,7 @@ export async function POST(request: Request) {
     notifyData = await notifyRes.json();
 
     if (!notifyRes.ok || notifyData.status !== true) {
+      console.error('Notify initialize-payment rejected:', notifyRes.status, JSON.stringify(notifyData));
       await supabase
         .from('data_orders')
         .update({ status: 'failed', error_message: notifyData.message ?? 'Notify initialize-payment failed' })
