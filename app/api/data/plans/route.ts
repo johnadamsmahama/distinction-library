@@ -1,4 +1,3 @@
-// app/api/data/plans/route.ts
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -38,15 +37,9 @@ export async function GET(request: Request) {
     }
 
     if (!response.ok) {
-      // TEMPORARY: return the real upstream error so we can see what's wrong.
+      console.error("Data plans fetch failed:", response.status, rawText);
       return NextResponse.json(
-        {
-          status: "error",
-          message: "Could not fetch data plans.",
-          debug_upstream_status: response.status,
-          debug_upstream_body: data ?? rawText,
-          debug_key_prefix: apiKey.slice(0, 8), // just enough to confirm sandbox vs live, never the full key
-        },
+        { status: "error", message: "Could not fetch data plans." },
         { status: response.status }
       );
     }
