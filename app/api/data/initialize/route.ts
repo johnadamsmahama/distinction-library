@@ -1,22 +1,15 @@
-// app/api/data/initialize/route.ts
-//
-// Computes client_price (wholesale + flat markup) and calls Notify Data's
-// Pay & Order flow. Notify handles the Paystack charge, webhook, order
-// fulfillment, and profit payout to your Paystack subaccount automatically —
-// this route just kicks that off and hands back a checkout URL.
-
 import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const NOTIFY_BASE_URL = "https://onlinesmsnotifygh.com";
+const PLANS_PATH = "/api/reseller/plans";
 const INITIALIZE_PAYMENT_PATH = "/api/reseller/initialize-payment";
-const MARKUP = 0.4; // flat GHS 0.40 markup per plan
 
 interface InitializePaymentBody {
-  network: "MTN" | "TELECEL" | "AT"; // AirtelTigo is "AT", not "AIRTELTIGO"
-  packageId: number; // from GET /api/reseller/plans
-  wholesalePrice: number; // pulled fresh from /api/reseller/plans, never cached client-side
-  phone: string; // e.g. "0240000000"
-  email: string; // customer's email, for their Paystack receipt
+  network: "MTN" | "TELECEL" | "AT";
+  packageId: number;
+  phone: string;
+  email: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -28,21 +21,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { network, packageId, wholesalePrice, phone, email } = body;
+  const { network, packageId, phone, email } = body;
 
-  if (!network || !packageId || !wholesalePrice || !phone || !email) {
+  if (!network || !packageId || !phone || !email) {
     return NextResponse.json(
-      { error: "Missing required fields: network, packageId, wholesalePrice, phone, email" },
+      { error: "Missing required fields: network, packageId, phone, email" },
       { status: 400 }
     );
   }
 
-  // Compute the price the student actually pays. Notify requires
-  // client_price >= wholesale price, so this markup can never go negative.
-  const clientPrice = Number((wholesalePrice + MARKUP).toFixed(2));
-
   const apiKey = process.env.NOTIFY_API_KEY;
-  const userId = process.env.NOTIFY_USER_ID; // numeric Reseller User ID from your dashboard (e.g. 763)
+  const userId = process.env.NOTIFY_USER_ID;
 
   if (!apiKey || !userId) {
     return NextResponse.json(
@@ -51,11 +40,54 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const supabase = createAdminClient();
+
   try {
+    // 1. Fetch the real wholesale price for this package directly from Notify —
+    //    never trust a price sent by the client.
+    const plansUrl = new URL(`${NOTIFY_BASE_URL}${PLANS_PATH}`);
+    plansUrl.searchParams.set("network", network.toLowerCase());
+
+    const plansRes = await fetch(plansUrl.toString(), {
+      headers: { "x-api-key": apiKey, Accept: "application/json" },
+      cache: "no-store",
+    });
+    const plansData = await plansRes.json();
+
+    if (!plansRes.ok || plansData.status !== "success") {
+      return NextResponse.json(
+        { error: "Could not verify plan price", details: plansData },
+        { status: 502 }
+      );
+    }
+
+    const plan = plansData.data.find((p: any) => p.package_id === packageId);
+    if (!plan) {
+      return NextResponse.json({ error: "Invalid packageId for this network" }, { status: 400 });
+    }
+    const wholesalePrice = Number(plan.price);
+
+    // 2. Look up this network's markup from Supabase — editable any time,
+    //    no code change or redeploy needed.
+    const { data: markupRow, error: markupError } = await supabase
+      .from("data_markup_rules")
+      .select("markup")
+      .eq("network", network)
+      .single();
+
+    if (markupError || !markupRow) {
+      return NextResponse.json(
+        { error: "No markup rule configured for this network" },
+        { status: 500 }
+      );
+    }
+
+    const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
+
+    // 3. Initialize payment with Notify Data.
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}${INITIALIZE_PAYMENT_PATH}`, {
       method: "POST",
       headers: {
-        // This specific endpoint uses Bearer auth, unlike /plans and /order which use x-api-key.
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -67,7 +99,7 @@ export async function POST(req: NextRequest) {
         network,
         client_price: clientPrice,
         user_id: Number(userId),
-        type: "inline", // popup on-site, no page redirect (defaults to "redirect" if omitted)
+        type: "inline",
       }),
     });
 
@@ -80,14 +112,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // TODO (next step): insert a "pending" row into the Supabase order-tracking
-    // table here, keyed by data.reference, before responding to the frontend.
-    // Then poll/update it via GET /api/reseller/payment-status/{reference}.
+    // TODO (next step): insert a "pending" row into data_orders here,
+    // keyed by data.reference, before responding to the frontend.
 
     return NextResponse.json({
       clientPrice,
       reference: data.reference,
-      authorizationUrl: data.authorization_url, // frontend passes this to the Paystack inline popup
+      authorizationUrl: data.authorization_url,
     });
   } catch (err) {
     console.error("initialize-payment error:", err);
