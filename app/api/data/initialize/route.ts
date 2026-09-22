@@ -6,6 +6,8 @@ const NOTIFY_BASE_URL = "https://onlinesmsnotifygh.com";
 const PLANS_PATH = "/api/reseller/plans";
 const INITIALIZE_PAYMENT_PATH = "/api/reseller/initialize-payment";
 
+// Notify/markup tables use "AT"/"TELECEL"; data_orders' check constraint
+// expects "AirtelTigo"/"Telecel". Map between them here, once, in one place.
 const DATA_ORDERS_NETWORK: Record<string, string> = {
   MTN: "MTN",
   TELECEL: "Telecel",
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Who is buying? Required for data_orders.user_id (not nullable).
   const sessionClient = createClient();
   const { data: authData } = await sessionClient.auth.getUser();
   if (!authData.user) {
@@ -57,6 +60,8 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
 
   try {
+    // 1. Fetch the real wholesale price for this package directly from Notify —
+    //    never trust a price sent by the client.
     const plansUrl = new URL(`${NOTIFY_BASE_URL}${PLANS_PATH}`);
     plansUrl.searchParams.set("network", network.toLowerCase());
 
@@ -79,6 +84,8 @@ export async function POST(req: NextRequest) {
     }
     const wholesalePrice = Number(plan.price);
 
+    // 2. Look up this network's markup from Supabase — editable any time,
+    //    no code change or redeploy needed.
     const { data: markupRow, error: markupError } = await supabase
       .from("data_markup_rules")
       .select("markup")
@@ -94,6 +101,9 @@ export async function POST(req: NextRequest) {
 
     const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
 
+    // 3. Initialize payment with Notify Data's Pay & Order flow.
+    //    Only the fields in their documented schema — no extra "type" field,
+    //    which isn't part of the request (it only appears in their response).
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}${INITIALIZE_PAYMENT_PATH}`, {
       method: "POST",
       headers: {
@@ -108,7 +118,6 @@ export async function POST(req: NextRequest) {
         network,
         client_price: clientPrice,
         user_id: Number(userId),
-        type: "inline",
       }),
     });
 
@@ -121,19 +130,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 4. Log this order as "pending" before responding, so it's tracked
+    //    from the moment payment starts. Status is later confirmed via
+    //    POST /api/reseller/payment-status/{reference}.
     const { error: insertError } = await supabase.from("data_orders").insert({
       user_id: buyerId,
       network: DATA_ORDERS_NETWORK[network],
       phone_number: phone,
       email,
       plan_id: String(packageId),
-      plan_label: plan.gig_size ? `${plan.gig_size}GB` : null,
+      plan_label: plan.gig_size ? String(plan.gig_size) : null,
       amount: clientPrice,
       status: "pending",
       paystack_reference: data.reference,
     });
 
     if (insertError) {
+      // Don't fail the whole request over a logging issue — the payment flow
+      // already succeeded with Notify. Just log it so it's visible.
       console.error("Failed to log data_orders row:", insertError);
     }
 
