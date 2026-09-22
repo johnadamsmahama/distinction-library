@@ -9,100 +9,79 @@ const NETWORKS = [
   { key: "AT", label: "AirtelTigo", img: "/airteltigo.jpg.jpeg", color: "#1d3a8a", checkColor: "#fff" },
 ];
 
-export default function BuyDataPage() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+type Plan = {
+  package_id: number;
+  gig_size: string;
+  price: string;
+  validity?: string;
+};
 
+const labelStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 700,
+  color: "#5a6f9a",
+  letterSpacing: 1.5,
+  textTransform: "uppercase",
+  display: "block",
+  marginBottom: 6,
+};
+
+export default function BuyDataPage() {
   const supabase = createClient();
-  const canSubmit = phone.trim().length > 5 && selected;
+
+  const [network, setNetwork] = useState<string | null>(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [recipient, setRecipient] = useState<"me" | "other">("me");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUserId(data.user.id);
-        if (data.user.email) setEmail(data.user.email);
-      }
-    });
-  }, []);
+    if (!network) return;
+    setPlansLoading(true);
+    setSelectedPlan(null);
+    fetch(`/api/data/plans?network=${network.toLowerCase()}`)
+      .then((res) => res.json())
+      .then((json) => {
+        const list: Plan[] = Array.isArray(json.data) ? json.data : json.data ? [json.data] : [];
+        setPlans(list);
+      })
+      .catch(() => setError("Couldn't load plans right now. Try again."))
+      .finally(() => setPlansLoading(false));
+  }, [network]);
 
-  async function handleSubmit() {
-    if (!canSubmit) return;
+  const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
+
+  async function handlePay() {
+    if (!canSubmit || !selectedPlan || !network) return;
     setLoading(true);
     setError(null);
 
-    const { error: insertError } = await supabase.from("data_waitlist").insert({
-      network: selected,
-      phone: phone.trim(),
-      email: email.trim() || null,
-      user_id: userId,
-    });
+    try {
+      const res = await fetch("/api/data/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: phone.trim(),
+          network: network.toLowerCase(),
+          planId: selectedPlan.package_id,
+        }),
+      });
+      const json = await res.json();
 
-    setLoading(false);
+      if (!res.ok) {
+        setError(json.error || "Something went wrong starting your payment.");
+        setLoading(false);
+        return;
+      }
 
-    if (insertError) {
-      setError("Something went wrong. Please try again.");
-      console.error(insertError);
-    } else {
-      setSubmitted(true);
+      window.location.href = json.authorizationUrl;
+    } catch {
+      setError("Couldn't reach the server. Check your connection and try again.");
+      setLoading(false);
     }
-  }
-
-  if (submitted) {
-    return (
-      <>
-        <style jsx global>{`
-          html, body { background: #0f1f45 !important; margin: 0; padding: 0; min-height: 100%; }
-        `}</style>
-        <div
-          style={{
-            fontFamily: "'Segoe UI', sans-serif",
-            background: "#0f1f45",
-            minHeight: "100dvh",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "24px",
-            boxSizing: "border-box",
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
-            <h2 style={{ color: "#C9A843", fontSize: 24, fontWeight: 800, marginBottom: 8 }}>
-              You&apos;re on the list!
-            </h2>
-            <p style={{ color: "#8fa0c8", fontSize: 14, lineHeight: 1.6 }}>
-              We&apos;ll notify you the moment data bundles go live.
-            </p>
-            <button
-              onClick={() => {
-                setSubmitted(false);
-                setSelected(null);
-                setPhone("");
-              }}
-              style={{
-                marginTop: 24,
-                background: "transparent",
-                border: "1.5px solid #C9A843",
-                color: "#C9A843",
-                borderRadius: 0,
-                padding: "10px 24px",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      </>
-    );
   }
 
   return (
@@ -118,26 +97,12 @@ export default function BuyDataPage() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start",
           padding: "clamp(8px, 2vh, 20px) 20px",
           boxSizing: "border-box",
         }}
       >
         <div style={{ maxWidth: 420, width: "100%", margin: "0 auto" }}>
-
-          {/* Header */}
           <div style={{ marginBottom: "clamp(10px, 2vh, 20px)" }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: "#C9A843",
-                textTransform: "uppercase",
-              }}
-            >
-              Coming Soon
-            </span>
             <h2
               style={{
                 fontSize: "clamp(20px, 3vh, 26px)",
@@ -147,54 +112,35 @@ export default function BuyDataPage() {
                 letterSpacing: -0.5,
               }}
             >
-              Buy Data
+              Buy data
             </h2>
             <p style={{ fontSize: 13, color: "#8fa0c8", lineHeight: 1.5, margin: 0 }}>
-              Affordable bundles for UPSA students. Reserve your spot — no payment needed.
+              Get a bundle sent straight to any number in seconds.
             </p>
           </div>
 
-          {/* Network Selection */}
-          <p
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: "#5a6f9a",
-              letterSpacing: 1.5,
-              textTransform: "uppercase",
-              marginBottom: "clamp(6px, 1.2vh, 10px)",
-            }}
-          >
-            Select Network
-          </p>
+          <p style={labelStyle}>Select network</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "clamp(6px, 1vh, 8px)", marginBottom: "clamp(10px, 2vh, 18px)" }}>
             {NETWORKS.map((net) => (
               <button
                 key={net.key}
-                onClick={() => setSelected(net.key)}
+                onClick={() => setNetwork(net.key)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 14,
-                  background:
-                    selected === net.key ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                  border:
-                    selected === net.key
-                      ? `1.5px solid ${net.color}`
-                      : "1.5px solid rgba(255,255,255,0.07)",
+                  background: network === net.key ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
+                  border: network === net.key ? `1.5px solid ${net.color}` : "1.5px solid rgba(255,255,255,0.07)",
                   borderRadius: 0,
                   padding: "clamp(7px, 1.4vh, 11px) 16px",
                   cursor: "pointer",
-                  transition: "all 0.2s",
-                  boxShadow: selected === net.key ? `0 0 0 3px ${net.color}22` : "none",
+                  boxShadow: network === net.key ? `0 0 0 3px ${net.color}22` : "none",
                 }}
               >
-                {/* Logo */}
                 <div
                   style={{
                     width: 46,
                     height: 46,
-                    borderRadius: 0,
                     background: "#ffffff",
                     display: "flex",
                     alignItems: "center",
@@ -206,159 +152,153 @@ export default function BuyDataPage() {
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={net.img}
-                    alt={net.label}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                  />
+                  <img src={net.img} alt={net.label} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                 </div>
-
                 <div style={{ flex: 1, textAlign: "left" }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{net.label}</div>
                   <div style={{ fontSize: 11, color: "#5a6f9a" }}>Mobile data bundles</div>
                 </div>
-
-                {/* Radio dot */}
                 <div
                   style={{
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
                     flexShrink: 0,
-                    border:
-                      selected === net.key ? "none" : "1.5px solid rgba(255,255,255,0.2)",
-                    background: selected === net.key ? net.color : "transparent",
+                    border: network === net.key ? "none" : "1.5px solid rgba(255,255,255,0.2)",
+                    background: network === net.key ? net.color : "transparent",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    transition: "all 0.2s",
                   }}
                 >
-                  {selected === net.key && (
-                    <span
-                      style={{
-                        color: net.checkColor,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        lineHeight: 1,
-                      }}
-                    >
-                      ✓
-                    </span>
+                  {network === net.key && (
+                    <span style={{ color: net.checkColor, fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>
                   )}
                 </div>
               </button>
             ))}
           </div>
 
-          {/* Inputs */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              borderRadius: 0,
-              padding: "clamp(10px, 1.8vh, 14px) 16px",
-              marginBottom: "clamp(10px, 1.8vh, 16px)",
-            }}
-          >
-            <div style={{ marginBottom: 12 }}>
-              <label
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "#5a6f9a",
-                  letterSpacing: 1.5,
-                  textTransform: "uppercase",
-                  display: "block",
-                  marginBottom: 6,
-                }}
-              >
-                Phone Number
-              </label>
-              <div
-                style={{
-                  display: "flex",
-                  border: "1.5px solid rgba(255,255,255,0.08)",
-                  borderRadius: 0,
-                  overflow: "hidden",
-                }}
-              >
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    padding: "10px 12px",
-                    fontSize: 13,
-                    color: "#8fa0c8",
-                    borderRight: "1.5px solid rgba(255,255,255,0.08)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  🇬🇭 +233
-                </span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="024 000 0000"
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    padding: "10px 14px",
-                    fontSize: 14,
-                    color: "#fff",
-                    background: "transparent",
-                  }}
-                />
+          {network && (
+            <>
+              <p style={labelStyle}>Select plan</p>
+              {plansLoading && (
+                <p style={{ color: "#8fa0c8", fontSize: 13, marginBottom: 16 }}>Loading plans...</p>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "clamp(10px, 2vh, 18px)" }}>
+                {plans.map((plan) => {
+                  const active = selectedPlan?.package_id === plan.package_id;
+                  const netMeta = NETWORKS.find((n) => n.key === network)!;
+                  return (
+                    <button
+                      key={plan.package_id}
+                      onClick={() => setSelectedPlan(plan)}
+                      style={{
+                        textAlign: "left",
+                        background: active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
+                        border: active ? `1.5px solid ${netMeta.color}` : "1.5px solid rgba(255,255,255,0.07)",
+                        borderRadius: 0,
+                        padding: "10px 12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}</div>
+                      <div style={{ fontSize: 11, color: "#8fa0c8" }}>
+                        {plan.validity ? `${plan.validity} · ` : ""}GH₵{parseFloat(plan.price).toFixed(2)}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-
-            <div>
-              <label
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: "#5a6f9a",
-                  letterSpacing: 1.5,
-                  textTransform: "uppercase",
-                  display: "block",
-                  marginBottom: 6,
-                }}
-              >
-                Email{" "}
-                <span
-                  style={{ color: "#3d5078", fontWeight: 400, textTransform: "none", letterSpacing: 0 }}
-                >
-                  (optional)
-                </span>
-              </label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="10347621@upsamail.edu.gh"
-                style={{
-                  width: "100%",
-                  border: "1.5px solid rgba(255,255,255,0.08)",
-                  borderRadius: 0,
-                  padding: "10px 14px",
-                  fontSize: 14,
-                  color: "#fff",
-                  background: "transparent",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <p style={{ color: "#E30613", fontSize: 12, marginBottom: 10, textAlign: "center" }}>
-              {error}
-            </p>
+            </>
           )}
 
-          {/* CTA */}
+          {selectedPlan && (
+            <>
+              <p style={labelStyle}>Who is this for?</p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                <button
+                  onClick={() => setRecipient("me")}
+                  style={{
+                    flex: 1,
+                    background: recipient === "me" ? "rgba(255,255,255,0.08)" : "transparent",
+                    border: recipient === "me" ? "1.5px solid #C9A843" : "1.5px solid rgba(255,255,255,0.15)",
+                    borderRadius: 0,
+                    padding: "10px",
+                    color: "#fff",
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  For me
+                </button>
+                <button
+                  onClick={() => setRecipient("other")}
+                  style={{
+                    flex: 1,
+                    background: recipient === "other" ? "rgba(255,255,255,0.08)" : "transparent",
+                    border: recipient === "other" ? "1.5px solid #C9A843" : "1.5px solid rgba(255,255,255,0.15)",
+                    borderRadius: 0,
+                    padding: "10px",
+                    color: "#fff",
+                    fontSize: 13,
+                    cursor: "pointer",
+                  }}
+                >
+                  Someone else
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Phone number</label>
+                <div style={{ display: "flex", border: "1.5px solid rgba(255,255,255,0.08)", borderRadius: 0, overflow: "hidden" }}>
+                  <span
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      padding: "10px 12px",
+                      fontSize: 13,
+                      color: "#8fa0c8",
+                      borderRight: "1.5px solid rgba(255,255,255,0.08)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    🇬🇭 +233
+                  </span>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="024 000 0000"
+                    style={{ flex: 1, border: "none", outline: "none", padding: "10px 14px", fontSize: 14, color: "#fff", background: "transparent" }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {selectedPlan && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+                paddingTop: 12,
+                marginBottom: 16,
+              }}
+            >
+              <span style={{ fontSize: 12, color: "#5a6f9a", textTransform: "uppercase", letterSpacing: 1.5 }}>Total</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
+                GH₵{parseFloat(selectedPlan.price).toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {error && (
+            <p style={{ color: "#E30613", fontSize: 12, marginBottom: 10, textAlign: "center" }}>{error}</p>
+          )}
+
           <button
-            onClick={handleSubmit}
+            onClick={handlePay}
             disabled={!canSubmit || loading}
             style={{
               width: "100%",
@@ -370,21 +310,14 @@ export default function BuyDataPage() {
               fontSize: 14,
               fontWeight: 800,
               cursor: canSubmit && !loading ? "pointer" : "default",
-              transition: "all 0.2s",
               letterSpacing: 0.3,
             }}
           >
-            {loading ? "Saving your spot..." : "Notify Me When It Launches"}
+            {loading ? "Starting payment..." : "Pay by Mobile Money or card"}
           </button>
 
-          <p style={{ textAlign: "center", fontSize: 11, color: "#3d5078", marginTop: 10, marginBottom: 4 }}>
-            No payment required — just your spot in line.
-          </p>
-          <p style={{ textAlign: "center", fontSize: 11, color: "#5a6f9a", margin: 0 }}>
-            Signing up as{" "}
-            <strong style={{ color: "#8fa0c8" }}>
-              {email ? email.split("@")[0] : "Guest"}
-            </strong>
+          <p style={{ textAlign: "center", fontSize: 11, color: "#3d5078", marginTop: 10, marginBottom: 0 }}>
+            Data is sent to the number automatically after payment.
           </p>
         </div>
       </div>
