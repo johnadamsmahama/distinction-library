@@ -192,6 +192,7 @@ export default function BuyDataPage() {
     <>
       <style jsx global>{`
         html, body { background: #0f1f45 !important; margin: 0; padding: 0; min-height: 100%; }
+        @keyframes buyDataSpin { to { transform: rotate(360deg); } }
       `}</style>
       <div
         style={{
@@ -241,12 +242,9 @@ export default function BuyDataPage() {
                   border: "3px solid rgba(201,168,67,0.25)",
                   borderTopColor: "#C9A843",
                   borderRadius: "50%",
-                  animation: "spin 0.8s linear infinite",
+                  animation: "buyDataSpin 0.8s linear infinite",
                 }}
               />
-              <style jsx>{`
-                @keyframes spin { to { transform: rotate(360deg); } }
-              `}</style>
               <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
                 Waiting for your payment...
               </p>
