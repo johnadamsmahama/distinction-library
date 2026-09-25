@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const dynamic = "force-dynamic";
+
 // ONE-TIME CLEANUP ROUTE — delete after running once.
 //
 // Frees Supabase Storage quota by removing:
