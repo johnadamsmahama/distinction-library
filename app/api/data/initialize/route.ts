@@ -2,15 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-// Notify Data's own format (used for their API calls and the data_markup_rules table)
 const NETWORK_MAP: Record<string, string> = {
   mtn: 'MTN',
   telecel: 'TELECEL',
   at: 'AT',
 };
 
-// data_orders' check constraint expects these exact capitalizations —
-// different from Notify's own format above.
 const DATA_ORDERS_NETWORK: Record<string, string> = {
   MTN: 'MTN',
   TELECEL: 'Telecel',
@@ -61,8 +58,6 @@ export async function POST(request: Request) {
 
   const adminSupabase = createAdminClient();
 
-  // 1. Fetch the real wholesale price directly from Notify — never trust a
-  //    client-sent price.
   const plansUrl = new URL(`${NOTIFY_BASE_URL}/api/reseller/plans`);
   plansUrl.searchParams.set('network', network.toLowerCase());
 
@@ -87,8 +82,6 @@ export async function POST(request: Request) {
   const wholesalePrice = parseFloat(plan.price);
   const planLabel = `${plan.gig_size}GB${plan.validity ? ` (${plan.validity})` : ''}`;
 
-  // 2. Look up this network's markup from Supabase — editable any time from
-  //    the data_markup_rules table, no code change or redeploy needed.
   const { data: markupRow, error: markupError } = await adminSupabase
     .from('data_markup_rules')
     .select('markup')
@@ -104,7 +97,6 @@ export async function POST(request: Request) {
 
   const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
 
-  // 3. Create the pending order row FIRST, before calling Notify.
   const { data: order, error: orderError } = await supabase
     .from('data_orders')
     .insert({
@@ -125,14 +117,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not create order' }, { status: 500 });
   }
 
-  // 4. Hand off to Notify's Pay & Order flow. Notify — not us — talks to
-  //    Paystack, handles the webhook, fulfills the order, and routes our
-  //    profit share to the Paystack subaccount already registered against
-  //    our reseller account. We never touch a Paystack key here.
-  //
-  //    Only the fields in Notify's documented schema — confirmed via live
-  //    testing that this endpoint uses x-api-key (not Bearer), and that an
-  //    unrecognized "type" field breaks the request.
+  const notifyRequestBody = {
+    email: user.email,
+    package_id: Number(planId),
+    phone_number: phoneNumber,
+    network: vendorNetwork,
+    client_price: clientPrice,
+    user_id: Number(notifyUserId),
+  };
+
+  // TEMPORARY DEBUG — remove once we confirm the root cause
+  console.log('DEBUG initialize request:', JSON.stringify(notifyRequestBody));
+
   let notifyData: any;
   try {
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}/api/reseller/initialize-payment`, {
@@ -142,17 +138,13 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({
-        email: user.email,
-        package_id: Number(planId),
-        phone_number: phoneNumber,
-        network: vendorNetwork,
-        client_price: clientPrice,
-        user_id: Number(notifyUserId),
-      }),
+      body: JSON.stringify(notifyRequestBody),
     });
 
     notifyData = await notifyRes.json();
+
+    // TEMPORARY DEBUG — remove once we confirm the root cause
+    console.log('DEBUG notify response:', notifyRes.status, JSON.stringify(notifyData));
 
     if (!notifyRes.ok || notifyData.status !== true) {
       console.error('Notify initialize-payment rejected:', notifyRes.status, JSON.stringify(notifyData));
