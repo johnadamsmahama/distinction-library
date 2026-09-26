@@ -34,7 +34,7 @@ function WhatsAppIcon() {
 
 export default function CommunityAndToolsSection() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
 
       {/* Buy Data — live, teal "zine" panel */}
       <Link
