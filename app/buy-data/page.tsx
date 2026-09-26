@@ -52,7 +52,7 @@ export default function BuyDataPage() {
   const [recipient, setRecipient] = useState<"me" | "other">("me");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [markups, setMarkups] = useState<Record<string, number>>({});
+  const [prices, setPrices] = useState<Record<string, number>>({});
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -61,7 +61,7 @@ export default function BuyDataPage() {
   useEffect(() => {
     fetch("/api/data/markup")
       .then((res) => res.json())
-      .then((json) => setMarkups(json.markups || {}))
+      .then((json) => setPrices(json.prices || {}))
       .catch(() => {});
   }, []);
 
@@ -89,12 +89,16 @@ export default function BuyDataPage() {
 
   const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
-  function displayPrice(plan: Plan): number {
-    if (!network) return parseFloat(plan.price);
+  function displayPrice(plan: Plan): number | null {
+    if (!network) return null;
     const notifyNetwork = NOTIFY_NETWORK[network];
-    const markup = markups[notifyNetwork] ?? 0;
-    return parseFloat(plan.price) + markup;
+    const key = `${notifyNetwork}:${plan.package_id}`;
+    return prices[key] ?? null;
   }
+
+  // Only show packages that actually have a price set — an unset price
+  // means we can't safely charge for it yet.
+  const purchasablePlans = plans.filter((p) => displayPrice(p) !== null);
 
   function startPolling(reference: string) {
     if (pollTimer.current) clearInterval(pollTimer.current);
@@ -390,9 +394,10 @@ export default function BuyDataPage() {
                     <p style={{ color: "#8fa0c8", fontSize: 13, marginBottom: 16 }}>Loading plans...</p>
                   )}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "clamp(10px, 2vh, 18px)" }}>
-                    {plans.map((plan) => {
+                    {purchasablePlans.map((plan) => {
                       const active = selectedPlan?.package_id === plan.package_id;
                       const netMeta = NETWORKS.find((n) => n.key === network)!;
+                      const price = displayPrice(plan)!;
                       return (
                         <button
                           key={plan.package_id}
@@ -406,14 +411,19 @@ export default function BuyDataPage() {
                             cursor: "pointer",
                           }}
                         >
-                          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}GB</div>
                           <div style={{ fontSize: 11, color: "#8fa0c8" }}>
-                            {plan.validity ? `${plan.validity} · ` : ""}GH₵{displayPrice(plan).toFixed(2)}
+                            {plan.validity ? `${plan.validity} · ` : ""}GH₵{price.toFixed(2)}
                           </div>
                         </button>
                       );
                     })}
                   </div>
+                  {!plansLoading && purchasablePlans.length === 0 && (
+                    <p style={{ color: "#8fa0c8", fontSize: 13, marginBottom: 16 }}>
+                      No packages are available for this network right now.
+                    </p>
+                  )}
                 </>
               )}
 
@@ -492,7 +502,7 @@ export default function BuyDataPage() {
                 >
                   <span style={{ fontSize: 12, color: "#5a6f9a", textTransform: "uppercase", letterSpacing: 1.5 }}>Total</span>
                   <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                    GH₵{displayPrice(selectedPlan).toFixed(2)}
+                    GH₵{(displayPrice(selectedPlan) ?? 0).toFixed(2)}
                   </span>
                 </div>
               )}
