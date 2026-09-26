@@ -54,6 +54,7 @@ export default function BuyDataPage() {
   const [error, setError] = useState<string | null>(null);
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
+  const [pendingAuthUrl, setPendingAuthUrl] = useState<string | null>(null);
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollDeadline = useRef<number>(0);
@@ -165,16 +166,16 @@ export default function BuyDataPage() {
 
       // Open the payment page in a new tab so this page stays alive to
       // track the order — Notify's checkout doesn't redirect back to us.
+      // Mobile browsers often block this since it happens after an await,
+      // so we keep the URL around for a manual "Open payment page" button.
       const paymentWindow = window.open(json.authorizationUrl, "_blank");
+      setPendingAuthUrl(json.authorizationUrl);
 
       setOrder({ phase: "waiting", reference: json.reference });
       startPolling(json.reference);
 
-      if (!paymentWindow) {
-        // Popup blocked — give the buyer a manual link instead of silently failing.
-        setError(
-          "Your browser blocked the payment popup. Tap the button below to open it manually."
-        );
+      if (!paymentWindow || paymentWindow.closed) {
+        setError("popup_blocked");
       }
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -186,8 +187,15 @@ export default function BuyDataPage() {
     if (pollTimer.current) clearInterval(pollTimer.current);
     setOrder({ phase: "idle" });
     setError(null);
+    setPendingAuthUrl(null);
     setSelectedPlan(null);
     setPhone("");
+  }
+
+  function handleOpenPaymentManually() {
+    if (pendingAuthUrl) {
+      window.open(pendingAuthUrl, "_blank");
+    }
   }
 
   const showForm = order.phase === "idle" || order.phase === "starting";
@@ -238,23 +246,51 @@ export default function BuyDataPage() {
                 marginBottom: 16,
               }}
             >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  margin: "0 auto 14px",
-                  border: "3px solid rgba(201,168,67,0.25)",
-                  borderTopColor: "#C9A843",
-                  borderRadius: "50%",
-                  animation: "buyDataSpin 0.8s linear infinite",
-                }}
-              />
-              <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
-                Waiting for your payment...
-              </p>
-              <p style={{ color: "#8fa0c8", fontSize: 12, margin: 0 }}>
-                Complete payment in the tab that opened. This page will update automatically.
-              </p>
+              {error === "popup_blocked" ? (
+                <>
+                  <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 10px" }}>
+                    Your browser blocked the payment page
+                  </p>
+                  <p style={{ color: "#8fa0c8", fontSize: 12, margin: "0 0 16px" }}>
+                    Tap below to open it manually. This page will keep checking for your payment automatically.
+                  </p>
+                  <button
+                    onClick={handleOpenPaymentManually}
+                    style={{
+                      background: "#C9A843",
+                      color: "#0f1f45",
+                      border: "none",
+                      padding: "10px 20px",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: "pointer",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Open payment page
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      margin: "0 auto 14px",
+                      border: "3px solid rgba(201,168,67,0.25)",
+                      borderTopColor: "#C9A843",
+                      borderRadius: "50%",
+                      animation: "buyDataSpin 0.8s linear infinite",
+                    }}
+                  />
+                  <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
+                    Waiting for your payment...
+                  </p>
+                  <p style={{ color: "#8fa0c8", fontSize: 12, margin: 0 }}>
+                    Complete payment in the tab that opened. This page will update automatically.
+                  </p>
+                </>
+              )}
               <p style={{ color: "#5a6f9a", fontSize: 11, marginTop: 10 }}>
                 Reference: {order.reference}
               </p>
@@ -507,7 +543,7 @@ export default function BuyDataPage() {
                 </div>
               )}
 
-              {error && (
+              {error && error !== "popup_blocked" && (
                 <p style={{ color: "#E30613", fontSize: 12, marginBottom: 10, textAlign: "center" }}>{error}</p>
               )}
 
