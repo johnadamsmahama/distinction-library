@@ -1,27 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-// Public, read-only: exposes each network's markup so the frontend can show
-// the true total (wholesale + markup) before payment starts. Not sensitive —
-// just a pricing fact — so no auth required here.
-export async function GET(req: NextRequest) {
+export const dynamic = "force-dynamic";
+
+// Public, read-only: exposes each package's exact selling price so the
+// frontend can show the real total before payment starts. Not sensitive —
+// just pricing facts — so no auth required here.
+//
+// Shape: { prices: { "MTN:16": 4.8, "TELECEL:37": 39.5, "AT:52": 59.5, ... } }
+export async function GET() {
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase.from("data_markup_rules").select("network, markup");
+  const { data, error } = await supabase
+    .from("data_package_prices")
+    .select("network, package_id, selling_price");
 
   if (error || !data) {
-    // TEMPORARY DEBUG — remove once we confirm the root cause
-    console.error("data_markup_rules fetch failed:", JSON.stringify(error));
-    return NextResponse.json(
-      { error: "Could not fetch markup rules", debug: error },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Could not fetch prices" }, { status: 500 });
   }
 
-  const markups: Record<string, number> = {};
+  const prices: Record<string, number> = {};
   for (const row of data) {
-    markups[row.network] = Number(row.markup);
+    prices[`${row.network}:${row.package_id}`] = Number(row.selling_price);
   }
 
-  return NextResponse.json({ markups });
+  return NextResponse.json({ prices });
 }
