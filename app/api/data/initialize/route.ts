@@ -58,6 +58,8 @@ export async function POST(request: Request) {
 
   const adminSupabase = createAdminClient();
 
+  // Confirm the package is real and get its label — still verified live
+  // against Notify, never trusted from the client.
   const plansUrl = new URL(`${NOTIFY_BASE_URL}/api/reseller/plans`);
   plansUrl.searchParams.set('network', network.toLowerCase());
 
@@ -79,23 +81,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Plan not found' }, { status: 400 });
   }
 
-  const wholesalePrice = parseFloat(plan.price);
   const planLabel = `${plan.gig_size}GB${plan.validity ? ` (${plan.validity})` : ''}`;
 
-  const { data: markupRow, error: markupError } = await adminSupabase
-    .from('data_markup_rules')
-    .select('markup')
+  // Look up the exact selling price you set for this specific package —
+  // not a flat percentage/markup formula.
+  const { data: priceRow, error: priceError } = await adminSupabase
+    .from('data_package_prices')
+    .select('selling_price')
     .eq('network', vendorNetwork)
+    .eq('package_id', Number(planId))
     .single();
 
-  if (markupError || !markupRow) {
+  if (priceError || !priceRow) {
     return NextResponse.json(
-      { error: 'No markup rule configured for this network' },
-      { status: 500 }
+      { error: 'No price has been set for this package yet' },
+      { status: 400 }
     );
   }
 
-  const clientPrice = Number((wholesalePrice + Number(markupRow.markup)).toFixed(2));
+  const clientPrice = Number(priceRow.selling_price);
 
   const { data: order, error: orderError } = await supabase
     .from('data_orders')
@@ -126,9 +130,6 @@ export async function POST(request: Request) {
     user_id: Number(notifyUserId),
   };
 
-  // TEMPORARY DEBUG — remove once we confirm the root cause
-  console.log('DEBUG initialize request:', JSON.stringify(notifyRequestBody));
-
   let notifyData: any;
   try {
     const notifyRes = await fetch(`${NOTIFY_BASE_URL}/api/reseller/initialize-payment`, {
@@ -142,9 +143,6 @@ export async function POST(request: Request) {
     });
 
     notifyData = await notifyRes.json();
-
-    // TEMPORARY DEBUG — remove once we confirm the root cause
-    console.log('DEBUG notify response:', notifyRes.status, JSON.stringify(notifyData));
 
     if (!notifyRes.ok || notifyData.status !== true) {
       console.error('Notify initialize-payment rejected:', notifyRes.status, JSON.stringify(notifyData));
