@@ -22,9 +22,11 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 });
-  }
+  // Login is optional — anyone can buy data, UPSA student or not. Logged-in
+  // students just get their real email attached to the order for their
+  // records; guests get a placeholder, since Notify's API requires an email
+  // field but we don't want to ask guests for one.
+  const isGuest = !user;
 
   const { phoneNumber, network, planId } = (await request.json()) as {
     phoneNumber: string;
@@ -49,6 +51,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid Ghana phone number' }, { status: 400 });
   }
 
+  const orderEmail = user?.email ?? `guest-${phoneNumber.replace(/\D/g, '')}@guest.distinctionlibrary.com`;
+
   const apiKey = process.env.NOTIFY_API_KEY;
   const notifyUserId = process.env.NOTIFY_USER_ID;
 
@@ -58,8 +62,6 @@ export async function POST(request: Request) {
 
   const adminSupabase = createAdminClient();
 
-  // Confirm the package is real and get its label — still verified live
-  // against Notify, never trusted from the client.
   const plansUrl = new URL(`${NOTIFY_BASE_URL}/api/reseller/plans`);
   plansUrl.searchParams.set('network', network.toLowerCase());
 
@@ -83,8 +85,6 @@ export async function POST(request: Request) {
 
   const planLabel = `${plan.gig_size}GB${plan.validity ? ` (${plan.validity})` : ''}`;
 
-  // Look up the exact selling price you set for this specific package —
-  // not a flat percentage/markup formula.
   const { data: priceRow, error: priceError } = await adminSupabase
     .from('data_package_prices')
     .select('selling_price')
@@ -101,11 +101,15 @@ export async function POST(request: Request) {
 
   const clientPrice = Number(priceRow.selling_price);
 
-  const { data: order, error: orderError } = await supabase
+  // Guest orders use the admin client to bypass RLS, since there's no
+  // logged-in session to satisfy a user-scoped insert policy.
+  const orderClient = isGuest ? adminSupabase : supabase;
+
+  const { data: order, error: orderError } = await orderClient
     .from('data_orders')
     .insert({
-      user_id: user.id,
-      email: user.email,
+      user_id: user?.id ?? null,
+      email: orderEmail,
       network: DATA_ORDERS_NETWORK[vendorNetwork],
       phone_number: phoneNumber,
       plan_id: String(planId),
@@ -122,7 +126,7 @@ export async function POST(request: Request) {
   }
 
   const notifyRequestBody = {
-    email: user.email,
+    email: orderEmail,
     package_id: Number(planId),
     phone_number: phoneNumber,
     network: vendorNetwork,
@@ -146,7 +150,7 @@ export async function POST(request: Request) {
 
     if (!notifyRes.ok || notifyData.status !== true) {
       console.error('Notify initialize-payment rejected:', notifyRes.status, JSON.stringify(notifyData));
-      await supabase
+      await adminSupabase
         .from('data_orders')
         .update({ status: 'failed', vendor_response: notifyData })
         .eq('id', order.id);
@@ -155,14 +159,14 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     console.error('Could not reach Notify Data API:', err);
-    await supabase
+    await adminSupabase
       .from('data_orders')
       .update({ status: 'failed' })
       .eq('id', order.id);
     return NextResponse.json({ error: 'Payment initialization failed' }, { status: 502 });
   }
 
-  await supabase
+  await adminSupabase
     .from('data_orders')
     .update({ paystack_reference: notifyData.reference })
     .eq('id', order.id);
