@@ -10,7 +10,7 @@ export default async function PastQuestionsPage() {
   if (!user) redirect('/login');
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
+    <div className="-mx-5 sm:-mx-7 -mt-8 -mb-8">
       <PastQuestionsBrowser />
     </div>
   );
