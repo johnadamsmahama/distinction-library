@@ -247,6 +247,17 @@ export default function PastQuestionsBrowser() {
   return (
     <div className="relative" style={{ background: LIB_BG, minHeight: '100vh' }}>
       <div className="max-w-[480px] mx-auto px-4 pt-6 pb-10">
+        <div className={`flex items-center gap-2 mb-4 font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 11, color: LIB_INK }}>
+          <a href="/dashboard" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+            <span>←</span>
+            <span>Home</span>
+          </a>
+          <span style={{ color: `${LIB_INK}66` }}>/</span>
+          <a href="/library" className="hover:opacity-70 transition-opacity">
+            Library
+          </a>
+        </div>
+
         {/* Punched rod — the catalog-drawer detail */}
         <div className="flex justify-center gap-6 mb-3.5">
           {[0, 1, 2, 3, 4].map((i) => (
