@@ -245,7 +245,7 @@ export default function PastQuestionsBrowser() {
   }, [filteredCourseOptions, courseId]);
 
   return (
-    <div className="relative" style={{ background: LIB_BG, minHeight: '100%' }}>
+    <div className="relative" style={{ background: LIB_BG, minHeight: '100vh' }}>
       <div className="max-w-[480px] mx-auto px-4 pt-6 pb-10">
         {/* Punched rod — the catalog-drawer detail */}
         <div className="flex justify-center gap-6 mb-3.5">
