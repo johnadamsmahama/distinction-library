@@ -26,7 +26,7 @@ const RESOURCES = [
     catNo: '002',
     catType: 'EXAM',
     description: 'Browse past exam questions by course',
-    href: '/papers?tab=papers',
+    href: '/library/past-questions',
     icon: (
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M9 13h6 M9 17h6" />
     ),
