@@ -16,8 +16,8 @@ type Paper = {
 
 const mono = 'font-[family-name:var(--font-courier-prime)]';
 
-const LIB_BG = '#D9CBA3';
-const LIB_CARD = '#F3EAD3';
+const LIB_BG = '#F1E9D8';
+const LIB_CARD = '#FBF7ED';
 const LIB_INK = '#1B4332';
 const LIB_INK_SOFT = '#5C5236';
 const LIB_STAMP = '#A6431F';
