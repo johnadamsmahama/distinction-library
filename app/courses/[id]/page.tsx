@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import TrackedResourceLink from '@/components/papers/TrackedResourceLink';
+import BackLink from '@/components/shared/BackLink';
 
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   lecture_slides: 'Lecture Slides',
@@ -41,9 +41,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
   return (
     <div>
-      <Link href="/courses" className="font-condensed font-bold text-xs uppercase text-gold hover:underline">
-        ← All courses
-      </Link>
+      <BackLink href="/courses" label="All courses" />
       <h1 className="font-display font-bold text-2xl text-navy mt-2 mb-1">
         {course.code} — {course.name}
       </h1>
