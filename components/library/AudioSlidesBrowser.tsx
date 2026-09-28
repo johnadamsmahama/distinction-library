@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import FilterSelect from './FilterSelect';
 
 type Recording = {
   id: string;
@@ -59,35 +60,6 @@ function formatDuration(seconds: number | null) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-function FilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full appearance-none cursor-pointer rounded-none pl-2.5 pr-6 py-[5px] font-bold uppercase tracking-wide outline-none ${mono}`}
-        style={{ fontSize: 10, background: GLD_CARD, border: '1.5px solid rgba(74,59,20,0.15)', color: GLD_INK_SOFT }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ fontSize: 9, color: '#999' }}>
-        ▾
-      </div>
-    </div>
-  );
-}
 
 // Deterministic "at rest" bar heights so tiles don't visually jump around
 // between renders — seeded off the recording id rather than random.
@@ -378,11 +350,19 @@ export default function AudioSlidesBrowser() {
             value={level}
             onChange={setLevel}
             options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+            card={GLD_CARD}
+            border="rgba(74,59,20,0.4)"
+            text={GLD_INK_SOFT}
+            fontClassName={mono}
           />
           <FilterSelect
             value={courseId}
             onChange={setCourseId}
             options={[{ value: '', label: 'All Courses' }, ...filteredCourseOptions.map((c) => ({ value: c.id, label: c.code }))]}
+            card={GLD_CARD}
+            border="rgba(74,59,20,0.4)"
+            text={GLD_INK_SOFT}
+            fontClassName={mono}
           />
         </div>
 
