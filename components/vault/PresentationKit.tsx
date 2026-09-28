@@ -473,7 +473,7 @@ export default function PresentationKit() {
           <div className="border border-gold/25 border-t-0 bg-black/25 p-4 flex gap-2">
             <button
               onClick={startOver}
-              className="font-mono text-xs text-white/60 border border-white/15 px-4 py-2.5 hover:border-gold/50 hover:text-gold transition-colors"
+              className="font-mono text-xs text-white/75 border border-white/35 px-4 py-2.5 hover:border-gold/50 hover:text-gold transition-colors"
             >
               start over
             </button>
