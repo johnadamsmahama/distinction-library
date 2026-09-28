@@ -60,7 +60,7 @@ export default function CourseSearchList({ courses }: { courses: Course[] }) {
             <li key={course.id}>
               <Link
                 href={`/predictor/${course.id}`}
-                className="group flex items-center justify-between rounded-none border border-white/10 bg-white/5 p-4 transition-colors hover:border-gold/50 hover:bg-white/10"
+                className="group flex items-center justify-between rounded-none border border-white/35 bg-white/5 p-4 transition-colors hover:border-gold/50 hover:bg-white/10"
               >
                 <div>
                   <p className="font-condensed text-base">{course.name}</p>
