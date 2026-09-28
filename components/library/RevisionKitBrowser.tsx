@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import FilterSelect from './FilterSelect';
 
 type Kit = {
   id: string;
@@ -55,39 +56,6 @@ async function downloadFile(url: string, filename: string) {
   } catch {
     window.open(url, '_blank');
   }
-}
-
-function FilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full appearance-none cursor-pointer rounded-none pl-2.5 pr-6 py-[5px] font-bold uppercase tracking-wide outline-none ${mono}`}
-        style={{ fontSize: 10, background: AMB_CARD, border: '1.5px solid rgba(58,36,16,0.15)', color: AMB_INK_SOFT }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div
-        className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
-        style={{ fontSize: 9, color: '#999' }}
-      >
-        ▾
-      </div>
-    </div>
-  );
 }
 
 function KitTile({ kit }: { kit: Kit }) {
@@ -289,11 +257,19 @@ export default function RevisionKitBrowser() {
             value={level}
             onChange={setLevel}
             options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+            card={AMB_CARD}
+            border="rgba(58,36,16,0.4)"
+            text={AMB_INK_SOFT}
+            fontClassName={mono}
           />
           <FilterSelect
             value={courseId}
             onChange={setCourseId}
             options={[{ value: '', label: 'All Courses' }, ...filteredCourseOptions.map((c) => ({ value: c.id, label: c.code }))]}
+            card={AMB_CARD}
+            border="rgba(58,36,16,0.4)"
+            text={AMB_INK_SOFT}
+            fontClassName={mono}
           />
           <FilterSelect
             value={semester}
@@ -303,6 +279,10 @@ export default function RevisionKitBrowser() {
               { value: '1', label: 'Semester 1' },
               { value: '2', label: 'Semester 2' },
             ]}
+            card={AMB_CARD}
+            border="rgba(58,36,16,0.4)"
+            text={AMB_INK_SOFT}
+            fontClassName={mono}
           />
         </div>
 
