@@ -146,7 +146,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
                     value={u.role}
                     disabled={busyId === u.id}
                     onChange={(e) => changeRole(u.id, e.target.value)}
-                    className="font-condensed font-semibold text-[11px] px-2 py-1 rounded-md border border-navy/15 bg-white/70 outline-none focus:border-gold"
+                    className="font-condensed font-semibold text-[11px] px-2 py-1 rounded-md border border-navy/40 bg-white/70 outline-none focus:border-gold"
                   >
                     <option value="student">Student</option>
                     <option value="moderator">Moderator</option>
