@@ -1,19 +1,12 @@
 import Link from 'next/link';
+import BackLink from '@/components/shared/BackLink';
 import PublicContactForm from '@/components/contact/PublicContactForm';
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-off-white">
       <div className="max-w-content mx-auto px-5 sm:px-7 py-10">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 font-condensed font-bold text-sm text-gold hover:text-gold-dark mb-6"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Back to home
-        </Link>
+        <BackLink href="/" label="Home" className="mb-6" />
 
         <h1 className="font-display font-bold text-2xl text-navy mb-1">Contact &amp; Support</h1>
         <p className="font-body text-sm text-g600 mb-6">
