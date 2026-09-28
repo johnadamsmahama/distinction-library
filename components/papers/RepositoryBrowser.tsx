@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
+import FilterSelect from '../library/FilterSelect';
 
 type Tab = 'papers' | 'materials';
 
@@ -293,52 +294,11 @@ const MAT_CARD = '#FBF7ED';
 const MAT_BG = '#F1E9D8';
 
 /* ── Cream filter select ── */
-function MaterialFilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  const active = value !== '';
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none cursor-pointer rounded-none pl-3 pr-7 py-[5px] font-mono font-bold uppercase tracking-wide outline-none transition-all"
-        style={{
-          fontSize: 10,
-          background: active ? MAT_RUST + '18' : MAT_CARD,
-          border: `1.5px solid ${active ? MAT_RUST : 'rgba(23,35,63,0.15)'}`,
-          color: active ? '#7A3A20' : MAT_INK_SOFT,
-          minWidth: 0,
-        }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[9px]"
-        style={{ color: active ? MAT_RUST : '#999' }}
-      >
-        ▾
-      </div>
-    </div>
-  );
-}
-
 /* ── Horizontal material card — cream/paper, sharp corners ── */
 function MaterialCard({
   code,
   name,
   tag,
-  downloads,
   href,
   downloadName,
   itemId,
@@ -346,7 +306,6 @@ function MaterialCard({
   code: string;
   name: string;
   tag: string;
-  downloads: number;
   href: string;
   downloadName: string;
   itemId: string;
@@ -397,13 +356,9 @@ function MaterialCard({
         </div>
 
         <div
-          className="flex items-center justify-between pt-2"
+          className="flex items-center justify-end pt-2"
           style={{ borderTop: '1px solid rgba(23,35,63,0.12)' }}
         >
-          <span className="font-mono" style={{ fontSize: 9.5, color: MAT_INK_SOFT }}>
-            <b style={{ color: MAT_INK, fontWeight: 700 }}>{downloads}</b>{' '}
-            {downloads === 1 ? 'download' : 'downloads'}
-          </span>
           <span
             className="flex items-center gap-1 rounded-none"
             style={{
@@ -664,20 +619,38 @@ export default function RepositoryBrowser({
 
           {/* ── FILTER STRIP ── */}
           <div className="grid grid-cols-3 gap-2 pb-4">
-            <MaterialFilterSelect
+            <FilterSelect
               value={level}
               onChange={setLevel}
               options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+              card={MAT_CARD}
+              border="rgba(23,35,63,0.4)"
+              text={MAT_INK_SOFT}
+              activeBg={MAT_RUST + '18'}
+              activeBorder={MAT_RUST}
+              activeText="#7A3A20"
             />
-            <MaterialFilterSelect
+            <FilterSelect
               value={courseId}
               onChange={setCourseId}
               options={[{ value: '', label: 'All Courses' }, ...filteredCourses.map((c) => ({ value: c.id, label: c.code }))]}
+              card={MAT_CARD}
+              border="rgba(23,35,63,0.4)"
+              text={MAT_INK_SOFT}
+              activeBg={MAT_RUST + '18'}
+              activeBorder={MAT_RUST}
+              activeText="#7A3A20"
             />
-            <MaterialFilterSelect
+            <FilterSelect
               value={week}
               onChange={setWeek}
               options={[{ value: '', label: 'All Weeks' }, ...WEEKS.map((w) => ({ value: String(w), label: `Week ${w}` }))]}
+              card={MAT_CARD}
+              border="rgba(23,35,63,0.4)"
+              text={MAT_INK_SOFT}
+              activeBg={MAT_RUST + '18'}
+              activeBorder={MAT_RUST}
+              activeText="#7A3A20"
             />
           </div>
         </div>
@@ -711,7 +684,6 @@ export default function RepositoryBrowser({
                   code={m.courses.code}
                   name={m.title}
                   tag={m.week_number ? `WEEK ${m.week_number}` : 'MATERIAL'}
-                  downloads={m.download_count}
                   href={m.file_url}
                   downloadName={`${m.courses.code} - ${m.title}.pdf`}
                   itemId={m.id}
