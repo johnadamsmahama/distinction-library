@@ -81,7 +81,7 @@ export default function DashboardNav({
                 key={link.href}
                 href={link.href}
                 className={`px-[15px] py-2 rounded-none font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
-                  active ? 'bg-gold text-navy' : 'text-white/65 hover:text-white hover:bg-white/[.07]'
+                  active ? 'bg-gold text-navy' : 'text-white/75 hover:text-white hover:bg-white/[.07]'
                 }`}
               >
                 {link.label}
@@ -93,13 +93,13 @@ export default function DashboardNav({
         <div className="flex items-center gap-3.5">
           <Link
             href="/dashboard/settings"
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/45 hover:text-white transition-colors hidden sm:block"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block"
           >
             Settings
           </Link>
           <Link
             href="/support"
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/45 hover:text-white transition-colors hidden sm:block"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block"
           >
             Support
           </Link>
@@ -153,7 +153,7 @@ export default function DashboardNav({
 
           <button
             onClick={handleLogout}
-            className="hidden md:block font-condensed font-bold text-xs uppercase tracking-wide text-white/45 hover:text-gold-light transition-colors"
+            className="hidden md:block font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-gold-light transition-colors"
           >
             Log out
           </button>
