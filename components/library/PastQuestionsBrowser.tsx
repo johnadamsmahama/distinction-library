@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import FilterSelect from './FilterSelect';
 
 type Paper = {
   id: string;
@@ -57,35 +58,6 @@ async function downloadFile(url: string, filename: string) {
   }
 }
 
-function FilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="relative w-full">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full appearance-none cursor-pointer rounded-none pl-2 pr-5 py-[6px] font-bold uppercase tracking-wide outline-none ${mono}`}
-        style={{ fontSize: 8.5, background: LIB_CARD, border: `1.5px solid ${LIB_INK}33`, color: LIB_INK }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ fontSize: 8, color: LIB_INK_SOFT }}>
-        ▾
-      </div>
-    </div>
-  );
-}
 
 /* ── The pulled-drawer catalog card ── */
 function CatalogCard({ paper }: { paper: Paper }) {
@@ -247,7 +219,7 @@ export default function PastQuestionsBrowser() {
   return (
     <div className="relative" style={{ background: LIB_BG, minHeight: '100vh' }}>
       <div className="max-w-[480px] mx-auto px-4 pt-6 pb-10">
-        <div className={`flex items-center gap-2 mb-4 font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 11, color: LIB_INK }}>
+        <div className={`flex items-center gap-2 mb-4 font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 13, color: LIB_INK }}>
           <a href="/dashboard" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
             <span>←</span>
             <span>Home</span>
@@ -304,11 +276,19 @@ export default function PastQuestionsBrowser() {
             value={level}
             onChange={setLevel}
             options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+            card={LIB_CARD}
+            border={`${LIB_INK}66`}
+            text={LIB_INK}
+            fontClassName={mono}
           />
           <FilterSelect
             value={courseId}
             onChange={setCourseId}
             options={[{ value: '', label: 'All Courses' }, ...filteredCourseOptions.map((c) => ({ value: c.id, label: c.code }))]}
+            card={LIB_CARD}
+            border={`${LIB_INK}66`}
+            text={LIB_INK}
+            fontClassName={mono}
           />
           <FilterSelect
             value={examType}
@@ -318,6 +298,10 @@ export default function PastQuestionsBrowser() {
               { value: 'mid_semester', label: 'Mid-Sem' },
               { value: 'end_of_semester', label: 'End of Sem' },
             ]}
+            card={LIB_CARD}
+            border={`${LIB_INK}66`}
+            text={LIB_INK}
+            fontClassName={mono}
           />
         </div>
 
