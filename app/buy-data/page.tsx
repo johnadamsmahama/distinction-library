@@ -39,6 +39,12 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 6,
 };
 
+// Every unselected button/border on this dark page used to be a different,
+// barely-visible white opacity (0.03 to 0.2, chosen inconsistently spot by
+// spot). One shared value here means a future contrast fix is a one-line
+// change instead of hunting through the file again.
+const FAINT_BORDER = "rgba(255,255,255,0.28)";
+
 const POLL_INTERVAL_MS = 4000;
 const POLL_TIMEOUT_MS = 3 * 60 * 1000; // stop polling after 3 minutes
 
@@ -52,9 +58,8 @@ export default function BuyDataPage() {
   const [recipient, setRecipient] = useState<"me" | "other">("me");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [prices, setPrices] = useState<Record<string, number>>({});
+  const [markups, setMarkups] = useState<Record<string, number>>({});
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
-  const [pendingAuthUrl, setPendingAuthUrl] = useState<string | null>(null);
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollDeadline = useRef<number>(0);
@@ -62,7 +67,7 @@ export default function BuyDataPage() {
   useEffect(() => {
     fetch("/api/data/markup")
       .then((res) => res.json())
-      .then((json) => setPrices(json.prices || {}))
+      .then((json) => setMarkups(json.markups || {}))
       .catch(() => {});
   }, []);
 
@@ -90,16 +95,12 @@ export default function BuyDataPage() {
 
   const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
-  function displayPrice(plan: Plan): number | null {
-    if (!network) return null;
+  function displayPrice(plan: Plan): number {
+    if (!network) return parseFloat(plan.price);
     const notifyNetwork = NOTIFY_NETWORK[network];
-    const key = `${notifyNetwork}:${plan.package_id}`;
-    return prices[key] ?? null;
+    const markup = markups[notifyNetwork] ?? 0;
+    return parseFloat(plan.price) + markup;
   }
-
-  // Only show packages that actually have a price set — an unset price
-  // means we can't safely charge for it yet.
-  const purchasablePlans = plans.filter((p) => displayPrice(p) !== null);
 
   function startPolling(reference: string) {
     if (pollTimer.current) clearInterval(pollTimer.current);
@@ -166,16 +167,16 @@ export default function BuyDataPage() {
 
       // Open the payment page in a new tab so this page stays alive to
       // track the order — Notify's checkout doesn't redirect back to us.
-      // Mobile browsers often block this since it happens after an await,
-      // so we keep the URL around for a manual "Open payment page" button.
       const paymentWindow = window.open(json.authorizationUrl, "_blank");
-      setPendingAuthUrl(json.authorizationUrl);
 
       setOrder({ phase: "waiting", reference: json.reference });
       startPolling(json.reference);
 
-      if (!paymentWindow || paymentWindow.closed) {
-        setError("popup_blocked");
+      if (!paymentWindow) {
+        // Popup blocked — give the buyer a manual link instead of silently failing.
+        setError(
+          "Your browser blocked the payment popup. Tap the button below to open it manually."
+        );
       }
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
@@ -187,15 +188,8 @@ export default function BuyDataPage() {
     if (pollTimer.current) clearInterval(pollTimer.current);
     setOrder({ phase: "idle" });
     setError(null);
-    setPendingAuthUrl(null);
     setSelectedPlan(null);
     setPhone("");
-  }
-
-  function handleOpenPaymentManually() {
-    if (pendingAuthUrl) {
-      window.open(pendingAuthUrl, "_blank");
-    }
   }
 
   const showForm = order.phase === "idle" || order.phase === "starting";
@@ -240,57 +234,29 @@ export default function BuyDataPage() {
             <div
               style={{
                 background: "rgba(255,255,255,0.05)",
-                border: "1.5px solid rgba(255,255,255,0.1)",
+                border: `1.5px solid ${FAINT_BORDER}`,
                 padding: 20,
                 textAlign: "center",
                 marginBottom: 16,
               }}
             >
-              {error === "popup_blocked" ? (
-                <>
-                  <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 10px" }}>
-                    Your browser blocked the payment page
-                  </p>
-                  <p style={{ color: "#8fa0c8", fontSize: 12, margin: "0 0 16px" }}>
-                    Tap below to open it manually. This page will keep checking for your payment automatically.
-                  </p>
-                  <button
-                    onClick={handleOpenPaymentManually}
-                    style={{
-                      background: "#C9A843",
-                      color: "#0f1f45",
-                      border: "none",
-                      padding: "10px 20px",
-                      fontWeight: 700,
-                      fontSize: 13,
-                      cursor: "pointer",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Open payment page
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      margin: "0 auto 14px",
-                      border: "3px solid rgba(201,168,67,0.25)",
-                      borderTopColor: "#C9A843",
-                      borderRadius: "50%",
-                      animation: "buyDataSpin 0.8s linear infinite",
-                    }}
-                  />
-                  <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
-                    Waiting for your payment...
-                  </p>
-                  <p style={{ color: "#8fa0c8", fontSize: 12, margin: 0 }}>
-                    Complete payment in the tab that opened. This page will update automatically.
-                  </p>
-                </>
-              )}
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  margin: "0 auto 14px",
+                  border: "3px solid rgba(201,168,67,0.25)",
+                  borderTopColor: "#C9A843",
+                  borderRadius: "50%",
+                  animation: "buyDataSpin 0.8s linear infinite",
+                }}
+              />
+              <p style={{ color: "#fff", fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
+                Waiting for your payment...
+              </p>
+              <p style={{ color: "#8fa0c8", fontSize: 12, margin: 0 }}>
+                Complete payment in the tab that opened. This page will update automatically.
+              </p>
               <p style={{ color: "#5a6f9a", fontSize: 11, marginTop: 10 }}>
                 Reference: {order.reference}
               </p>
@@ -374,7 +340,7 @@ export default function BuyDataPage() {
                       alignItems: "center",
                       gap: 14,
                       background: network === net.key ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                      border: network === net.key ? `1.5px solid ${net.color}` : "1.5px solid rgba(255,255,255,0.07)",
+                      border: network === net.key ? `1.5px solid ${net.color}` : `1.5px solid ${FAINT_BORDER}`,
                       borderRadius: 0,
                       padding: "clamp(7px, 1.4vh, 11px) 16px",
                       cursor: "pointer",
@@ -408,7 +374,7 @@ export default function BuyDataPage() {
                         height: 20,
                         borderRadius: "50%",
                         flexShrink: 0,
-                        border: network === net.key ? "none" : "1.5px solid rgba(255,255,255,0.2)",
+                        border: network === net.key ? "none" : `1.5px solid ${FAINT_BORDER}`,
                         background: network === net.key ? net.color : "transparent",
                         display: "flex",
                         alignItems: "center",
@@ -430,10 +396,9 @@ export default function BuyDataPage() {
                     <p style={{ color: "#8fa0c8", fontSize: 13, marginBottom: 16 }}>Loading plans...</p>
                   )}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "clamp(10px, 2vh, 18px)" }}>
-                    {purchasablePlans.map((plan) => {
+                    {plans.map((plan) => {
                       const active = selectedPlan?.package_id === plan.package_id;
                       const netMeta = NETWORKS.find((n) => n.key === network)!;
-                      const price = displayPrice(plan)!;
                       return (
                         <button
                           key={plan.package_id}
@@ -441,25 +406,20 @@ export default function BuyDataPage() {
                           style={{
                             textAlign: "left",
                             background: active ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                            border: active ? `1.5px solid ${netMeta.color}` : "1.5px solid rgba(255,255,255,0.07)",
+                            border: active ? `1.5px solid ${netMeta.color}` : `1.5px solid ${FAINT_BORDER}`,
                             borderRadius: 0,
                             padding: "10px 12px",
                             cursor: "pointer",
                           }}
                         >
-                          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}GB</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{plan.gig_size}</div>
                           <div style={{ fontSize: 11, color: "#8fa0c8" }}>
-                            {plan.validity ? `${plan.validity} · ` : ""}GH₵{price.toFixed(2)}
+                            {plan.validity ? `${plan.validity} · ` : ""}GH₵{displayPrice(plan).toFixed(2)}
                           </div>
                         </button>
                       );
                     })}
                   </div>
-                  {!plansLoading && purchasablePlans.length === 0 && (
-                    <p style={{ color: "#8fa0c8", fontSize: 13, marginBottom: 16 }}>
-                      No packages are available for this network right now.
-                    </p>
-                  )}
                 </>
               )}
 
@@ -472,7 +432,7 @@ export default function BuyDataPage() {
                       style={{
                         flex: 1,
                         background: recipient === "me" ? "rgba(255,255,255,0.08)" : "transparent",
-                        border: recipient === "me" ? "1.5px solid #C9A843" : "1.5px solid rgba(255,255,255,0.15)",
+                        border: recipient === "me" ? "1.5px solid #C9A843" : `1.5px solid ${FAINT_BORDER}`,
                         borderRadius: 0,
                         padding: "10px",
                         color: "#fff",
@@ -487,7 +447,7 @@ export default function BuyDataPage() {
                       style={{
                         flex: 1,
                         background: recipient === "other" ? "rgba(255,255,255,0.08)" : "transparent",
-                        border: recipient === "other" ? "1.5px solid #C9A843" : "1.5px solid rgba(255,255,255,0.15)",
+                        border: recipient === "other" ? "1.5px solid #C9A843" : `1.5px solid ${FAINT_BORDER}`,
                         borderRadius: 0,
                         padding: "10px",
                         color: "#fff",
@@ -501,14 +461,14 @@ export default function BuyDataPage() {
 
                   <div style={{ marginBottom: 16 }}>
                     <label style={labelStyle}>Phone number</label>
-                    <div style={{ display: "flex", border: "1.5px solid rgba(255,255,255,0.08)", borderRadius: 0, overflow: "hidden" }}>
+                    <div style={{ display: "flex", border: `1.5px solid ${FAINT_BORDER}`, borderRadius: 0, overflow: "hidden" }}>
                       <span
                         style={{
                           background: "rgba(255,255,255,0.05)",
                           padding: "10px 12px",
                           fontSize: 13,
                           color: "#8fa0c8",
-                          borderRight: "1.5px solid rgba(255,255,255,0.08)",
+                          borderRight: `1.5px solid ${FAINT_BORDER}`,
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -531,19 +491,19 @@ export default function BuyDataPage() {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "baseline",
-                    borderTop: "1px solid rgba(255,255,255,0.1)",
+                    borderTop: `1px solid ${FAINT_BORDER}`,
                     paddingTop: 12,
                     marginBottom: 16,
                   }}
                 >
                   <span style={{ fontSize: 12, color: "#5a6f9a", textTransform: "uppercase", letterSpacing: 1.5 }}>Total</span>
                   <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                    GH₵{(displayPrice(selectedPlan) ?? 0).toFixed(2)}
+                    GH₵{displayPrice(selectedPlan).toFixed(2)}
                   </span>
                 </div>
               )}
 
-              {error && error !== "popup_blocked" && (
+              {error && (
                 <p style={{ color: "#E30613", fontSize: 12, marginBottom: 10, textAlign: "center" }}>{error}</p>
               )}
 
