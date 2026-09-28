@@ -70,6 +70,7 @@ export default function BuyDataPage() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [markups, setMarkups] = useState<Record<string, number>>({});
+  const [sellingPrices, setSellingPrices] = useState<Record<string, Record<number, number>>>({});
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -79,6 +80,13 @@ export default function BuyDataPage() {
     fetch("/api/data/markup")
       .then((res) => res.json())
       .then((json) => setMarkups(json.markups || {}))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/data/prices")
+      .then((res) => res.json())
+      .then((json) => setSellingPrices(json.prices || {}))
       .catch(() => {});
   }, []);
 
@@ -120,8 +128,19 @@ export default function BuyDataPage() {
   function displayPrice(plan: Plan): number {
     if (!network) return parseFloat(plan.price);
     const notifyNetwork = NOTIFY_NETWORK[network];
+    const ours = sellingPrices[notifyNetwork]?.[plan.package_id];
+    if (ours !== undefined) return ours;
+    // Fallback for a package we haven't priced in data_package_prices yet —
+    // better to show something than nothing, but this should be rare.
     const markup = markups[notifyNetwork] ?? 0;
     return parseFloat(plan.price) + markup;
+  }
+
+  // Notify's gig_size field is inconsistent about whether it already
+  // includes a unit — this guarantees "GB" shows exactly once.
+  function formatGigSize(gigSize: string): string {
+    const trimmed = gigSize.trim();
+    return /gb\s*$/i.test(trimmed) ? trimmed : `${trimmed}GB`;
   }
 
   function startPolling(reference: string) {
@@ -450,7 +469,7 @@ export default function BuyDataPage() {
                             cursor: "pointer",
                           }}
                         >
-                          <div style={{ fontSize: 11.5, fontWeight: 700, color: active ? TEAL_DEEP : CREAM }}>{plan.gig_size}</div>
+                          <div style={{ fontSize: 11.5, fontWeight: 700, color: active ? TEAL_DEEP : CREAM }}>{formatGigSize(plan.gig_size)}</div>
                           <div style={{ fontSize: 7.5, color: active ? TEAL_DEEP : CREAM, opacity: active ? 0.6 : 0.6, marginTop: 2 }}>
                             GH₵{displayPrice(plan).toFixed(2)}
                           </div>
