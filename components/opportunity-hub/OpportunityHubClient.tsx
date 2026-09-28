@@ -106,7 +106,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                   className={`px-3 py-1.5 rounded-none font-condensed text-[11.5px] font-semibold whitespace-nowrap border transition-colors flex-shrink-0 ${
                     active
                       ? 'bg-gold/15 border-gold text-gold'
-                      : 'border-white/10 text-white/45 hover:text-white/70'
+                      : 'border-white/35 text-white/75 hover:text-white'
                   }`}
                 >
                   {f.label}
