@@ -271,7 +271,7 @@ export default function QuizGenerator() {
                     className={`font-mono text-sm px-4 h-full border transition-colors ${
                       numQuestions === n
                         ? 'bg-gold/15 text-gold border-gold/40'
-                        : 'border-white/15 text-white/50 hover:border-gold/30'
+                        : 'border-white/35 text-white/75 hover:border-gold/30'
                     }`}
                   >
                     {n}
@@ -302,7 +302,7 @@ export default function QuizGenerator() {
               <button
                 onClick={saveSession}
                 disabled={saved}
-                className="font-mono text-[10px] text-white/60 border border-white/15 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+                className="font-mono text-[10px] text-white/75 border border-white/35 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
               >
                 {saved ? 'saved ✓' : 'save session'}
               </button>
@@ -342,7 +342,7 @@ export default function QuizGenerator() {
                               ? 'border-red-400/50 bg-red-400/10 text-red-300'
                               : userAnswer === opt
                               ? 'border-gold/50 bg-gold/10 text-white'
-                              : 'border-white/10 text-white/60 hover:border-gold/30'
+                              : 'border-white/35 text-white/75 hover:border-gold/30'
                           }`}
                         >
                           <input
@@ -373,7 +373,7 @@ export default function QuizGenerator() {
                               ? 'border-red-400/50 bg-red-400/10 text-red-300'
                               : userAnswer === opt
                               ? 'bg-gold/15 text-gold border-gold/40'
-                              : 'border-white/15 text-white/50 hover:border-gold/30'
+                              : 'border-white/35 text-white/75 hover:border-gold/30'
                           }`}
                         >
                           {opt}
@@ -414,7 +414,7 @@ export default function QuizGenerator() {
           <div className="border border-gold/25 border-t-0 bg-black/25 p-4 flex gap-2">
             <button
               onClick={startOver}
-              className="font-mono text-xs text-white/60 border border-white/15 px-4 py-2.5 hover:border-gold/50 hover:text-gold transition-colors"
+              className="font-mono text-xs text-white/75 border border-white/35 px-4 py-2.5 hover:border-gold/50 hover:text-gold transition-colors"
             >
               new quiz
             </button>
