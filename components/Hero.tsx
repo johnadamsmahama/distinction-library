@@ -41,7 +41,7 @@ export default function Hero() {
           </a>
           <a
             href="#features"
-            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-none border-[1.5px] border-white/20 hover:border-white/50 hover:-translate-y-0.5 transition-all"
+            className="bg-transparent text-white font-condensed font-bold text-sm px-[25px] py-3 rounded-none border-[1.5px] border-white/35 hover:border-white/50 hover:-translate-y-0.5 transition-all"
           >
             Explore Features
           </a>
