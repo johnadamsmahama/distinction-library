@@ -240,7 +240,7 @@ export default function Companion() {
             <button
               onClick={saveSession}
               disabled={saved}
-              className="font-mono text-[10px] text-white/60 border border-white/15 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
+              className="font-mono text-[10px] text-white/75 border border-white/35 px-3 py-1.5 hover:border-gold/50 hover:text-gold transition-colors disabled:opacity-50"
             >
               {saved ? 'saved ✓' : 'save session'}
             </button>
