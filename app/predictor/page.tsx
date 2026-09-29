@@ -29,7 +29,7 @@ export default async function PredictorLandingPage() {
         html, body { background: #060F1E !important; }
       `}</style>
       <main className="min-h-screen bg-navy-deep text-white">
-      <div className="mx-auto max-w-2xl px-6 py-16">
+      <div className="mx-auto max-w-2xl px-6 pt-6 pb-16">
         <p className="font-condensed text-sm uppercase tracking-widest text-gold">
           Exam Predictor
         </p>
