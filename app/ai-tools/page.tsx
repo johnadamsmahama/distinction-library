@@ -74,11 +74,15 @@ export default async function AiToolsPage() {
 
   return (
     <div>
+      <div className="flex items-center gap-2 mb-4 font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-gold">
+        <span>←</span>
+        <a href="/dashboard" className="hover:opacity-70 transition-opacity">Home</a>
+      </div>
       <div className="font-condensed font-bold text-[10px] uppercase tracking-widest mb-1.5 text-gold">
         Distinction Library Intelligence
       </div>
       <h1 className="font-display font-bold text-2xl text-white mb-1">AI Tools</h1>
-      <p className="font-body text-xs text-white/55 mb-5">
+      <p className="font-body text-xs text-white/70 mb-5">
         AI-powered study help, built on your own material.
       </p>
 
@@ -95,7 +99,7 @@ export default async function AiToolsPage() {
                 }}
               />
               <div
-                className="relative rounded-none p-4 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.25)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
+                className="relative rounded-none p-4 transition-all backdrop-blur-sm overflow-hidden border border-[rgba(212,160,23,0.4)] group-hover:border-gold group-hover:shadow-[0_0_28px_rgba(212,160,23,0.2)]"
                 style={{ backgroundColor: 'rgba(20,33,61,0.55)' }}
               >
                 <div
@@ -111,7 +115,7 @@ export default async function AiToolsPage() {
                   <Icon />
                 </div>
                 <h2 className="relative font-display font-bold text-base text-white mb-1">{tool.title}</h2>
-                <p className="relative font-body text-xs text-white/60 leading-snug">{tool.desc}</p>
+                <p className="relative font-body text-xs text-white/75 leading-snug">{tool.desc}</p>
               </div>
             </a>
           );
