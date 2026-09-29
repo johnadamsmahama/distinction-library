@@ -54,7 +54,11 @@ export default async function PredictorPage({ params }: PageProps) {
   const items: RankedItem[] = prediction?.ranked_items ?? [];
 
   return (
-    <main className="min-h-screen bg-navy-deep text-white">
+    <>
+      <style>{`
+        html, body { background: #060F1E !important; }
+      `}</style>
+      <main className="min-h-screen bg-navy-deep text-white">
       <div className="mx-auto max-w-2xl px-6 py-16">
         {/* Header */}
         <p className="font-condensed text-sm uppercase tracking-widest text-gold">
@@ -153,5 +157,6 @@ export default async function PredictorPage({ params }: PageProps) {
         )}
       </div>
     </main>
+    </>
   );
 }
