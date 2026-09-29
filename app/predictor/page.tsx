@@ -24,7 +24,11 @@ export default async function PredictorLandingPage() {
     .order("code", { ascending: true });
 
   return (
-    <main className="min-h-screen bg-navy-deep text-white">
+    <>
+      <style>{`
+        html, body { background: #060F1E !important; }
+      `}</style>
+      <main className="min-h-screen bg-navy-deep text-white">
       <div className="mx-auto max-w-2xl px-6 py-16">
         <p className="font-condensed text-sm uppercase tracking-widest text-gold">
           Exam Predictor
@@ -51,5 +55,6 @@ export default async function PredictorLandingPage() {
         )}
       </div>
     </main>
+    </>
   );
 }
