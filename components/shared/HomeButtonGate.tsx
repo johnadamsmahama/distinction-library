@@ -47,7 +47,20 @@ const ESSENTIALS_ALIASES = ['tutors'];
 // Pages with their own full-bleed design that builds Home/Library
 // navigation directly into the page itself — the global breadcrumb bar
 // would otherwise sit on top of it on the default light background.
-const SELF_NAV_PAGES = ['/papers/upload', '/papers/upload/lecture-slides', '/papers/upload/past-papers', '/library', '/library/past-questions'];
+const SELF_NAV_PAGES = [
+  '/papers/upload',
+  '/papers/upload/lecture-slides',
+  '/papers/upload/past-papers',
+  '/library',
+  '/library/past-questions',
+  // These three AI Tools pages have a dark navy background — the global
+  // breadcrumb below is text-navy, meant for light backgrounds, so it was
+  // rendering dark text on a dark background. Same fix as /library/past-questions:
+  // opt out here, build a light-colored crumb into each page directly.
+  '/ai-tools/companion',
+  '/ai-tools/quiz-generator',
+  '/ai-tools/presentation-kit',
+];
 
 export default function HomeButtonGate() {
   const pathname = usePathname();
