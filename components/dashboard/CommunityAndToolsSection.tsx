@@ -1,7 +1,14 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 
-const WHATSAPP_URL = 'https://chat.whatsapp.com/IbMtGP4aNvY6QGPDUQQDvV?s=cl&p=a&ilr=0&amv=1';
 const CLASSROOM_URL = 'https://classroom.google.com/c/ODU4NjYwODEwMDYw?cjc=h4sud6b4';
+
+const WHATSAPP_GROUPS = [
+  { label: 'MAHAMACARES [LVL100s]', url: 'https://chat.whatsapp.com/H5LVXzYTQNfJBkyLGBNCOe' },
+  { label: 'MAHAMACARES [LVL 200s]', url: 'https://chat.whatsapp.com/IbMtGP4aNvY6QGPDUQQDvV' },
+];
 
 function SignalBarsIcon() {
   return (
@@ -33,6 +40,8 @@ function WhatsAppIcon() {
 }
 
 export default function CommunityAndToolsSection() {
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
+
   return (
     <div className="space-y-12">
 
@@ -100,11 +109,10 @@ export default function CommunityAndToolsSection() {
             </div>
           </a>
 
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-[66px] right-0 z-[3] w-[62%] bg-[#F6F1E3] p-4 block"
+          <button
+            type="button"
+            onClick={() => setShowGroupPicker(true)}
+            className="absolute top-[66px] right-0 z-[3] w-[62%] bg-[#F6F1E3] p-4 block text-left"
             style={{ transform: 'rotate(6deg)', boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
           >
             <span
@@ -124,9 +132,52 @@ export default function CommunityAndToolsSection() {
                 <span className="block font-[family-name:var(--font-courier-prime)] text-[8.5px] text-g600">Tutorials &amp; campus updates</span>
               </div>
             </div>
-          </a>
+          </button>
         </div>
       </div>
+
+      {showGroupPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-4 pb-4 sm:pb-0"
+          onClick={() => setShowGroupPicker(false)}
+        >
+          <div
+            className="w-full sm:max-w-[380px] bg-[#F6F1E3] rounded-t-2xl sm:rounded-2xl p-5 pb-[calc(20px+env(safe-area-inset-bottom))]"
+            style={{ boxShadow: '0 -8px 30px rgba(23,35,63,0.35)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-display font-black text-[19px] text-navy-deep m-0">Choose your group</h4>
+              <button
+                type="button"
+                onClick={() => setShowGroupPicker(false)}
+                aria-label="Close"
+                className="text-g600 text-[22px] leading-none px-1"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {WHATSAPP_GROUPS.map((group) => (
+                <a
+                  key={group.url}
+                  href={group.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setShowGroupPicker(false)}
+                  className="flex items-center gap-3 bg-white/60 hover:bg-white rounded-xl px-4 py-3.5 transition-colors"
+                >
+                  <div className="w-[34px] h-[34px] flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB] rounded-md">
+                    <WhatsAppIcon />
+                  </div>
+                  <span className="font-condensed font-bold text-[14px] text-navy-deep">{group.label}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
