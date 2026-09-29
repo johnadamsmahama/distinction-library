@@ -12,7 +12,11 @@ export default function AuthShell({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-navy-deep px-7 py-16">
+    <>
+      <style>{`
+        html, body { background: #060F1E !important; }
+      `}</style>
+      <div className="min-h-screen flex items-center justify-center bg-navy-deep px-7 py-16">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -56,6 +60,7 @@ export default function AuthShell({
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
