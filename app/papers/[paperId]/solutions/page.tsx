@@ -19,16 +19,21 @@ export default async function SolutionsPage({
 
   if (!paper) {
     return (
-      <div
-        style={{
-          backgroundImage:
-            'radial-gradient(120% 60% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
-          minHeight: '100vh',
-        }}
-        className="px-4 sm:px-6 lg:px-8 pt-10"
-      >
-        <div className="text-off-white/60 font-body text-sm">Paper not found.</div>
-      </div>
+      <>
+        <style>{`
+          html, body { background: #060F1E !important; }
+        `}</style>
+        <div
+          style={{
+            backgroundImage:
+              'radial-gradient(120% 60% at 50% 0%, #0F2244 0%, #0D2B5E 45%, #060F1E 100%)',
+            minHeight: '100vh',
+          }}
+          className="px-4 sm:px-6 lg:px-8 pt-10"
+        >
+          <div className="text-off-white/60 font-body text-sm">Paper not found.</div>
+        </div>
+      </>
     );
   }
 
