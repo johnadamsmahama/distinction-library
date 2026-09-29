@@ -69,25 +69,19 @@ export default function BuyDataPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [markups, setMarkups] = useState<Record<string, number>>({});
   const [sellingPrices, setSellingPrices] = useState<Record<string, Record<number, number>>>({});
+  const [pricesLoaded, setPricesLoaded] = useState(false);
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
 
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollDeadline = useRef<number>(0);
 
   useEffect(() => {
-    fetch("/api/data/markup")
-      .then((res) => res.json())
-      .then((json) => setMarkups(json.markups || {}))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
     fetch("/api/data/prices")
       .then((res) => res.json())
       .then((json) => setSellingPrices(json.prices || {}))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setPricesLoaded(true));
   }, []);
 
   // Fetch all three networks' plans in parallel as soon as the page loads,
@@ -121,20 +115,23 @@ export default function BuyDataPage() {
     };
   }, []);
 
-  const plans = network ? plansByNetwork[network] ?? [] : [];
+  const allPlansForNetwork = network ? plansByNetwork[network] ?? [] : [];
   const plansPending = !!network && !(network in plansByNetwork);
-  const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
-  function displayPrice(plan: Plan): number {
-    if (!network) return parseFloat(plan.price);
+  // A package only appears once we actually have a real saved price for
+  // it — never an estimate. If a new package shows up from Notify before
+  // we've priced it, it simply stays invisible until it's priced, rather
+  // than showing a guessed price that the backend would then reject anyway.
+  function displayPrice(plan: Plan): number | null {
+    if (!network) return null;
     const notifyNetwork = NOTIFY_NETWORK[network];
-    const ours = sellingPrices[notifyNetwork]?.[plan.package_id];
-    if (ours !== undefined) return ours;
-    // Fallback for a package we haven't priced in data_package_prices yet —
-    // better to show something than nothing, but this should be rare.
-    const markup = markups[notifyNetwork] ?? 0;
-    return parseFloat(plan.price) + markup;
+    const price = sellingPrices[notifyNetwork]?.[plan.package_id];
+    return price !== undefined ? price : null;
   }
+
+  const plans = allPlansForNetwork.filter((p) => displayPrice(p) !== null);
+
+  const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
   // Notify's gig_size field is inconsistent about whether it already
   // includes a unit — this guarantees "GB" shows exactly once.
@@ -447,15 +444,20 @@ export default function BuyDataPage() {
               {network && (
                 <>
                   <p style={labelStyle}>Select plan</p>
-                  {plansPending && plans.length === 0 && (
+                  {(plansPending || !pricesLoaded) && plans.length === 0 && (
                     <p style={{ color: CREAM, opacity: 0.7, fontSize: 12, marginBottom: 12 }}>
                       Fetching {NETWORKS.find((n) => n.key === network)?.label}'s plans...
+                    </p>
+                  )}
+                  {!plansPending && pricesLoaded && plans.length === 0 && (
+                    <p style={{ color: CREAM, opacity: 0.7, fontSize: 12, marginBottom: 12 }}>
+                      No packages are available for this network right now.
                     </p>
                   )}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6, marginBottom: "clamp(10px, 2vh, 18px)" }}>
                     {plans.map((plan) => {
                       const active = selectedPlan?.package_id === plan.package_id;
-                      const netMeta = NETWORKS.find((n) => n.key === network)!;
+                      const price = displayPrice(plan)!;
                       return (
                         <button
                           key={plan.package_id}
@@ -470,8 +472,8 @@ export default function BuyDataPage() {
                           }}
                         >
                           <div style={{ fontSize: 11.5, fontWeight: 700, color: active ? TEAL_DEEP : CREAM }}>{formatGigSize(plan.gig_size)}</div>
-                          <div style={{ fontSize: 7.5, color: active ? TEAL_DEEP : CREAM, opacity: active ? 0.6 : 0.6, marginTop: 2 }}>
-                            GH₵{displayPrice(plan).toFixed(2)}
+                          <div style={{ fontSize: 7.5, color: active ? TEAL_DEEP : CREAM, opacity: 0.6, marginTop: 2 }}>
+                            GH₵{price.toFixed(2)}
                           </div>
                         </button>
                       );
@@ -523,7 +525,7 @@ export default function BuyDataPage() {
                 >
                   <span style={{ fontSize: 12, color: CREAM, opacity: 0.7, textTransform: "uppercase", letterSpacing: 1.5 }}>Total</span>
                   <span style={{ fontSize: 20, fontWeight: 800, color: CREAM }}>
-                    GH₵{displayPrice(selectedPlan).toFixed(2)}
+                    GH₵{(displayPrice(selectedPlan) ?? 0).toFixed(2)}
                   </span>
                 </div>
               )}
