@@ -31,7 +31,11 @@ export default async function AiToolsLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="relative overflow-hidden min-h-screen bg-gradient-to-b from-navy to-navy-deep">
+    <>
+      <style>{`
+        html, body { background: #060F1E !important; }
+      `}</style>
+      <div className="relative overflow-hidden min-h-screen bg-gradient-to-b from-navy to-navy-deep">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -47,5 +51,6 @@ export default async function AiToolsLayout({ children }: { children: React.Reac
         </div>
       </div>
     </div>
+    </>
   );
 }
