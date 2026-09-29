@@ -113,7 +113,7 @@ export default function Companion() {
             className={`font-mono text-[11px] px-3.5 py-2 flex items-center gap-1.5 relative ${
               mode === t.id
                 ? 'text-gold border border-gold/40 border-b-transparent bg-navy-deep top-px'
-                : 'text-white/40 border border-transparent hover:text-white/70'
+                : 'text-gold/50 border border-transparent hover:text-gold/80'
             }`}
           >
             {t.label}
