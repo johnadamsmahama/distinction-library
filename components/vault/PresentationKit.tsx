@@ -264,7 +264,7 @@ export default function PresentationKit() {
                 className={`font-mono text-[11px] px-3.5 py-2 relative ${
                   source === t.id
                     ? 'text-gold border border-gold/40 border-b-transparent bg-navy-deep top-px'
-                    : 'text-gold/50 border border-transparent hover:text-gold/80'
+                    : 'text-gold border border-transparent hover:border-gold/25'
                 }`}
               >
                 {t.label}
