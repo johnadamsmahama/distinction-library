@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import BackLink from '@/components/shared/BackLink';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 type SolvedQuestion = {
@@ -120,7 +120,11 @@ export default function SolvePaperView({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#e2ddc9' }} className="py-3 px-3 sm:py-6 sm:px-4">
+    <>
+      <style>{`
+        html, body { background: #e2ddc9 !important; }
+      `}</style>
+      <div style={{ minHeight: '100vh', background: '#e2ddc9' }} className="py-3 px-3 sm:py-6 sm:px-4">
       <div
         className="max-w-content mx-auto"
         style={{
@@ -156,6 +160,7 @@ export default function SolvePaperView({
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -174,7 +179,13 @@ function PaperHeader({
 }) {
   return (
     <div style={{ background: '#fdfbf6', borderBottom: '2px solid #0F2244' }} className="px-5 sm:px-8 pt-5 pb-4">
-      <BackLink href="/papers" label="Library" className="py-1" />
+      <Link
+        href="/papers"
+        style={{ color: '#0F2244' }}
+        className="font-condensed text-[13px] font-bold uppercase tracking-[0.08em] hover:opacity-70 transition-opacity inline-block py-1"
+      >
+        ← Library
+      </Link>
 
       <div className="flex items-start justify-between mt-3.5 gap-3">
         <div>
