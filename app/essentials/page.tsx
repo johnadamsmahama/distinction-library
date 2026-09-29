@@ -56,20 +56,26 @@ export default async function SuccessCentrePage() {
   if (!user) redirect('/login');
 
   return (
-    <div
-      className="-mx-5 sm:-mx-7 -my-8 px-5 sm:px-7 py-8 min-h-[calc(100vh-1px)]"
-      style={{
-        backgroundColor: '#C7B892',
-        backgroundImage:
-          'linear-gradient(rgba(74,59,34,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(74,59,34,0.08) 1px, transparent 1px)',
-        backgroundSize: '14px 14px',
-      }}
-    >
-      <div className="font-condensed font-extrabold text-[11px] uppercase tracking-wide text-[#2F4A3D] mb-1">
+    <>
+      {/* Fixed to the viewport rather than the page flow, so this covers
+          the whole screen — including behind HomeButtonGate, which AppShell
+          renders as a sibling before this component, not inside it — no
+          margin trick on our own div could ever reach that area. */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundColor: '#C7B892',
+          backgroundImage:
+            'linear-gradient(rgba(74,59,34,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(74,59,34,0.08) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+        }}
+      />
+
+      <div className="font-condensed font-extrabold text-[11px] uppercase tracking-wide text-navy mb-1">
         Support Beyond The Study Materials
       </div>
-      <h1 className="font-display font-black text-2xl text-[#1E2A1F] mb-1">Essentials</h1>
-      <p className="font-body text-sm text-[#4A3B22] mb-6 max-w-md">
+      <h1 className="font-display font-black text-2xl text-navy mb-1">Essentials</h1>
+      <p className="font-body text-sm text-g600 mb-6 max-w-md">
         Mentors, career tools, and opportunities — everything outside the library.
       </p>
 
@@ -78,17 +84,17 @@ export default async function SuccessCentrePage() {
           <Link
             key={item.href}
             href={item.href}
-            className="group relative bg-[#FDFCF7] border-[1.5px] border-[#2F4A3D] rounded-none p-6 min-h-[210px] shadow-[0_6px_14px_rgba(58,36,16,0.18)] hover:-translate-y-0.5 transition-transform"
+            className="group relative bg-off-white border-[1.5px] border-navy rounded-none p-6 min-h-[210px] shadow-[0_6px_14px_rgba(58,36,16,0.18)] hover:-translate-y-0.5 transition-transform"
           >
-            <div className="relative w-11 h-11 border-2 border-[#2F4A3D] flex items-center justify-center text-[#2F4A3D] mb-4 -rotate-[9deg] group-hover:bg-[#2F4A3D] group-hover:text-[#FDFCF7] transition-colors">
-              <span className="absolute inset-[4px] border border-[#2F4A3D]/40 pointer-events-none" />
+            <div className="relative w-11 h-11 border-2 border-navy flex items-center justify-center text-navy mb-4 -rotate-[9deg] group-hover:bg-navy group-hover:text-off-white transition-colors">
+              <span className="absolute inset-[4px] border border-navy/40 pointer-events-none" />
               <span className="relative z-10 rotate-[9deg] flex items-center justify-center">{item.icon}</span>
             </div>
-            <h2 className="font-display font-bold text-lg text-[#2F4A3D] mb-1.5">{item.title}</h2>
-            <p className="font-body text-sm text-[#5A6E5C]">{item.desc}</p>
+            <h2 className="font-display font-bold text-lg text-navy mb-1.5">{item.title}</h2>
+            <p className="font-body text-sm text-g600">{item.desc}</p>
           </Link>
         ))}
       </div>
-    </div>
+    </>
   );
 }
