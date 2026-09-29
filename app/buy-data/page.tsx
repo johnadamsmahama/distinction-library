@@ -20,7 +20,7 @@ const NOTIFY_NETWORK: Record<string, string> = {
 
 type Plan = {
   package_id: number;
-  gig_size: string;
+  gig_size: string | number;
   price: string;
   validity?: string;
 };
@@ -133,10 +133,11 @@ export default function BuyDataPage() {
 
   const canSubmit = !!network && !!selectedPlan && /^0[2-9]\d{8}$/.test(phone.trim());
 
-  // Notify's gig_size field is inconsistent about whether it already
-  // includes a unit — this guarantees "GB" shows exactly once.
-  function formatGigSize(gigSize: string): string {
-    const trimmed = gigSize.trim();
+  // Notify's gig_size field is sometimes a plain number (1, 10) and
+  // sometimes a string that may already include "GB" — this guarantees
+  // "GB" shows exactly once regardless of which one comes back.
+  function formatGigSize(gigSize: string | number): string {
+    const trimmed = String(gigSize).trim();
     return /gb\s*$/i.test(trimmed) ? trimmed : `${trimmed}GB`;
   }
 
