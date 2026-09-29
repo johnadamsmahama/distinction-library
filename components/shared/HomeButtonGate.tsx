@@ -57,6 +57,7 @@ const SELF_NAV_PAGES = [
   // breadcrumb below is text-navy, meant for light backgrounds, so it was
   // rendering dark text on a dark background. Same fix as /library/past-questions:
   // opt out here, build a light-colored crumb into each page directly.
+  '/ai-tools',
   '/ai-tools/companion',
   '/ai-tools/quiz-generator',
   '/ai-tools/presentation-kit',
