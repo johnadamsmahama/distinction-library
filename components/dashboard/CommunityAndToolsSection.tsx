@@ -6,7 +6,7 @@ import Link from 'next/link';
 const CLASSROOM_URL = 'https://classroom.google.com/c/ODU4NjYwODEwMDYw?cjc=h4sud6b4';
 
 const WHATSAPP_GROUPS = [
-  { label: 'MAHAMACARES [LVL100s]', url: 'https://chat.whatsapp.com/H5LVXzYTQNfJBkyLGBNCOe' },
+  { label: 'MAHAMACARES [LVL 100s]', url: 'https://chat.whatsapp.com/H5LVXzYTQNfJBkyLGBNCOe' },
   { label: 'MAHAMACARES [LVL 200s]', url: 'https://chat.whatsapp.com/IbMtGP4aNvY6QGPDUQQDvV' },
 ];
 
