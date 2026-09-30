@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import BackLink from '@/components/shared/BackLink';
 import { createClient } from '@/lib/supabase/client';
 
 type SolvedQuestion = {
@@ -20,7 +20,7 @@ const PAGE_PADDING = 48;
 const BLOCK_GAP = 24;
 
 const RULED_PAPER =
-  'repeating-linear-gradient(#fffdf7 0px, #fffdf7 27px, #e5e0cf 28px)';
+  'repeating-linear-gradient(#fbf5e6 0px, #fbf5e6 27px, #e3d6b4 28px)';
 
 export default function SolvePaperView({
   paperId,
@@ -120,11 +120,7 @@ export default function SolvePaperView({
   }
 
   return (
-    <>
-      <style>{`
-        html, body { background: #e2ddc9 !important; }
-      `}</style>
-      <div style={{ minHeight: '100vh', background: '#e2ddc9' }} className="py-3 px-3 sm:py-6 sm:px-4">
+    <div style={{ minHeight: '100vh', background: '#e9dfc4' }} className="py-3 px-3 sm:py-6 sm:px-4">
       <div
         className="max-w-content mx-auto"
         style={{
@@ -151,7 +147,7 @@ export default function SolvePaperView({
           {state === 'error' && (
             <div
               style={{ fontFamily: 'Georgia, serif' }}
-              className="text-[13px] text-red-800 border-l-[3px] border-red-800 pl-4 py-2 mb-4"
+              style={{ color: '#8a2e2e', borderColor: '#8a2e2e' }} className="text-[13px] border-l-[3px] pl-4 py-2 mb-4"
             >
               {errorMsg}
             </div>
@@ -160,7 +156,6 @@ export default function SolvePaperView({
         </div>
       </div>
     </div>
-    </>
   );
 }
 
@@ -178,25 +173,19 @@ function PaperHeader({
   solved: boolean;
 }) {
   return (
-    <div style={{ background: '#fdfbf6', borderBottom: '2px solid #0F2244' }} className="px-5 sm:px-8 pt-5 pb-4">
-      <Link
-        href="/papers"
-        style={{ color: '#0F2244' }}
-        className="font-condensed text-[13px] font-bold uppercase tracking-[0.08em] hover:opacity-70 transition-opacity inline-block py-1"
-      >
-        ← Library
-      </Link>
+    <div style={{ background: '#f6efdc', borderBottom: '2px solid #8a2e2e' }} className="px-5 sm:px-8 pt-5 pb-4">
+      <BackLink href="/papers" label="Library" colorClassName="text-[#8a2e2e]" className="py-1" />
 
       <div className="flex items-start justify-between mt-3.5 gap-3">
         <div>
           <div
-            style={{ color: '#8a8570' }}
+            style={{ color: '#8a7a5c' }}
             className="font-condensed font-semibold text-[10px] uppercase tracking-[0.12em]"
           >
             {courseCode} · {courseName.toUpperCase()}
           </div>
           <div
-            style={{ color: '#8a8570' }}
+            style={{ color: '#8a7a5c' }}
             className="font-condensed text-[9.5px] uppercase tracking-[0.1em] mt-1"
           >
             {examType === 'mid_semester' ? 'Mid-Semester Examination' : 'End of Semester Examination'} · {year}
@@ -228,8 +217,8 @@ function PaperHeader({
 function ChromeSpinner({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#0F2244]/25 border-t-[#0F2244] animate-spin" />
-      <div style={{ color: '#6a6a5a' }} className="font-condensed text-[12px] uppercase tracking-wide text-center">
+      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#8a2e2e]/25 border-t-[#8a2e2e] animate-spin" />
+      <div style={{ color: '#7a6a4a' }} className="font-condensed text-[12px] uppercase tracking-wide text-center">
         {label}
       </div>
     </div>
@@ -239,11 +228,11 @@ function ChromeSpinner({ label }: { label: string }) {
 function SolvingState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#0F2244]/25 border-t-[#0F2244] animate-spin" />
-      <div style={{ fontFamily: 'Georgia, serif', color: '#0F2244' }} className="text-lg max-w-sm">
+      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#8a2e2e]/25 border-t-[#8a2e2e] animate-spin" />
+      <div style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-lg max-w-sm">
         Solving this paper for the first time
       </div>
-      <div style={{ color: '#6a6a5a' }} className="font-condensed text-[12px] uppercase tracking-wide max-w-xs">
+      <div style={{ color: '#7a6a4a' }} className="font-condensed text-[12px] uppercase tracking-wide max-w-xs">
         This page will update automatically once it&apos;s ready — no need to refresh.
       </div>
     </div>
@@ -259,17 +248,17 @@ function NotReadyState({
 }) {
   return (
     <div className="flex flex-col items-center text-center py-16 gap-6 max-w-md mx-auto">
-      <div style={{ fontFamily: 'Georgia, serif', color: '#0F2244' }} className="text-lg leading-snug">
+      <div style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-lg leading-snug">
         The Distinction Library Team, in partnership with Distinction Tutors, is currently
         solving this paper.
       </div>
-      <div style={{ color: '#6a6a5a' }} className="font-body text-[13px]">
+      <div style={{ color: '#7a6a4a' }} className="font-body text-[13px]">
         Check back soon.
       </div>
       <button
         onClick={onNotifyMe}
         disabled={notifyState !== 'idle'}
-        style={{ borderRadius: 0, background: '#0F2244', color: '#E2BE5A', border: '1px solid #E2BE5A' }}
+        style={{ borderRadius: 0, background: '#8a2e2e', color: '#f6efdc', border: 'none' }}
         className="font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] px-6 py-3 disabled:opacity-60 transition-colors"
       >
         {notifyState === 'saved' ? 'We\u2019ll notify you' : notifyState === 'saving' ? 'Saving…' : 'Notify me when ready'}
@@ -365,10 +354,10 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
           </div>
 
           <div
-            style={{ borderTop: '1px dashed #b8b09a' }}
+            style={{ borderTop: '1px dashed #b8a878' }}
             className="mt-4 pt-3.5 flex items-center justify-between"
           >
-            <span style={{ fontFamily: 'Georgia, serif', color: '#6a6a5a' }} className="text-[10.5px] italic">
+            <span style={{ fontFamily: 'Georgia, serif', color: '#7a6a4a' }} className="text-[10.5px] italic">
               Solved — reviewed by the Distinction Tutoring Team
             </span>
           </div>
@@ -377,18 +366,18 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
             <button
               onClick={() => setPageIndex((p) => Math.max(p - 1, 0))}
               disabled={pageIndex === 0}
-              style={{ borderRadius: 0, border: '1px solid #0F2244', color: '#0F2244', background: 'transparent' }}
+              style={{ borderRadius: 0, border: '1px solid #8a2e2e', color: '#8a2e2e', background: 'transparent' }}
               className="font-condensed font-semibold text-[10.5px] px-4 py-2 disabled:opacity-30 transition-opacity"
             >
               ← PREV
             </button>
-            <span style={{ fontFamily: 'Georgia, serif', color: '#6a6a5a' }} className="text-[11px] italic">
+            <span style={{ fontFamily: 'Georgia, serif', color: '#7a6a4a' }} className="text-[11px] italic">
               Page {pageIndex + 1} of {totalPages}
             </span>
             <button
               onClick={() => setPageIndex((p) => Math.min(p + 1, totalPages - 1))}
               disabled={pageIndex >= totalPages - 1}
-              style={{ borderRadius: 0, background: '#0F2244', color: '#fdfbf6', border: 'none' }}
+              style={{ borderRadius: 0, background: '#8a2e2e', color: '#f6efdc', border: 'none' }}
               className="font-condensed font-semibold text-[10.5px] px-4 py-2 disabled:opacity-30 transition-opacity"
             >
               NEXT →
@@ -404,20 +393,20 @@ function ScriptBlock({ question }: { question: SolvedQuestion }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <span style={{ fontFamily: 'Georgia, serif', color: '#0F2244' }} className="text-[15px] font-bold">
+        <span style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-[15px] font-bold">
           Question {question.order_index}.
         </span>
         <div className="flex items-center gap-2 shrink-0">
           {question.is_predicted && (
             <span
-              style={{ borderRadius: 0, background: 'rgba(226,190,90,0.18)', border: '1px solid #E2BE5A', color: '#0F2244' }}
+              style={{ borderRadius: 0, background: 'rgba(226,190,90,0.18)', border: '1px solid #E2BE5A', color: '#3a3020' }}
               className="font-condensed font-semibold uppercase tracking-wide text-[9.5px] px-2 py-0.5"
             >
               Predicted
             </span>
           )}
           {question.marks != null && (
-            <span style={{ color: '#8a8570', fontStyle: 'italic' }} className="text-[10.5px]">
+            <span style={{ color: '#8a7a5c', fontStyle: 'italic' }} className="text-[10.5px]">
               [{question.marks} marks]
             </span>
           )}
@@ -425,7 +414,7 @@ function ScriptBlock({ question }: { question: SolvedQuestion }) {
       </div>
 
       <div
-        style={{ fontFamily: 'Georgia, serif', color: '#2a2a2a', lineHeight: '28px' }}
+        style={{ fontFamily: 'Georgia, serif', color: '#2a2418', lineHeight: '28px' }}
         className="text-[13.5px] mt-0.5"
       >
         {question.question_text}
@@ -439,7 +428,7 @@ function ScriptBlock({ question }: { question: SolvedQuestion }) {
           Model answer
         </div>
         <div
-          style={{ fontFamily: 'Georgia, serif', color: '#3a3a3a', lineHeight: '28px' }}
+          style={{ fontFamily: 'Georgia, serif', color: '#4a3f2a', lineHeight: '28px' }}
           className="text-[12.5px] whitespace-pre-wrap"
         >
           {question.answer_text}
