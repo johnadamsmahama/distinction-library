@@ -9,20 +9,26 @@ import Link from 'next/link';
  * Style matches the Home/Library breadcrumb already used across the Library
  * pages: Courier Prime, 13px, bold, uppercase, navy.
  *
- * Use `tone="light"` only on dark backgrounds.
+ * Use `tone="light"` only on dark backgrounds. For a page with its own
+ * established accent color (e.g. Solve Paper's red ink), pass
+ * `colorClassName` to override the tone's default color entirely — this
+ * should stay the exception, not the default, or the whole point of one
+ * shared back-link (one consistent color) erodes page by page.
  */
 export default function BackLink({
   href,
   label,
   tone = 'dark',
+  colorClassName,
   className = '',
 }: {
   href: string;
   label: string;
   tone?: 'dark' | 'light';
+  colorClassName?: string;
   className?: string;
 }) {
-  const color = tone === 'light' ? 'text-white/85' : 'text-navy';
+  const color = colorClassName ?? (tone === 'light' ? 'text-white/85' : 'text-navy');
   return (
     <Link
       href={href}
