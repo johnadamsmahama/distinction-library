@@ -68,6 +68,14 @@ export default function HomeButtonGate() {
   if (pathname === '/dashboard') return null;
   if (SELF_NAV_PAGES.includes(pathname)) return null;
 
+  // /papers/[paperId]/solutions — a dynamic route, so it can't be matched
+  // by exact string in SELF_NAV_PAGES above. It builds its own "Library"
+  // back-link into its header already; without this check, the global
+  // breadcrumb was rendering a second, duplicate "Home / Library" above it.
+  const pathParts = pathname.split('/').filter(Boolean);
+  const isSolvePaperView = pathParts[0] === 'papers' && pathParts[2] === 'solutions';
+  if (isSolvePaperView) return null;
+
   const segments = pathname.split('/').filter(Boolean); // e.g. ['essentials', 'mentors']
   const topSegment = segments[0];
   const section = SECTIONS[topSegment];
