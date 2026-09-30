@@ -146,8 +146,8 @@ export default function SolvePaperView({
           )}
           {state === 'error' && (
             <div
-              style={{ fontFamily: 'Georgia, serif' }}
-              style={{ color: '#8a2e2e', borderColor: '#8a2e2e' }} className="text-[13px] border-l-[3px] pl-4 py-2 mb-4"
+              style={{ fontFamily: 'Georgia, serif', color: '#8a2e2e', borderColor: '#8a2e2e' }}
+              className="text-[13px] border-l-[3px] pl-4 py-2 mb-4"
             >
               {errorMsg}
             </div>
