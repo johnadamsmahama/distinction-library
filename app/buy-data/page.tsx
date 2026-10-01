@@ -58,8 +58,11 @@ const labelStyle: React.CSSProperties = {
 const FAINT_BORDER = "rgba(246,241,227,0.35)";
 const FAINT_FILL = "rgba(246,241,227,0.08)";
 
-const POLL_INTERVAL_MS = 4000;
-const POLL_TIMEOUT_MS = 3 * 60 * 1000; // stop polling after 3 minutes
+const PENDING_ORDER_KEY = "distinctionlibrary_pending_data_order";
+// After returning from payment, check a few times in case the webhook
+// hasn't landed yet, then settle rather than spin forever.
+const RESUME_CHECK_ATTEMPTS = 5;
+const RESUME_CHECK_INTERVAL_MS = 4000;
 
 export default function BuyDataPage() {
   const supabase = createClient();
@@ -72,9 +75,6 @@ export default function BuyDataPage() {
   const [sellingPrices, setSellingPrices] = useState<Record<string, Record<number, number>>>({});
   const [pricesLoaded, setPricesLoaded] = useState(false);
   const [order, setOrder] = useState<OrderState>({ phase: "idle" });
-
-  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollDeadline = useRef<number>(0);
 
   useEffect(() => {
     fetch("/api/data/prices")
@@ -108,11 +108,66 @@ export default function BuyDataPage() {
     setSelectedPlan(null);
   }, [network]);
 
-  // Clean up any running poll when leaving the page.
+  // On page load, check if we're returning from a payment we started
+  // earlier. Notify's checkout doesn't redirect back to us, so the buyer
+  // ends up here by their own action (back button, revisiting the link) —
+  // whenever that happens, pick up where we left off using whatever the
+  // webhook has already recorded, rather than trusting anything client-side.
   useEffect(() => {
-    return () => {
-      if (pollTimer.current) clearInterval(pollTimer.current);
+    const raw = localStorage.getItem(PENDING_ORDER_KEY);
+    if (!raw) return;
+
+    let pending: { reference: string; phone: string };
+    try {
+      pending = JSON.parse(raw);
+    } catch {
+      localStorage.removeItem(PENDING_ORDER_KEY);
+      return;
+    }
+
+    setPhone(pending.phone ?? "");
+    setOrder({ phase: "waiting", reference: pending.reference });
+
+    let attempts = 0;
+    const checkOnce = async () => {
+      attempts += 1;
+      try {
+        const res = await fetch(`/api/data/status/${pending.reference}`);
+        const json = await res.json();
+
+        if (res.ok && (json.status === "delivered" || json.status === "processing")) {
+          localStorage.removeItem(PENDING_ORDER_KEY);
+          setOrder({ phase: "success", reference: pending.reference });
+          return;
+        }
+        if (res.ok && json.status === "failed") {
+          localStorage.removeItem(PENDING_ORDER_KEY);
+          setOrder({
+            phase: "failed",
+            reference: pending.reference,
+            message: "Payment didn't go through. No charge should have been made — please try again.",
+          });
+          return;
+        }
+      } catch {
+        // transient — just try again on the next attempt
+      }
+
+      if (attempts < RESUME_CHECK_ATTEMPTS) {
+        setTimeout(checkOnce, RESUME_CHECK_INTERVAL_MS);
+      } else {
+        // Still not confirmed after several tries — the webhook may just be
+        // slow. Don't leave a spinner running forever; tell them plainly.
+        setOrder({
+          phase: "failed",
+          reference: pending.reference,
+          message: "Still processing — this can take a minute. Your data will arrive shortly even if this page doesn't update; no need to pay again.",
+        });
+        localStorage.removeItem(PENDING_ORDER_KEY);
+      }
     };
+
+    checkOnce();
   }, []);
 
   const allPlansForNetwork = network ? plansByNetwork[network] ?? [] : [];
@@ -141,45 +196,6 @@ export default function BuyDataPage() {
     return /gb\s*$/i.test(trimmed) ? trimmed : `${trimmed}GB`;
   }
 
-  function startPolling(reference: string) {
-    if (pollTimer.current) clearInterval(pollTimer.current);
-    pollDeadline.current = Date.now() + POLL_TIMEOUT_MS;
-
-    pollTimer.current = setInterval(async () => {
-      if (Date.now() > pollDeadline.current) {
-        if (pollTimer.current) clearInterval(pollTimer.current);
-        setOrder({
-          phase: "failed",
-          reference,
-          message: "This is taking longer than expected. Check My Orders shortly, or contact support with your reference.",
-        });
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/data/status/${reference}`);
-        const json = await res.json();
-
-        if (!res.ok) return; // transient error, just try again on the next tick
-
-        if (json.status === "delivered" || json.status === "processing") {
-          if (pollTimer.current) clearInterval(pollTimer.current);
-          setOrder({ phase: "success", reference });
-        } else if (json.status === "failed") {
-          if (pollTimer.current) clearInterval(pollTimer.current);
-          setOrder({
-            phase: "failed",
-            reference,
-            message: "Payment didn't go through. No charge should have been made — please try again.",
-          });
-        }
-        // "pending" — keep polling
-      } catch {
-        // transient network error, just try again on the next tick
-      }
-    }, POLL_INTERVAL_MS);
-  }
-
   async function handlePay() {
     if (!canSubmit || !selectedPlan || !network) return;
     setError(null);
@@ -204,19 +220,15 @@ export default function BuyDataPage() {
         return;
       }
 
-      // Open the payment page in a new tab so this page stays alive to
-      // track the order — Notify's checkout doesn't redirect back to us.
-      const paymentWindow = window.open(json.authorizationUrl, "_blank");
-
-      setOrder({ phase: "waiting", reference: json.reference });
-      startPolling(json.reference);
-
-      if (!paymentWindow) {
-        // Popup blocked — give the buyer a manual link instead of silently failing.
-        setError(
-          "Your browser blocked the payment popup. Tap the button below to open it manually."
-        );
-      }
+      // Save the reference so that whenever the buyer comes back to this
+      // page — back button, revisiting the link, any time — we can pick up
+      // the real result. Then just navigate there directly, same tab,
+      // same as clicking any ordinary link.
+      localStorage.setItem(
+        PENDING_ORDER_KEY,
+        JSON.stringify({ reference: json.reference, phone: phone.trim() })
+      );
+      window.location.href = json.authorizationUrl;
     } catch {
       setError("Couldn't reach the server. Check your connection and try again.");
       setOrder({ phase: "idle" });
@@ -224,7 +236,7 @@ export default function BuyDataPage() {
   }
 
   function handleStartOver() {
-    if (pollTimer.current) clearInterval(pollTimer.current);
+    localStorage.removeItem(PENDING_ORDER_KEY);
     setOrder({ phase: "idle" });
     setError(null);
     setSelectedPlan(null);
@@ -305,10 +317,10 @@ export default function BuyDataPage() {
                 }}
               />
               <p style={{ color: CREAM, fontWeight: 700, fontSize: 15, margin: "0 0 6px" }}>
-                Waiting for your payment...
+                Checking your payment...
               </p>
               <p style={{ color: CREAM, opacity: 0.75, fontSize: 12, margin: 0 }}>
-                Complete payment in the tab that opened. This page will update automatically.
+                This will only take a moment.
               </p>
               <p style={{ color: CREAM, opacity: 0.55, fontSize: 11, marginTop: 10 }}>
                 Reference: {order.reference}
