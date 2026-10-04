@@ -116,6 +116,12 @@ export default function ClassLinkPage() {
           <p className="text-[14px] text-[#6B7A8F] leading-relaxed">
             Thank you. You can close this page now.
           </p>
+          <p className="text-[13px] font-bold text-[#2F3B4C] mt-4">
+            Need help? Call or WhatsApp{' '}
+            <a href="tel:+233248111310" className="text-[#2F5A8A] underline">
+              +233 248 111 310
+            </a>
+          </p>
         </div>
       </div>
     );
@@ -125,8 +131,9 @@ export default function ClassLinkPage() {
     <div className="min-h-screen bg-[#EEF2F7] font-body flex justify-center px-3 py-5">
       <form
         onSubmit={handleSubmit}
-        className="max-w-[420px] w-full self-start bg-white border-t-4 border-[#5B87B8] shadow-[0_2px_12px_rgba(31,53,80,0.08)]"
+        className="cl-form max-w-[420px] w-full self-start bg-white border-t-4 border-[#5B87B8] shadow-[0_2px_12px_rgba(31,53,80,0.08)]"
       >
+        <style>{`.cl-form input, .cl-form textarea, .cl-form select, .cl-form button { border-radius: 0 !important; -webkit-appearance: none; appearance: none; }`}</style>
         <div className="px-5 pt-6 pb-5 border-b border-[#DDE4EE]">
           <h1 className="text-[22px] font-bold text-[#1F3550]">Class group link issues</h1>
           <p className="text-[13px] text-[#6B7A8F] mt-1">Takes about a minute</p>
@@ -249,6 +256,16 @@ export default function ClassLinkPage() {
           >
             {submitting ? 'Submitting…' : 'Submit'}
           </button>
+
+          <div className="border-t border-[#DDE4EE] pt-4 mt-1">
+            <p className="text-[13px] font-extrabold text-[#1F3550] mb-1">Need help?</p>
+            <p className="text-[14px] font-bold text-[#2F3B4C]">
+              Call or WhatsApp{' '}
+              <a href="tel:+233248111310" className="text-[#2F5A8A] underline">
+                +233 248 111 310
+              </a>
+            </p>
+          </div>
         </div>
       </form>
     </div>
