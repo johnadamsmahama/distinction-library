@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client';
 
 type Course = { id: string; code: string; name: string; department: string; level: string };
 
+const FALLBACK_DEPARTMENT = 'Multiple Departments';
+
 export default function CourseManager({ courses: initialCourses }: { courses: Course[] }) {
   const [courses, setCourses] = useState(initialCourses);
   const [code, setCode] = useState('');
@@ -17,15 +19,24 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
   const addCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!code.trim() || !name.trim() || !department.trim()) {
-      setError('Fill in all fields.');
+    // Department is intentionally optional — some courses run across
+    // multiple departments, so leaving it blank is a valid choice, not an
+    // error. It still gets a real, meaningful value either way, since the
+    // public course list groups courses by this field.
+    if (!code.trim() || !name.trim()) {
+      setError('Fill in the course code and name.');
       return;
     }
     setLoading(true);
     const supabase = createClient();
     const { data, error: insertErr } = await supabase
       .from('courses')
-      .insert({ code: code.trim(), name: name.trim(), department: department.trim(), level })
+      .insert({
+        code: code.trim(),
+        name: name.trim(),
+        department: department.trim() || FALLBACK_DEPARTMENT,
+        level,
+      })
       .select()
       .single();
     setLoading(false);
@@ -37,6 +48,7 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
     setCourses((prev) => [...prev, data as Course].sort((a, b) => a.code.localeCompare(b.code)));
     setCode('');
     setName('');
+    setDepartment('');
   };
 
   const removeCourse = async (id: string) => {
@@ -63,8 +75,8 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
           <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className={labelClass}>Department</label>
-          <input value={department} onChange={(e) => setDepartment(e.target.value)} className={inputClass} />
+          <label className={labelClass}>Department <span className="normal-case font-normal text-g600">(optional — leave blank if it spans multiple departments)</span></label>
+          <input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="e.g. Communication Studies" className={inputClass} />
         </div>
         <div>
           <label className={labelClass}>Level</label>
