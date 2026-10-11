@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import crypto from 'crypto';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentProfile, isStaffRole } from '@/lib/auth-helpers';
@@ -37,6 +38,16 @@ const INTERNAL_HEADER = 'x-internal-trigger-secret';
 
 type JobResult = { filename: string; status: string; note: string };
 
+// A previously stored file whose content hash matches the file being
+// processed. Identical content is stored ONCE and linked to every course
+// it belongs to (past_paper_courses / study_material_courses).
+type ExistingFile = {
+  table: 'past_papers' | 'study_materials';
+  id: string;
+  courseId: string | null;
+  status: string | null;
+};
+
 // Supabase storage-js defaults to 'text/plain;charset=UTF-8' when no
 // contentType is passed to .upload() — this went unnoticed while the
 // past-papers/study-materials buckets allowed any mime type, but now that
@@ -59,6 +70,69 @@ function mimeForExt(ext: string | undefined): string {
 
 function hashBuffer(buffer: Buffer): string {
   return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+/**
+ * Identical content was found in the library and the AI has now decided
+ * which course this upload belongs to. Either it's already shown under
+ * that course (skip), or we add a link so the SAME stored file is also
+ * shown under it — nothing is uploaded or stored a second time.
+ * Throws on database errors; the per-file catch records them.
+ */
+async function linkExistingFile(params: {
+  admin: SupabaseClient;
+  existing: ExistingFile;
+  fileName: string;
+  course: { id: string; code: string };
+  originalCode: string | null;
+}): Promise<JobResult> {
+  const { admin, existing, fileName, course, originalCode } = params;
+  const fromLabel = originalCode ? ` under ${originalCode}` : '';
+
+  // Files that were rejected or removed shouldn't be linked anywhere.
+  if (existing.status !== 'approved' && existing.status !== 'pending') {
+    return {
+      filename: fileName,
+      status: 'skipped_duplicate',
+      note: `Identical file exists${fromLabel} but isn't available in the library, so it wasn't added to ${course.code}.`,
+    };
+  }
+
+  const linkTable = existing.table === 'past_papers' ? 'past_paper_courses' : 'study_material_courses';
+  const fkColumn = existing.table === 'past_papers' ? 'past_paper_id' : 'study_material_id';
+
+  const { data: alreadyLinked, error: linkedErr } = await admin
+    .from(linkTable)
+    .select(fkColumn)
+    .eq(fkColumn, existing.id)
+    .eq('course_id', course.id)
+    .limit(1);
+  if (linkedErr) throw new Error(linkedErr.message);
+
+  if (alreadyLinked && alreadyLinked.length > 0) {
+    return {
+      filename: fileName,
+      status: 'skipped_duplicate',
+      note: `Already in the library under ${course.code} (matched by content, not filename).`,
+    };
+  }
+
+  const { error: linkErr } = await admin
+    .from(linkTable)
+    .upsert(
+      { [fkColumn]: existing.id, course_id: course.id },
+      { onConflict: `${fkColumn},course_id`, ignoreDuplicates: true }
+    );
+  if (linkErr) throw new Error(linkErr.message);
+
+  const isLive = existing.status === 'approved';
+  return {
+    filename: fileName,
+    status: isLive ? 'auto_approved' : 'queued_for_review',
+    note: isLive
+      ? `Already in the library${fromLabel} (matched by content) — not stored again, now also live under ${course.code}.`
+      : `Already in the library${fromLabel} and awaiting approval (matched by content) — not stored again, now also linked to ${course.code}.`,
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -154,21 +228,32 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await entry.async('arraybuffer'));
       const fileHash = hashBuffer(buffer);
 
-      // Exact-duplicate check by content hash, done before anything else —
-      // if this exact file already exists (in either table), skip it
-      // immediately without spending an AI classification call on it.
+      // Look up identical content by hash, but do NOT skip yet. The same
+      // file can legitimately belong to more than one course (e.g. a
+      // course taught under different codes at different levels), and we
+      // only know which course THIS upload is for after classification.
+      // The decision (skip vs. link) happens right after the course is
+      // confirmed below.
       const [existingPaper, existingMaterial] = await Promise.all([
-        admin.from('past_papers').select('id, course_id').eq('file_hash', fileHash).limit(1).maybeSingle(),
-        admin.from('study_materials').select('id, course_id').eq('file_hash', fileHash).limit(1).maybeSingle(),
+        admin.from('past_papers').select('id, course_id, status').eq('file_hash', fileHash).limit(1).maybeSingle(),
+        admin.from('study_materials').select('id, course_id, status').eq('file_hash', fileHash).limit(1).maybeSingle(),
       ]);
 
-      if (existingPaper.data || existingMaterial.data) {
-        newResults.push({
-          filename: fileName,
-          status: 'skipped_duplicate',
-          note: 'Identical file already exists in the library (matched by content, not filename).',
-        });
-        continue;
+      let existingFile: ExistingFile | null = null;
+      if (existingPaper.data) {
+        existingFile = {
+          table: 'past_papers',
+          id: existingPaper.data.id,
+          courseId: existingPaper.data.course_id,
+          status: existingPaper.data.status,
+        };
+      } else if (existingMaterial.data) {
+        existingFile = {
+          table: 'study_materials',
+          id: existingMaterial.data.id,
+          courseId: existingMaterial.data.course_id,
+          status: existingMaterial.data.status,
+        };
       }
 
       let extractedText: string | null = null;
@@ -243,6 +328,25 @@ export async function POST(req: NextRequest) {
           status: 'needs_manual_review',
           note: `Could be ${course.code} or ${altLabel} — please confirm which one this belongs to.`,
         });
+        continue;
+      }
+
+      // Course is confirmed. If identical content already exists, link the
+      // existing file to this course (or skip if it's already linked) —
+      // never store the same bytes twice.
+      if (existingFile) {
+        const originalCode = existingFile.courseId
+          ? courseList.find((c) => c.id === existingFile!.courseId)?.code ?? null
+          : null;
+        newResults.push(
+          await linkExistingFile({
+            admin,
+            existing: existingFile,
+            fileName,
+            course,
+            originalCode,
+          })
+        );
         continue;
       }
 
