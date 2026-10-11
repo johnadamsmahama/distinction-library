@@ -8,6 +8,14 @@
 // app/api/trusted-upload/resolve/route.ts — this file only owns the
 // batch/cursor loop and duplicate pre-check.
 //
+// DUPLICATE HANDLING (shared files): a file's content hash identifies the
+// stored file. If identical content already exists:
+//   - and it is already linked to THIS batch's course -> skipped_duplicate
+//   - and it is linked only to OTHER courses -> we don't store it again;
+//     we add a link (past_paper_courses / study_material_courses) so the
+//     same file is also shown under this course. Reported as 'approved'
+//     with a note saying it was linked, not re-uploaded.
+//
 // AUTH NOTE: this route is called two ways —
 //   1) From the browser (TrustedUploadPanel), authenticated via the user's
 //      Supabase session cookie.
@@ -23,6 +31,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
 import crypto from 'crypto';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCurrentProfile, isAdminRole } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
@@ -43,6 +52,101 @@ const INTERNAL_HEADER = 'x-internal-trigger-secret';
 
 function hashBuffer(buffer: Buffer): string {
   return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+/**
+ * Checks whether identical content (by hash) already exists in the library.
+ *
+ * Returns null when the content is brand new — the caller should process
+ * the file normally. Otherwise returns the JobResult to record for this
+ * file (already linked here -> skipped_duplicate; linked now -> approved).
+ * Throws on database errors so the caller's per-file catch records them.
+ */
+async function handleExistingContent(params: {
+  admin: SupabaseClient;
+  uploadType: string;
+  fileHash: string;
+  fileName: string;
+  courseId: string;
+  courseCode: string;
+}): Promise<JobResult | null> {
+  const { admin, uploadType, fileHash, fileName, courseId, courseCode } = params;
+
+  const [papersRes, materialsRes] = await Promise.all([
+    admin.from('past_papers').select('id, course_id').eq('file_hash', fileHash),
+    admin.from('study_materials').select('id, course_id').eq('file_hash', fileHash),
+  ]);
+  if (papersRes.error) throw new Error(papersRes.error.message);
+  if (materialsRes.error) throw new Error(materialsRes.error.message);
+
+  const papers = papersRes.data ?? [];
+  const materials = materialsRes.data ?? [];
+  if (papers.length === 0 && materials.length === 0) return null;
+
+  const isPaperUpload = uploadType === 'past_paper';
+  const sameKind = isPaperUpload ? papers : materials;
+
+  // Identical content exists, but as the other kind (a study material
+  // uploaded as a past paper or vice versa). Linking across kinds would be
+  // wrong, so keep the old behavior: skip and say why.
+  if (sameKind.length === 0) {
+    return {
+      filename: fileName,
+      status: 'skipped_duplicate',
+      note: `Identical file already exists in the library as a ${
+        isPaperUpload ? 'study material' : 'past paper'
+      }, so it was not added as a ${isPaperUpload ? 'past paper' : 'study material'}.`,
+    };
+  }
+
+  const linkTable = isPaperUpload ? 'past_paper_courses' : 'study_material_courses';
+  const fkColumn = isPaperUpload ? 'past_paper_id' : 'study_material_id';
+  const ids = sameKind.map((r: { id: string }) => r.id);
+
+  const { data: alreadyLinked, error: linkedErr } = await admin
+    .from(linkTable)
+    .select(fkColumn)
+    .in(fkColumn, ids)
+    .eq('course_id', courseId)
+    .limit(1);
+  if (linkedErr) throw new Error(linkedErr.message);
+
+  if (alreadyLinked && alreadyLinked.length > 0) {
+    return {
+      filename: fileName,
+      status: 'skipped_duplicate',
+      note: `Already in the library under ${courseCode} (matched by content, not filename).`,
+    };
+  }
+
+  // Same content, different course: link the existing file to this course
+  // instead of storing it a second time.
+  const target = sameKind[0] as { id: string; course_id: string | null };
+  const { error: linkErr } = await admin
+    .from(linkTable)
+    .upsert(
+      { [fkColumn]: target.id, course_id: courseId },
+      { onConflict: `${fkColumn},course_id`, ignoreDuplicates: true }
+    );
+  if (linkErr) throw new Error(linkErr.message);
+
+  let originalCode: string | null = null;
+  if (target.course_id) {
+    const { data: originalCourse } = await admin
+      .from('courses')
+      .select('code')
+      .eq('id', target.course_id)
+      .maybeSingle();
+    originalCode = originalCourse?.code ?? null;
+  }
+
+  return {
+    filename: fileName,
+    status: 'approved',
+    note: `Already in the library${
+      originalCode ? ` under ${originalCode}` : ''
+    } (matched by content) — not stored again, now also shown under ${courseCode}.`,
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -141,17 +245,20 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(await entry.async('arraybuffer'));
         const fileHash = hashBuffer(buffer);
 
-        const [existingPaper, existingMaterial] = await Promise.all([
-          admin.from('past_papers').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
-          admin.from('study_materials').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
-        ]);
+        // Duplicate pre-check by content hash. Identical content for the
+        // SAME course is skipped; identical content from a DIFFERENT course
+        // is linked to this course instead of being stored again.
+        const existingResult = await handleExistingContent({
+          admin,
+          uploadType: config.uploadType,
+          fileHash,
+          fileName,
+          courseId: config.courseId,
+          courseCode: config.courseCode,
+        });
 
-        if (existingPaper.data || existingMaterial.data) {
-          newResults.push({
-            filename: fileName,
-            status: 'skipped_duplicate',
-            note: 'Identical file already exists in the library (matched by content, not filename).',
-          });
+        if (existingResult) {
+          newResults.push(existingResult);
           continue;
         }
 
