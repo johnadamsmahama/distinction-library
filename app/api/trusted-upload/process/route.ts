@@ -29,6 +29,15 @@ import { createClient } from '@/lib/supabase/server';
 import { processPastPaperEntry, processStudyMaterialEntry } from '@/lib/trusted-upload/process-entry';
 import { JobResult, TrustedUploadConfig } from '@/lib/trusted-upload/types';
 
+// Without this, the route runs on Vercel's default timeout (10s on the
+// Hobby plan) — easily blown past by downloading a multi-MB zip, parsing
+// it with JSZip, and processing a batch, especially on a cold start. When
+// Vercel kills a function for running too long it's an abrupt termination,
+// not a catchable JS error, so none of the try/catch error_message capture
+// below ever runs — the job just sits at status 'failed' with no reason
+// recorded. 60s is the maximum allowed on Hobby.
+export const maxDuration = 60;
+
 const BATCH_SIZE = 3; // same reasoning as bulk-upload: stay under Vercel's function timeout
 const INTERNAL_HEADER = 'x-internal-trigger-secret';
 
