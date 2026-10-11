@@ -76,7 +76,10 @@ export async function POST(req: NextRequest) {
 
   const config = job.trusted_upload_config as TrustedUploadConfig | null;
   if (!config?.courseId || !config?.courseCode || !config?.uploadType) {
-    await admin.from('bulk_upload_jobs').update({ status: 'failed' }).eq('id', jobId);
+    await admin
+      .from('bulk_upload_jobs')
+      .update({ status: 'failed', error_message: 'Job is missing trusted_upload_config (courseId, courseCode, or uploadType not set).' })
+      .eq('id', jobId);
     return NextResponse.json({ error: 'Job is missing trusted_upload_config' }, { status: 500 });
   }
 
@@ -86,11 +89,29 @@ export async function POST(req: NextRequest) {
       .download(job.zip_path);
 
     if (downloadErr || !zipBlob) {
-      await admin.from('bulk_upload_jobs').update({ status: 'failed' }).eq('id', jobId);
+      await admin
+        .from('bulk_upload_jobs')
+        .update({
+          status: 'failed',
+          error_message: `Could not download zip file from storage: ${downloadErr?.message ?? 'file missing or empty'} (path: ${job.zip_path})`,
+        })
+        .eq('id', jobId);
       return NextResponse.json({ error: 'Could not download zip file' }, { status: 500 });
     }
 
-    const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+    let zip;
+    try {
+      zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+    } catch (zipErr: any) {
+      await admin
+        .from('bulk_upload_jobs')
+        .update({
+          status: 'failed',
+          error_message: `Could not open the zip file — it may be corrupted, password-protected, or not a valid zip: ${zipErr?.message ?? String(zipErr)}`,
+        })
+        .eq('id', jobId);
+      return NextResponse.json({ error: 'Could not open zip file' }, { status: 500 });
+    }
     const entries = Object.values(zip.files).filter((f) => !f.dir);
 
     const totalFiles = job.total_files ?? entries.length;
@@ -182,7 +203,10 @@ export async function POST(req: NextRequest) {
         console.error('TRUSTED_UPLOAD_INTERNAL_SECRET is not set — cannot continue batch chain.');
         await admin
           .from('bulk_upload_jobs')
-          .update({ status: 'failed' })
+          .update({
+            status: 'failed',
+            error_message: `Server misconfigured: TRUSTED_UPLOAD_INTERNAL_SECRET is not set, so batch ${newCursor}/${totalFiles} could not trigger the next batch. Files up to this point were processed successfully — only the remaining ones are affected.`,
+          })
           .eq('id', jobId);
         return NextResponse.json(
           { error: 'Server misconfigured: TRUSTED_UPLOAD_INTERNAL_SECRET missing.' },
@@ -208,7 +232,10 @@ export async function POST(req: NextRequest) {
         console.error('Next batch trigger did not succeed, marking job failed.');
         await admin
           .from('bulk_upload_jobs')
-          .update({ status: 'failed' })
+          .update({
+            status: 'failed',
+            error_message: `Processed ${newCursor}/${totalFiles} files, but the request to continue with the next batch failed (${nextBatchRes ? `HTTP ${nextBatchRes.status}` : 'network error reaching the server'}). The files already processed are safe — only the remaining ones were not reached.`,
+          })
           .eq('id', jobId);
       }
     }
@@ -216,7 +243,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ cursor: newCursor, totalFiles, done: isDone });
   } catch (e: any) {
     console.error('Trusted upload batch processing crashed:', e);
-    await admin.from('bulk_upload_jobs').update({ status: 'failed' }).eq('id', jobId);
+    await admin
+      .from('bulk_upload_jobs')
+      .update({ status: 'failed', error_message: e?.message ?? String(e) })
+      .eq('id', jobId);
     return NextResponse.json({ error: e?.message ?? 'Batch processing failed.' }, { status: 500 });
   }
 }
