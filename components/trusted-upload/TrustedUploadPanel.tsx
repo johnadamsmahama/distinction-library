@@ -245,6 +245,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
 
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<string | null>(null);
+  const [jobErrorMessage, setJobErrorMessage] = useState<string | null>(null);
   const [totalFiles, setTotalFiles] = useState<number | null>(null);
   const [cursor, setCursor] = useState(0);
   const [results, setResults] = useState<JobResult[]>([]);
@@ -256,7 +257,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
     const poll = async () => {
       const { data } = await supabase
         .from('bulk_upload_jobs')
-        .select('status, total_files, cursor, results')
+        .select('status, total_files, cursor, results, error_message')
         .eq('id', jobId)
         .single();
       if (data) {
@@ -264,6 +265,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
         setTotalFiles(data.total_files);
         setCursor(data.cursor);
         setResults((data.results as JobResult[]) ?? []);
+        setJobErrorMessage(data.error_message ?? null);
         if (data.status === 'completed' || data.status === 'failed') {
           if (pollRef.current) clearInterval(pollRef.current);
         }
@@ -316,7 +318,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
 
   const reset = () => {
     setJobId(null); setJobStatus(null); setTotalFiles(null);
-    setCursor(0); setResults([]); setZipFile(null);
+    setCursor(0); setResults([]); setZipFile(null); setJobErrorMessage(null);
   };
 
   const handleResolved = (updated: JobResult) => {
@@ -342,6 +344,17 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
         <div className="h-1.5 rounded-full bg-gold-light/20 overflow-hidden mb-3">
           <div className="h-full bg-gold transition-all" style={{ width: `${percent}%` }} />
         </div>
+
+        {jobStatus === 'failed' && jobErrorMessage && (
+          <div className="bg-red-50 border border-red-200 rounded-[6px] px-3 py-2.5 mb-3">
+            <p className="font-condensed font-bold text-[10px] uppercase tracking-wide text-red-700 mb-1">
+              What happened
+            </p>
+            <p className="font-mono text-[10.5px] text-red-900 leading-relaxed break-words">
+              {jobErrorMessage}
+            </p>
+          </div>
+        )}
 
         {needsAttention > 0 && (
           <div className="bg-orange-50 border border-orange-200 rounded-[4px] px-3 py-2 mb-3 text-[11.5px] text-orange-700">
