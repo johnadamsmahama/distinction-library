@@ -11,6 +11,13 @@ import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { extractPptxText } from '@/lib/pptx-text';
 import mammoth from 'mammoth';
 
+// Without this, the route runs on Vercel's default timeout (10s on the
+// Hobby plan) — the same silent-kill issue found and fixed in the sibling
+// /api/trusted-upload/process route. A function killed for running too
+// long terminates abruptly, bypassing any try/catch, so failures here
+// would go unrecorded the same way. 60s is the maximum allowed on Hobby.
+export const maxDuration = 60;
+
 // How many files to process per invocation. Kept small so each call stays
 // well under Vercel's function timeout — the route re-triggers itself for
 // the next batch until the whole zip is processed.
