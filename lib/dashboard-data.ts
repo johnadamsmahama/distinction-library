@@ -83,9 +83,19 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
 
   let studyProgress: { courseId: string; courseCode: string; viewed: number; total: number }[] = [];
   if (viewedCourseIds.length > 0) {
+    // Totals read through the course link tables, so files shared with a
+    // course (uploaded originally under another code) count toward it too.
     const [{ data: totalPapers }, { data: totalMaterials }] = await Promise.all([
-      supabase.from('past_papers').select('course_id').eq('status', 'approved').in('course_id', viewedCourseIds),
-      supabase.from('study_materials').select('course_id').eq('status', 'approved').in('course_id', viewedCourseIds),
+      supabase
+        .from('past_paper_courses')
+        .select('course_id, past_papers!inner(status)')
+        .eq('past_papers.status', 'approved')
+        .in('course_id', viewedCourseIds),
+      supabase
+        .from('study_material_courses')
+        .select('course_id, study_materials!inner(status)')
+        .eq('study_materials.status', 'approved')
+        .in('course_id', viewedCourseIds),
     ]);
 
     const totalByCourseMap = new Map<string, number>();
