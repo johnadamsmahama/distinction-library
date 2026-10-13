@@ -15,6 +15,24 @@ type Paper = {
   courses: { id: string; code: string; name: string; department: string; level: string };
 };
 
+// One row returned by the search_past_papers database function: a paper
+// paired with ONE of the courses it belongs to. A paper shared by several
+// courses comes back once per course, so it shows up on each course's shelf.
+type PaperRow = {
+  id: string;
+  year: number;
+  exam_type: 'mid_semester' | 'end_of_semester';
+  file_url: string;
+  watermarked_url: string | null;
+  download_count: number;
+  created_at: string;
+  course_id: string;
+  course_code: string;
+  course_name: string;
+  course_department: string;
+  course_level: string;
+};
+
 const mono = 'font-[family-name:var(--font-courier-prime)]';
 
 const LIB_BG = '#D9CBA3';
@@ -23,7 +41,10 @@ const LIB_INK = '#1B4332';
 const LIB_INK_SOFT = '#5C5236';
 const LIB_STAMP = '#A6431F';
 
-const LEVELS = ['100', '200', '300', '400'];
+// Must match the values stored in courses.level exactly ('Diploma' is
+// stored as that word, not a number).
+const LEVELS = ['100', '200', '300', '400', 'Diploma'];
+const levelLabel = (l: string) => (l === 'Diploma' ? 'Diploma' : `Level ${l}`);
 
 // Fire-and-forget: same pattern used across the library — tells the
 // backend a download happened without blocking the file from opening.
@@ -175,21 +196,45 @@ export default function PastQuestionsBrowser() {
     let cancelled = false;
     async function fetchPapers() {
       setLoading(true);
-      let query = supabase
-        .from('past_papers')
-        .select('id, year, exam_type, file_url, watermarked_url, download_count, created_at, courses!inner(id, code, name, department, level)')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (courseId) query = query.eq('course_id', courseId);
-      if (level) query = query.eq('courses.level', level);
-      if (examType) query = query.eq('exam_type', examType);
-      if (debouncedSearch) {
-        query = query.or(`code.ilike.%${debouncedSearch}%,name.ilike.%${debouncedSearch}%`, { foreignTable: 'courses' });
+
+      // Search, level, course and exam-type filtering all happen inside the
+      // search_past_papers database function, which reads through the
+      // past_paper_courses link table. That is what lets one stored paper
+      // appear under every course it is shared by, and it matches course
+      // codes with or without a space ("BASC102" or "BASC 102").
+      const { data, error } = await supabase.rpc('search_past_papers', {
+        p_search: debouncedSearch || null,
+        p_level: level || null,
+        p_course_id: courseId || null,
+        p_exam_type: examType || null,
+        p_limit: 100,
+      });
+
+      if (error) {
+        // Surface failures instead of silently showing an empty shelf.
+        console.error('Past questions search failed:', error.message);
       }
-      const { data } = await query;
+
       if (!cancelled) {
-        setPapers((data as unknown as Paper[]) ?? []);
+        const rows = (data as PaperRow[] | null) ?? [];
+        setPapers(
+          rows.map((r) => ({
+            id: r.id,
+            year: r.year,
+            exam_type: r.exam_type,
+            file_url: r.file_url,
+            watermarked_url: r.watermarked_url,
+            download_count: r.download_count,
+            created_at: r.created_at,
+            courses: {
+              id: r.course_id,
+              code: r.course_code,
+              name: r.course_name,
+              department: r.course_department,
+              level: r.course_level,
+            },
+          }))
+        );
         setLoading(false);
       }
     }
@@ -275,7 +320,7 @@ export default function PastQuestionsBrowser() {
           <FilterSelect
             value={level}
             onChange={setLevel}
-            options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+            options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: levelLabel(l) }))]}
             card={LIB_CARD}
             border={`${LIB_INK}66`}
             text={LIB_INK}
@@ -327,7 +372,9 @@ export default function PastQuestionsBrowser() {
         ) : (
           <div>
             {papers.map((p) => (
-              <CatalogCard key={p.id} paper={p} />
+              // A shared paper appears once per course, so the key must
+              // include the course as well as the paper id.
+              <CatalogCard key={`${p.id}-${p.courses.id}`} paper={p} />
             ))}
           </div>
         )}
