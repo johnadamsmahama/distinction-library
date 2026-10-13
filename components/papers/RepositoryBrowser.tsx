@@ -33,7 +33,10 @@ const CONTENT_TYPE_LABEL: Record<string, string> = {
   lecture_slides: 'Lecture Slides',
 };
 
-const LEVELS = ['100', '200', '300', '400'];
+// Must match the values stored in courses.level exactly ('Diploma' is
+// stored as that word, not a number).
+const LEVELS = ['100', '200', '300', '400', 'Diploma'];
+const levelLabel = (l: string) => (l === 'Diploma' ? 'Diploma' : `Level ${l}`);
 const WEEKS = Array.from({ length: 14 }, (_, i) => i + 1);
 
 const GRAIN =
@@ -523,41 +526,72 @@ export default function RepositoryBrowser({
       setLoading(true);
       const term = debouncedSearch;
 
+      // Search, level, course and the other filters all run inside database
+      // functions that read through the course link tables
+      // (past_paper_courses / study_material_courses). That is what lets one
+      // stored file appear under every course it is shared by, and it
+      // matches course codes with or without a space ("BASC102" / "BASC 102").
       if (tab === 'papers') {
-        let query = supabase
-          .from('past_papers')
-          .select('id, year, exam_type, file_url, watermarked_url, download_count, created_at, courses!inner(id, code, name, department, level)')
-          .eq('status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(100);
-        if (courseId) query = query.eq('course_id', courseId);
-        if (level) query = query.eq('courses.level', level);
-        if (examType) query = query.eq('exam_type', examType);
-        // Search course code/name directly in the query, rather than
-        // filtering client-side after the fact — otherwise papers
-        // outside the most recent 100 approved rows are never seen,
-        // no matter how well they match the search term.
-        if (term) {
-          query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
+        const { data, error } = await supabase.rpc('search_past_papers', {
+          p_search: term || null,
+          p_level: level || null,
+          p_course_id: courseId || null,
+          p_exam_type: examType || null,
+          p_limit: 100,
+        });
+        // Surface failures instead of silently showing an empty shelf.
+        if (error) console.error('Past papers search failed:', error.message);
+        if (!cancelled) {
+          const rows = (data as any[] | null) ?? [];
+          setPapers(
+            rows.map((r) => ({
+              id: r.id,
+              year: r.year,
+              exam_type: r.exam_type,
+              file_url: r.file_url,
+              watermarked_url: r.watermarked_url,
+              download_count: r.download_count,
+              created_at: r.created_at,
+              courses: {
+                id: r.course_id,
+                code: r.course_code,
+                name: r.course_name,
+                department: r.course_department,
+                level: r.course_level,
+              },
+            }))
+          );
         }
-        const { data } = await query;
-        if (!cancelled) setPapers((data as unknown as PaperResult[]) ?? []);
       } else {
-        let query = supabase
-          .from('study_materials')
-          .select('id, title, content_type, week_number, file_url, download_count, created_at, courses!inner(id, code, name, department, level)')
-          .eq('status', 'approved')
-          .eq('content_type', 'lecture_slides')
-          .order('created_at', { ascending: false })
-          .limit(100);
-        if (courseId) query = query.eq('course_id', courseId);
-        if (level) query = query.eq('courses.level', level);
-        if (week) query = query.eq('week_number', Number(week));
-        if (term) {
-          query = query.or(`code.ilike.%${term}%,name.ilike.%${term}%`, { foreignTable: 'courses' });
+        const { data, error } = await supabase.rpc('search_study_materials', {
+          p_search: term || null,
+          p_level: level || null,
+          p_course_id: courseId || null,
+          p_week: week ? Number(week) : null,
+          p_limit: 100,
+        });
+        if (error) console.error('Lecture slides search failed:', error.message);
+        if (!cancelled) {
+          const rows = (data as any[] | null) ?? [];
+          setMaterials(
+            rows.map((r) => ({
+              id: r.id,
+              title: r.title,
+              content_type: r.content_type,
+              week_number: r.week_number,
+              file_url: r.file_url,
+              download_count: r.download_count,
+              created_at: r.created_at,
+              courses: {
+                id: r.course_id,
+                code: r.course_code,
+                name: r.course_name,
+                department: r.course_department,
+                level: r.course_level,
+              },
+            }))
+          );
         }
-        const { data } = await query;
-        if (!cancelled) setMaterials((data as unknown as MaterialResult[]) ?? []);
       }
       if (!cancelled) setLoading(false);
     }
@@ -622,7 +656,7 @@ export default function RepositoryBrowser({
             <FilterSelect
               value={level}
               onChange={setLevel}
-              options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+              options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: levelLabel(l) }))]}
               card={MAT_CARD}
               border="rgba(23,35,63,0.4)"
               text={MAT_INK_SOFT}
@@ -680,7 +714,7 @@ export default function RepositoryBrowser({
             <div className="flex flex-col gap-2.5">
               {visibleMaterials.map((m) => (
                 <MaterialCard
-                  key={m.id}
+                  key={`${m.id}-${m.courses.id}`}
                   code={m.courses.code}
                   name={m.title}
                   tag={m.week_number ? `WEEK ${m.week_number}` : 'MATERIAL'}
@@ -753,7 +787,7 @@ export default function RepositoryBrowser({
               value={level}
               onChange={setLevel}
               accent={accent}
-              options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: `Level ${l}` }))]}
+              options={[{ value: '', label: 'All Levels' }, ...LEVELS.map((l) => ({ value: l, label: levelLabel(l) }))]}
             />
             <FilterPill
               value={courseId}
@@ -811,7 +845,7 @@ export default function RepositoryBrowser({
             <div className="flex flex-col gap-2.5">
               {visiblePapers.map((p) => (
                 <ResultCard
-                  key={p.id}
+                  key={`${p.id}-${p.courses.id}`}
                   code={p.courses.code}
                   name={p.courses.name}
                   type={p.exam_type === 'mid_semester' ? 'Mid-Semester' : 'End of Semester'}
@@ -832,7 +866,7 @@ export default function RepositoryBrowser({
           <div className="flex flex-col gap-2.5">
             {visibleMaterials.map((m) => (
               <ResultCard
-                key={m.id}
+                key={`${m.id}-${m.courses.id}`}
                 code={m.courses.code}
                 name={m.title}
                 type={CONTENT_TYPE_LABEL[m.content_type]}
