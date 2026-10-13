@@ -22,22 +22,40 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
   if (!course) notFound();
 
-  const [{ data: papers }, { data: materials }] = await Promise.all([
-    supabase
-      .from('past_papers')
-      .select('id, year, exam_type, file_url, watermarked_url, created_at')
-      .eq('course_id', course.id)
-      .eq('status', 'approved')
-      .order('year', { ascending: false }),
-
-    supabase
-      .from('study_materials')
-      .select('id, title, content_type, week_number, file_url, created_at')
-      .eq('course_id', course.id)
-      .eq('status', 'approved')
-      .eq('content_type', 'lecture_slides')
-      .order('week_number', { ascending: true, nullsFirst: false }),
+  // Both lists read through the course link tables (via these database
+  // functions), so a file shared by several courses shows up here too, not
+  // only on the course it was first uploaded under. The functions already
+  // return approved files only; ordering is applied below.
+  const [papersRes, materialsRes] = await Promise.all([
+    supabase.rpc('search_past_papers', { p_course_id: course.id, p_limit: 200 }),
+    supabase.rpc('search_study_materials', { p_course_id: course.id, p_limit: 200 }),
   ]);
+  if (papersRes.error) console.error('Course papers load failed:', papersRes.error.message);
+  if (materialsRes.error) console.error('Course materials load failed:', materialsRes.error.message);
+
+  type PaperRow = {
+    id: string;
+    year: number | null;
+    exam_type: 'mid_semester' | 'end_of_semester';
+    file_url: string;
+    watermarked_url: string | null;
+  };
+  type MaterialRow = {
+    id: string;
+    title: string;
+    content_type: string;
+    week_number: number | null;
+    file_url: string;
+  };
+
+  // Newest year first; papers with an unknown year go last.
+  const papers = ((papersRes.data as PaperRow[] | null) ?? []).sort(
+    (a, b) => (b.year ?? -Infinity) - (a.year ?? -Infinity)
+  );
+  // Week 1, 2, 3 … ; materials with no week number go last.
+  const materials = ((materialsRes.data as MaterialRow[] | null) ?? []).sort(
+    (a, b) => (a.week_number ?? Infinity) - (b.week_number ?? Infinity)
+  );
 
   return (
     <div>
@@ -52,7 +70,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h2 className="font-display font-bold text-lg text-navy mb-3">Past Papers</h2>
-          {!papers || papers.length === 0 ? (
+          {papers.length === 0 ? (
             <p className="font-body text-sm text-g600">No approved papers for this course yet.</p>
           ) : (
             <div className="space-y-2">
@@ -79,7 +97,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
         <div>
           <h2 className="font-display font-bold text-lg text-navy mb-3">Study Materials</h2>
-          {!materials || materials.length === 0 ? (
+          {materials.length === 0 ? (
             <p className="font-body text-sm text-g600">No approved materials for this course yet.</p>
           ) : (
             <div className="space-y-2">
