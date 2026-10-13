@@ -208,6 +208,9 @@ export default function PastPapersUploadForm({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  // Set when the uploaded file already existed and was linked to the chosen
+  // course instead of being stored again.
+  const [linkedNote, setLinkedNote] = useState<string | null>(null);
 
   if (uploadSuspended) {
     return (
@@ -227,11 +230,20 @@ export default function PastPapersUploadForm({
     return (
       <Bookplate>
         <div className="text-center py-4">
-          <h2 className="font-display font-bold text-base text-navy-deep mb-1.5">Submitted for review</h2>
-          <p className="font-body text-[13px] text-[#5B5643] mb-4 leading-relaxed">
-            Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
-            notification once it&apos;s approved or rejected.
-          </p>
+          {linkedNote ? (
+            <>
+              <h2 className="font-display font-bold text-base text-navy-deep mb-1.5">Already in the library</h2>
+              <p className="font-body text-[13px] text-[#5B5643] mb-4 leading-relaxed">{linkedNote}</p>
+            </>
+          ) : (
+            <>
+              <h2 className="font-display font-bold text-base text-navy-deep mb-1.5">Submitted for review</h2>
+              <p className="font-body text-[13px] text-[#5B5643] mb-4 leading-relaxed">
+                Thanks for contributing. A moderator will review this shortly — you&apos;ll get a
+                notification once it&apos;s approved or rejected.
+              </p>
+            </>
+          )}
           <button
             onClick={() => router.push('/dashboard')}
             className={`bg-gold text-navy-deep ${mono} font-bold text-xs uppercase px-4 py-2 rounded-none hover:brightness-105 transition-all`}
@@ -264,16 +276,45 @@ export default function PastPapersUploadForm({
 
     const fileHash = await hashFile(file);
 
-    const [existingPaperByHash, existingMaterialByHash] = await Promise.all([
-      supabase.from('past_papers').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
-      supabase.from('study_materials').select('id').eq('file_hash', fileHash).limit(1).maybeSingle(),
-    ]);
+    // Identical content already in the library? Don't reject it outright —
+    // the same file can belong to more than one course (e.g. a course taught
+    // under different codes at different levels). The database function links
+    // the EXISTING file to the course picked here, so nothing is stored twice.
+    const { data: linkResult, error: linkErr } = await supabase.rpc('link_existing_upload', {
+      p_file_hash: fileHash,
+      p_course_id: courseId,
+      p_kind: 'past_paper',
+    });
 
-    if (existingPaperByHash.data || existingMaterialByHash.data) {
+    if (linkErr) {
+      setLoading(false);
+      setError(linkErr.message);
+      return;
+    }
+
+    const linkStatus: string | undefined = linkResult?.status;
+    const originalCode: string | undefined = linkResult?.original_code ?? undefined;
+
+    if (linkStatus === 'already_linked') {
+      setLoading(false);
+      setError('This exact file is already in the library under this course.');
+      return;
+    }
+    if (linkStatus === 'other_kind' || linkStatus === 'unavailable') {
       setLoading(false);
       setError('This exact file has already been uploaded to the library.');
       return;
     }
+    if (linkStatus === 'linked') {
+      setLoading(false);
+      setLinkedNote(
+        `This exact file was already in the library${originalCode ? ` under ${originalCode}` : ''}. ` +
+          `It hasn't been stored again — it is now also shown under your selected course.`
+      );
+      setDone(true);
+      return;
+    }
+    // linkStatus === 'none' → genuinely new content, continue with the upload.
 
     // Unknown-year papers skip the same-course/year/exam-type duplicate
     // check — with no year to compare, that check can't meaningfully
