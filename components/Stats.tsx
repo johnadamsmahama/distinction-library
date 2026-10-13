@@ -6,15 +6,20 @@ export const dynamic = 'force-dynamic';
 export default async function Stats() {
   const supabase = createClient();
 
-  const [papersRes, materialsRes, papersDownloads, materialsDownloads] = await Promise.all([
-    supabase.from('past_papers').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-    supabase.from('study_materials').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+  // Totals come from a database function that counts every approved
+  // (file, course) shelf entry. A file shared by two courses counts twice,
+  // so these numbers rise automatically whenever a file is linked to another
+  // course. It is a function (not a direct table count) so logged-out
+  // visitors still see the totals without the link tables being opened up.
+  const [totalsRes, papersDownloads, materialsDownloads] = await Promise.all([
+    supabase.rpc('get_library_totals'),
     supabase.from('past_papers').select('download_count'),
     supabase.from('study_materials').select('download_count'),
   ]);
 
-  const papersCount = papersRes.count ?? 0;
-  const materialsCount = materialsRes.count ?? 0;
+  const totals = (totalsRes.data ?? {}) as { papers?: number; materials?: number };
+  const papersCount = totals.papers ?? 0;
+  const materialsCount = totals.materials ?? 0;
 
   const totalDownloads =
     (papersDownloads.data ?? []).reduce((sum, r: any) => sum + (r.download_count ?? 0), 0) +
