@@ -37,6 +37,7 @@ import { getCurrentProfile, isAdminRole } from '@/lib/auth-helpers';
 import { createClient } from '@/lib/supabase/server';
 import { processPastPaperEntry, processStudyMaterialEntry } from '@/lib/trusted-upload/process-entry';
 import { JobResult, TrustedUploadConfig } from '@/lib/trusted-upload/types';
+import { CourseRef, findCourseInPath, loadCourseMap } from '@/lib/trusted-upload/multi-course';
 
 // Without this, the route runs on Vercel's default timeout (10s on the
 // Hobby plan) — easily blown past by downloading a multi-MB zip, parsing
@@ -188,7 +189,11 @@ export async function POST(req: NextRequest) {
   }
 
   const config = job.trusted_upload_config as TrustedUploadConfig | null;
-  if (!config?.courseId || !config?.courseCode || !config?.uploadType) {
+  // Many-course batches carry no single course — each file's course comes
+  // from its zip folder — so courseId/courseCode are only required for
+  // one-course batches.
+  const isMulti = !!config?.multiCourse;
+  if (!config?.uploadType || (!isMulti && (!config.courseId || !config.courseCode))) {
     await admin
       .from('bulk_upload_jobs')
       .update({ status: 'failed', error_message: 'Job is missing trusted_upload_config (courseId, courseCode, or uploadType not set).' })
@@ -237,9 +242,34 @@ export async function POST(req: NextRequest) {
     const batch = entries.slice(startIndex, endIndex);
     const newResults: JobResult[] = [];
 
+    // Many-course batches: load the code -> course map once per batch.
+    const courseByCode = isMulti ? await loadCourseMap(admin) : null;
+
     for (let i = 0; i < batch.length; i++) {
       const entry = batch[i];
       const fileName = entry.name.split('/').pop() ?? entry.name;
+
+      // Which course this file belongs to. One-course batches: the course
+      // chosen for the whole batch. Many-course batches: the course whose
+      // code names the folder the file sits in.
+      let fileCourse: CourseRef = { id: config.courseId, code: config.courseCode };
+      // The name shown in the results list. Many-course batches prefix the
+      // course code so two files with the same name stay distinguishable.
+      let displayName = fileName;
+
+      if (isMulti) {
+        const found = findCourseInPath(entry.name, courseByCode!);
+        if (!found) {
+          newResults.push({
+            filename: entry.name,
+            status: 'skipped_manual',
+            note: `No course in the Library matches the folder for this file (${entry.name}). Add the course, then upload it again.`,
+          });
+          continue;
+        }
+        fileCourse = found;
+        displayName = `${found.code}/${fileName}`;
+      }
 
       try {
         const buffer = Buffer.from(await entry.async('arraybuffer'));
@@ -253,12 +283,12 @@ export async function POST(req: NextRequest) {
           uploadType: config.uploadType,
           fileHash,
           fileName,
-          courseId: config.courseId,
-          courseCode: config.courseCode,
+          courseId: fileCourse.id,
+          courseCode: fileCourse.code,
         });
 
         if (existingResult) {
-          newResults.push(existingResult);
+          newResults.push({ ...existingResult, filename: displayName });
           continue;
         }
 
@@ -272,8 +302,8 @@ export async function POST(req: NextRequest) {
                 fileHash,
                 fileName,
                 uploadedBy: job.uploaded_by,
-                courseId: config.courseId,
-                courseCode: config.courseCode,
+                courseId: fileCourse.id,
+                courseCode: fileCourse.code,
                 pathSalt,
               })
             : await processStudyMaterialEntry({
@@ -282,16 +312,16 @@ export async function POST(req: NextRequest) {
                 fileHash,
                 fileName,
                 uploadedBy: job.uploaded_by,
-                courseId: config.courseId,
-                courseCode: config.courseCode,
+                courseId: fileCourse.id,
+                courseCode: fileCourse.code,
                 pathSalt,
               });
 
-        newResults.push(result);
+        newResults.push({ ...result, filename: displayName });
       } catch (e: any) {
         console.error(`Trusted upload processing failed for ${fileName}:`, e);
         newResults.push({
-          filename: fileName,
+          filename: displayName,
           status: 'error',
           note: e?.message ?? 'Failed to process this file.',
         });
