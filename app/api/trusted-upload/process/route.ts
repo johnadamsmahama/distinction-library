@@ -16,17 +16,14 @@
 //     same file is also shown under this course. Reported as 'approved'
 //     with a note saying it was linked, not re-uploaded.
 //
-// AUTH NOTE: this route is called two ways —
-//   1) From the browser (TrustedUploadPanel), authenticated via the user's
-//      Supabase session cookie.
-//   2) From itself, server-to-server, to process the next batch. That
-//      request has no cookies, so it can't use the cookie-based session
-//      check. Instead it sends a shared secret header
-//      (x-internal-trigger-secret) that only this server knows, set via
-//      the TRUSTED_UPLOAD_INTERNAL_SECRET env var in Vercel. When that
-//      header matches, we trust the request without a user session —
-//      the original request was already verified as admin when the job
-//      was first created.
+// HOW BATCHES RUN: each request processes one batch (BATCH_SIZE files) and
+// returns { cursor, totalFiles, done }. The browser (TrustedUploadPanel)
+// calls this route again until done, so no request ever waits on another.
+//
+// AUTH NOTE: calls are authenticated via the admin's Supabase session
+// cookie. A request carrying the x-internal-trigger-secret header matching
+// TRUSTED_UPLOAD_INTERNAL_SECRET is also accepted (no longer used for
+// chaining, kept for manual/server-side triggering).
 
 import { NextRequest, NextResponse } from 'next/server';
 import JSZip from 'jszip';
@@ -342,49 +339,11 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', jobId);
 
-    if (!isDone) {
-      if (!process.env.TRUSTED_UPLOAD_INTERNAL_SECRET) {
-        // No secret configured — can't authenticate the next hop. Fail loudly
-        // instead of leaving the job stuck at "processing" forever.
-        console.error('TRUSTED_UPLOAD_INTERNAL_SECRET is not set — cannot continue batch chain.');
-        await admin
-          .from('bulk_upload_jobs')
-          .update({
-            status: 'failed',
-            error_message: `Server misconfigured: TRUSTED_UPLOAD_INTERNAL_SECRET is not set, so batch ${newCursor}/${totalFiles} could not trigger the next batch. Files up to this point were processed successfully — only the remaining ones are affected.`,
-          })
-          .eq('id', jobId);
-        return NextResponse.json(
-          { error: 'Server misconfigured: TRUSTED_UPLOAD_INTERNAL_SECRET missing.' },
-          { status: 500 }
-        );
-      }
-
-      const nextBatchRes = await fetch(`${req.nextUrl.origin}/api/trusted-upload/process`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          [INTERNAL_HEADER]: process.env.TRUSTED_UPLOAD_INTERNAL_SECRET,
-        },
-        body: JSON.stringify({ jobId }),
-      }).catch((e) => {
-        console.error('Failed to trigger next batch:', e);
-        return null;
-      });
-
-      if (!nextBatchRes || !nextBatchRes.ok) {
-        // The chain broke — mark the job failed rather than leaving it
-        // silently stuck at "processing" with a stalled progress bar.
-        console.error('Next batch trigger did not succeed, marking job failed.');
-        await admin
-          .from('bulk_upload_jobs')
-          .update({
-            status: 'failed',
-            error_message: `Processed ${newCursor}/${totalFiles} files, but the request to continue with the next batch failed (${nextBatchRes ? `HTTP ${nextBatchRes.status}` : 'network error reaching the server'}). The files already processed are safe — only the remaining ones were not reached.`,
-          })
-          .eq('id', jobId);
-      }
-    }
+    // No server-to-server chaining here. This request handles ONE batch and
+    // returns { cursor, totalFiles, done }; the browser (TrustedUploadPanel)
+    // keeps calling this route until done. The old design had each batch
+    // await the next one, so a zip of more than ~15 files nested requests
+    // deeper than Vercel allows and failed with HTTP 508 (loop detected).
 
     return NextResponse.json({ cursor: newCursor, totalFiles, done: isDone });
   } catch (e: any) {
