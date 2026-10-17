@@ -253,6 +253,10 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
   const [cursor, setCursor] = useState(0);
   const [results, setResults] = useState<JobResult[]>([]);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // True while this page is actively calling the process route batch by
+  // batch. loopStopped = the loop hit a connection problem and can be resumed.
+  const loopRunningRef = useRef(false);
+  const [loopStopped, setLoopStopped] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -278,6 +282,37 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
     pollRef.current = setInterval(poll, 3000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [jobId]);
+
+  // Processes the job one batch per request until it is done. The server
+  // saves its progress after every batch, so if the connection drops this
+  // can simply be resumed and carries on from where it stopped.
+  const runBatches = async (id: string) => {
+    if (loopRunningRef.current) return;
+    loopRunningRef.current = true;
+    setLoopStopped(false);
+    try {
+      for (;;) {
+        const res = await fetch('/api/trusted-upload/process', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId: id }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) {
+          // The server records its own failures on the job; an unreadable
+          // response here usually means the connection dropped mid-batch.
+          setLoopStopped(true);
+          return;
+        }
+        if (data.done || data.skipped) return;
+      }
+    } catch (e) {
+      console.error('Trusted upload batch request failed:', e);
+      setLoopStopped(true);
+    } finally {
+      loopRunningRef.current = false;
+    }
+  };
 
   const handleUpload = async () => {
     setError(null);
@@ -314,16 +349,12 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
     if (insertErr || !job) { setError(insertErr?.message ?? 'Could not start the upload job.'); return; }
 
     setJobId(job.id);
-    fetch('/api/trusted-upload/process', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId: job.id }),
-    }).catch((e) => console.error('Failed to start trusted upload processing:', e));
+    runBatches(job.id);
   };
 
   const reset = () => {
     setJobId(null); setJobStatus(null); setTotalFiles(null);
-    setCursor(0); setResults([]); setZipFile(null); setJobErrorMessage(null);
+    setCursor(0); setResults([]); setZipFile(null); setJobErrorMessage(null); setLoopStopped(false);
   };
 
   const handleResolved = (updated: JobResult) => {
@@ -358,6 +389,21 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
             <p className="font-mono text-[10.5px] text-red-900 leading-relaxed break-words">
               {jobErrorMessage}
             </p>
+          </div>
+        )}
+
+        {loopStopped && jobStatus === 'processing' && (
+          <div className="bg-orange-50 border border-orange-200 rounded-[4px] px-3 py-2 mb-3 text-[11.5px] text-orange-700">
+            <p className="mb-2">
+              The connection to the server was interrupted. Files already processed are safe —
+              continue to pick up where it stopped.
+            </p>
+            <button
+              onClick={() => jobId && runBatches(jobId)}
+              className="font-condensed font-bold text-[10px] uppercase text-white bg-navy px-2.5 py-1.5 rounded-[3px]"
+            >
+              Continue processing
+            </button>
           </div>
         )}
 
