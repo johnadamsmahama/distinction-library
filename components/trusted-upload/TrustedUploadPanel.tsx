@@ -238,6 +238,9 @@ function ResolveRow({
 
 export default function TrustedUploadPanel({ courses }: { courses: CourseOption[] }) {
   const [courseId, setCourseId] = useState('');
+  // false = every file in the zip belongs to the one course chosen below.
+  // true  = the zip has one folder per course, named with the course code.
+  const [multiCourse, setMultiCourse] = useState(false);
   const [uploadType, setUploadType] = useState<UploadType>('past_paper');
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -278,7 +281,7 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
 
   const handleUpload = async () => {
     setError(null);
-    if (!courseId) return setError('Select a course.');
+    if (!multiCourse && !courseId) return setError('Select a course.');
     if (!zipFile) return setError('Choose a zip file.');
     if (!zipFile.name.toLowerCase().endsWith('.zip')) return setError('Please choose a .zip file.');
 
@@ -287,8 +290,8 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setUploading(false); setError('Your session expired — please log in again.'); return; }
 
-    const selectedCourse = courses.find((c) => c.id === courseId);
-    if (!selectedCourse) { setUploading(false); setError('Selected course not found.'); return; }
+    const selectedCourse = multiCourse ? null : courses.find((c) => c.id === courseId);
+    if (!multiCourse && !selectedCourse) { setUploading(false); setError('Selected course not found.'); return; }
 
     const path = `${user.id}/${Date.now()}-${zipFile.name}`;
     const { error: uploadErr } = await supabase.storage.from('trusted-uploads').upload(path, zipFile);
@@ -300,7 +303,9 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
         uploaded_by: user.id,
         zip_path: path,
         job_type: 'trusted',
-        trusted_upload_config: { courseId, courseCode: selectedCourse.code, uploadType },
+        trusted_upload_config: multiCourse
+          ? { courseId: '', courseCode: '', uploadType, multiCourse: true }
+          : { courseId, courseCode: selectedCourse!.code, uploadType },
       })
       .select('id')
       .single();
@@ -392,18 +397,48 @@ export default function TrustedUploadPanel({ courses }: { courses: CourseOption[
   return (
     <div className="bg-white border border-g100 rounded-[8px] p-4">
       <div className="mb-3">
-        <label className={labelClass}>Course</label>
-        <CustomSelect
-          value={courseId}
-          onChange={setCourseId}
-          placeholder="Select a course…"
-          options={courses.map((c) => ({
-            value: c.id,
-            label: `${c.code} — ${c.name}${c.is_active === false ? ' (inactive)' : ''}`,
-          }))}
-          searchable
-        />
+        <label className={labelClass}>Courses in this zip</label>
+        <div className="flex gap-1.5">
+          {[
+            { many: false, label: 'One course' },
+            { many: true, label: 'Many courses' },
+          ].map((m) => (
+            <button
+              key={m.label}
+              type="button"
+              onClick={() => setMultiCourse(m.many)}
+              className={`flex-1 font-condensed font-bold text-[10px] uppercase text-center rounded-[3px] py-2 border-[1.3px] transition-colors ${
+                multiCourse === m.many ? 'bg-navy border-navy text-white' : 'bg-transparent border-navy text-navy'
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {multiCourse ? (
+        <div className="mb-3 bg-gold-light/10 border border-gold rounded-[4px] px-3 py-2.5 text-[11.5px] leading-relaxed text-navy">
+          The zip should contain <strong>one folder per course, named with the course code</strong> — for
+          example <span className="font-mono">BASC102/paper.pdf</span>. Each file is published under its
+          folder&apos;s course. Folders that don&apos;t match a course in the Library are skipped and
+          listed in the results, so nothing is filed under the wrong course.
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className={labelClass}>Course</label>
+          <CustomSelect
+            value={courseId}
+            onChange={setCourseId}
+            placeholder="Select a course…"
+            options={courses.map((c) => ({
+              value: c.id,
+              label: `${c.code} — ${c.name}${c.is_active === false ? ' (inactive)' : ''}`,
+            }))}
+            searchable
+          />
+        </div>
+      )}
 
       <div className="mb-3">
         <label className={labelClass}>Upload Type</label>
