@@ -14,6 +14,7 @@ import { createClient } from '@/lib/supabase/server';
 import { processPastPaperEntry, processStudyMaterialEntry } from '@/lib/trusted-upload/process-entry';
 import { confirmAsAlias } from '@/lib/trusted-upload/resolve-mismatch';
 import { JobResult, TrustedUploadConfig } from '@/lib/trusted-upload/types';
+import { CourseRef, findCourseInPath, loadCourseMap, normalizeCode } from '@/lib/trusted-upload/multi-course';
 
 type ResolveAction = 'confirm_alias' | 'reassign' | 'provide_metadata' | 'skip';
 
@@ -72,8 +73,29 @@ export async function POST(req: NextRequest) {
   }
 
   const config = job.trusted_upload_config as TrustedUploadConfig | null;
-  if (!config?.courseId || !config?.courseCode || !config?.uploadType) {
+  const isMulti = !!config?.multiCourse;
+  if (!config?.uploadType || (!isMulti && (!config.courseId || !config.courseCode))) {
     return NextResponse.json({ error: 'Job is missing trusted_upload_config' }, { status: 500 });
+  }
+
+  // `filename` is the name shown in the results list. In many-course batches
+  // that is "COURSECODE/file.pdf"; split it back into the course and the
+  // real file name. One-course batches are unchanged.
+  let baseName = filename;
+  let courseCtx: CourseRef = { id: config.courseId, code: config.courseCode };
+  let courseByCode: Map<string, CourseRef> | null = null;
+  if (isMulti) {
+    const slash = filename.indexOf('/');
+    if (slash <= 0) {
+      return NextResponse.json({ error: 'Unexpected file name for a many-course job.' }, { status: 400 });
+    }
+    courseByCode = await loadCourseMap(admin);
+    const found = courseByCode.get(normalizeCode(filename.slice(0, slash)));
+    if (!found) {
+      return NextResponse.json({ error: 'That file\'s course is no longer in the Library.' }, { status: 404 });
+    }
+    courseCtx = found;
+    baseName = filename.slice(slash + 1);
   }
 
   const results = job.results as JobResult[];
@@ -101,7 +123,10 @@ export async function POST(req: NextRequest) {
 
     const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
     const entry = Object.values(zip.files).find(
-      (f) => !f.dir && (f.name.split('/').pop() ?? f.name) === filename
+      (f) =>
+        !f.dir &&
+        (f.name.split('/').pop() ?? f.name) === baseName &&
+        (!isMulti || findCourseInPath(f.name, courseByCode!)?.id === courseCtx.id)
     );
     if (!entry) {
       return NextResponse.json({ error: 'File no longer found in the zip.' }, { status: 404 });
@@ -116,19 +141,19 @@ export async function POST(req: NextRequest) {
         if (!extractedCode) {
           return NextResponse.json({ error: 'extractedCode is required for confirm_alias' }, { status: 400 });
         }
-        await confirmAsAlias(admin, extractedCode, config.courseId, user.id);
+        await confirmAsAlias(admin, extractedCode, courseCtx.id, user.id);
         // Re-run normally — the alias just saved makes this resolve as
         // match_via_alias on this pass, no special-casing needed.
         newResult = await processPastPaperEntry({
-          admin, buffer, fileHash, fileName: filename,
-          uploadedBy: job.uploaded_by, courseId: config.courseId, courseCode: config.courseCode, pathSalt,
+          admin, buffer, fileHash, fileName: baseName,
+          uploadedBy: job.uploaded_by, courseId: courseCtx.id, courseCode: courseCtx.code, pathSalt,
         });
       } else if (action === 'reassign') {
         if (!newCourseId || !newCourseCode) {
           return NextResponse.json({ error: 'newCourseId and newCourseCode are required for reassign' }, { status: 400 });
         }
         newResult = await processPastPaperEntry({
-          admin, buffer, fileHash, fileName: filename,
+          admin, buffer, fileHash, fileName: baseName,
           uploadedBy: job.uploaded_by, courseId: newCourseId, courseCode: newCourseCode, pathSalt,
         });
       } else if (action === 'provide_metadata') {
@@ -140,8 +165,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'year is required unless marked unknown' }, { status: 400 });
           }
           newResult = await processPastPaperEntry({
-            admin, buffer, fileHash, fileName: filename,
-            uploadedBy: job.uploaded_by, courseId: config.courseId, courseCode: config.courseCode, pathSalt,
+            admin, buffer, fileHash, fileName: baseName,
+            uploadedBy: job.uploaded_by, courseId: courseCtx.id, courseCode: courseCtx.code, pathSalt,
             overrideYear: yearUnknown ? null : year,
             overrideExamType: examType,
           });
@@ -150,8 +175,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'weekNumber is required for this file' }, { status: 400 });
           }
           newResult = await processStudyMaterialEntry({
-            admin, buffer, fileHash, fileName: filename,
-            uploadedBy: job.uploaded_by, courseId: config.courseId, courseCode: config.courseCode, pathSalt,
+            admin, buffer, fileHash, fileName: baseName,
+            uploadedBy: job.uploaded_by, courseId: courseCtx.id, courseCode: courseCtx.code, pathSalt,
             overrideWeekNumber: weekNumber,
           });
         }
@@ -162,6 +187,10 @@ export async function POST(req: NextRequest) {
       newResult = { filename, status: 'error', note: e?.message ?? 'Failed to process this file.' };
     }
   }
+
+  // Keep the display name (which carries the course code in many-course
+  // batches) so the results list can still find and replace this row.
+  newResult = { ...newResult, filename };
 
   const updatedResults = [...results];
   updatedResults[existingIndex] = newResult;
