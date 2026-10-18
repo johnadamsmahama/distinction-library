@@ -217,7 +217,7 @@ export function QuickActions({
         </p>
       </div>
 
-      <div className="flex flex-col gap-3.5">
+      <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-2 lg:gap-4">
         {allCards.map((a, i) => (
           <AtelierCard key={a.href} action={a} number={i + 1} />
         ))}
