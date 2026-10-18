@@ -82,47 +82,56 @@ export default function CommunityAndToolsSection() {
           Community &amp; Tools
         </h3>
 
-        {/* Two tall cards side by side, not overlapping. The left card sits a little lower. */}
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-5 items-start pt-2">
+        <div className="relative h-[180px]">
           <a
             href={CLASSROOM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex flex-col w-full mt-8 min-h-[200px] sm:min-h-[230px] bg-[#F6F1E3] p-4 sm:p-5"
-            style={{ boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
+            className="absolute top-0 left-0 z-[2] w-[62%] bg-[#F6F1E3] p-4 block"
+            style={{ transform: 'rotate(-7deg)', boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
           >
             <span
               className="absolute -top-2 left-[18px] w-[46px] h-[18px] block"
               style={{
                 backgroundColor: 'rgba(143,193,203,0.65)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                transform: 'rotate(-8deg)',
               }}
             />
-            <div className="w-[34px] h-[34px] mb-3.5 flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB]">
-              <ClassroomIcon />
+            <div className="flex items-center gap-2.5">
+              <div className="w-[34px] h-[34px] flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB]">
+                <ClassroomIcon />
+              </div>
+              <div>
+                <b className="block font-condensed font-bold text-[14.5px] text-navy-deep">Join our Google Classroom</b>
+                <span className="block font-[family-name:var(--font-courier-prime)] text-[8.5px] text-g600">Free online classes</span>
+              </div>
             </div>
-            <b className="block font-condensed font-bold text-[14.5px] text-navy-deep mb-1">Join our Google Classroom</b>
-            <span className="block font-[family-name:var(--font-courier-prime)] text-[8.5px] text-g600">Free online classes</span>
           </a>
 
           <button
             type="button"
             onClick={() => setShowGroupPicker(true)}
-            className="relative flex flex-col w-full min-h-[200px] sm:min-h-[230px] bg-[#F6F1E3] p-4 sm:p-5 text-left"
-            style={{ boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
+            className="absolute top-[66px] right-0 z-[3] w-[62%] bg-[#F6F1E3] p-4 block text-left"
+            style={{ transform: 'rotate(6deg)', boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
           >
             <span
               className="absolute -top-2 right-[18px] w-[46px] h-[18px] block"
               style={{
                 backgroundColor: 'rgba(143,193,203,0.65)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                transform: 'rotate(6deg)',
               }}
             />
-            <div className="w-[34px] h-[34px] mb-3.5 flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB]">
-              <WhatsAppIcon />
+            <div className="flex items-center gap-2.5">
+              <div className="w-[34px] h-[34px] flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB]">
+                <WhatsAppIcon />
+              </div>
+              <div>
+                <b className="block font-condensed font-bold text-[14.5px] text-navy-deep">Join WhatsApp</b>
+                <span className="block font-[family-name:var(--font-courier-prime)] text-[8.5px] text-g600">Tutorials &amp; campus updates</span>
+              </div>
             </div>
-            <b className="block font-condensed font-bold text-[14.5px] text-navy-deep mb-1">Join WhatsApp</b>
-            <span className="block font-[family-name:var(--font-courier-prime)] text-[8.5px] text-g600">Tutorials &amp; campus updates</span>
           </button>
         </div>
       </div>
