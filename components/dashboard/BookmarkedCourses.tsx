@@ -198,7 +198,7 @@ export default function BookmarkedCourses({ courses }: { courses: BookmarkedCour
                 key={c.course_id}
                 className="flex items-center justify-between bg-white border border-[#D8D3C6] border-l-4 border-l-[#A45A2A] rounded-none px-4 py-3"
               >
-                <Link href={`/papers?course=${c.course_id}`} className="min-w-0">
+                <Link href={`/library/past-questions?course=${c.course_id}`} className="min-w-0">
                   <div className="font-condensed font-bold text-sm text-navy truncate">
                     {c.code} · {c.name}
                   </div>
