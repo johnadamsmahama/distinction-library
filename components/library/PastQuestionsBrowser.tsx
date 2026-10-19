@@ -177,11 +177,16 @@ function EmptyState({ noneAtAll }: { noneAtAll: boolean }) {
   );
 }
 
-export default function PastQuestionsBrowser() {
+// A course the page was opened with (e.g. from a dashboard course card).
+// Passed in so it stays selectable in the filter even when it has no
+// papers yet — the filter's other options come from the papers on screen.
+export type InitialCourse = { id: string; code: string; name: string; level: string };
+
+export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?: InitialCourse | null }) {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [level, setLevel] = useState('');
-  const [courseId, setCourseId] = useState('');
+  const [courseId, setCourseId] = useState(initialCourse?.id ?? '');
   const [examType, setExamType] = useState('');
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
@@ -249,9 +254,10 @@ export default function PastQuestionsBrowser() {
   // library pages, no separate courses prop required.
   const courseOptionsMap = useMemo(() => {
     const map = new Map<string, { id: string; code: string; level: string }>();
+    if (initialCourse) map.set(initialCourse.id, initialCourse);
     papers.forEach((p) => map.set(p.courses.id, p.courses));
     return map;
-  }, [papers]);
+  }, [papers, initialCourse]);
   const filteredCourseOptions = useMemo(
     () => Array.from(courseOptionsMap.values()).filter((c) => !level || c.level === level),
     [courseOptionsMap, level]
