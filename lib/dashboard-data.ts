@@ -15,9 +15,10 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
     supabase.from('profiles').select('*').eq('id', userId).single(),
 
     supabase
-      .from('bookmarked_courses')
-      .select('course_id, courses(id, code, name, department, level)')
-      .eq('user_id', userId),
+      .from('bookmarks')
+      .select('course_id, created_at, courses(id, code, name, level)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true }),
 
     supabase.rpc('get_leaderboard_rank', { p_user_id: userId }),
 
@@ -125,11 +126,47 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
       .sort((a, b) => b.viewed / b.total - a.viewed / a.total);
   }
 
+  // "Your courses": the courses this student picked, with how many approved
+  // papers and materials each has (counted through the course link tables, so
+  // files shared with a course count toward it too).
+  const bookmarkRows = ((bookmarksRes.data ?? []) as any[]).filter((b) => b.courses);
+  const bookmarkIds = bookmarkRows.map((b) => b.course_id as string);
+  const paperCountByCourse = new Map<string, number>();
+  const materialCountByCourse = new Map<string, number>();
+  if (bookmarkIds.length > 0) {
+    const [{ data: bPapers }, { data: bMaterials }] = await Promise.all([
+      supabase
+        .from('past_paper_courses')
+        .select('course_id, past_papers!inner(status)')
+        .eq('past_papers.status', 'approved')
+        .in('course_id', bookmarkIds),
+      supabase
+        .from('study_material_courses')
+        .select('course_id, study_materials!inner(status)')
+        .eq('study_materials.status', 'approved')
+        .in('course_id', bookmarkIds),
+    ]);
+    (bPapers ?? []).forEach((r: any) =>
+      paperCountByCourse.set(r.course_id, (paperCountByCourse.get(r.course_id) ?? 0) + 1)
+    );
+    (bMaterials ?? []).forEach((r: any) =>
+      materialCountByCourse.set(r.course_id, (materialCountByCourse.get(r.course_id) ?? 0) + 1)
+    );
+  }
+  const bookmarks = bookmarkRows.map((b: any) => ({
+    course_id: b.course_id as string,
+    code: b.courses.code as string,
+    name: b.courses.name as string,
+    level: b.courses.level as string,
+    past_paper_count: paperCountByCourse.get(b.course_id) ?? 0,
+    study_material_count: materialCountByCourse.get(b.course_id) ?? 0,
+  }));
+
   const vaultItems = vaultRes.data ?? [];
 
   return {
     profile: profileRes.data,
-    bookmarks: (bookmarksRes.data ?? []).map((b: any) => b.courses).filter(Boolean),
+    bookmarks,
     rank: rankRes.data ?? null,
     recentPapers: recentPapersRes.data ?? [],
     recentMaterials: recentMaterialsRes.data ?? [],
