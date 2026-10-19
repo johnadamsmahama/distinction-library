@@ -47,22 +47,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { count: pendingPapers },
     { count: pendingMaterials },
     { count: openTickets },
-    papersDownloads,
-    materialsDownloads,
+    totalDownloadsRes,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('past_papers').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('study_materials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('resolved', false),
-    supabase.from('past_papers').select('download_count'),
-    supabase.from('study_materials').select('download_count'),
+    // Summed inside the database. Selecting every row and adding them up here
+    // only ever saw the first 1000 rows, so the total dropped as papers were added.
+    supabase.rpc('get_total_downloads'),
   ]);
 
-  // Same aggregation used by the public Stats section (components/Stats.tsx),
-  // so the two numbers never drift out of sync.
-  const totalDownloads =
-    (papersDownloads.data ?? []).reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0) +
-    (materialsDownloads.data ?? []).reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0);
+  // Same function as the public Stats section (components/Stats.tsx), so the
+  // two numbers always match.
+  const totalDownloads = Number(totalDownloadsRes.data ?? 0);
 
   const stats = [
     { label: 'Total students', value: userCount ?? 0 },
