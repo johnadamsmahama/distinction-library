@@ -11,19 +11,18 @@ export default async function Stats() {
   // so these numbers rise automatically whenever a file is linked to another
   // course. It is a function (not a direct table count) so logged-out
   // visitors still see the totals without the link tables being opened up.
-  const [totalsRes, papersDownloads, materialsDownloads] = await Promise.all([
+  const [totalsRes, downloadsRes] = await Promise.all([
     supabase.rpc('get_library_totals'),
-    supabase.from('past_papers').select('download_count'),
-    supabase.from('study_materials').select('download_count'),
+    // Summed inside the database: selecting every row only returned the first
+    // 1000, so this number dropped as more papers were uploaded.
+    supabase.rpc('get_total_downloads'),
   ]);
 
   const totals = (totalsRes.data ?? {}) as { papers?: number; materials?: number };
   const papersCount = totals.papers ?? 0;
   const materialsCount = totals.materials ?? 0;
 
-  const totalDownloads =
-    (papersDownloads.data ?? []).reduce((sum, r: any) => sum + (r.download_count ?? 0), 0) +
-    (materialsDownloads.data ?? []).reduce((sum, r: any) => sum + (r.download_count ?? 0), 0);
+  const totalDownloads = Number(downloadsRes.data ?? 0);
 
   const STATS = [
     { num: `${papersCount}`, label: 'Past Questions', path: 'M4 4h16v16H4z M8 9h8M8 13h5' },
