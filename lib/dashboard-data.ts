@@ -23,14 +23,17 @@ export async function getDashboardData(supabase: SupabaseClient, userId: string)
 
     supabase
       .from('past_papers')
-      .select('id, year, exam_type, created_at, courses(code, name)')
+      // The course is named explicitly (past_papers_course_id_fkey) because past papers
+      // can now also link to courses through past_paper_courses, which made a plain
+      // courses(...) ambiguous and made this query fail.
+      .select('id, year, exam_type, created_at, courses!past_papers_course_id_fkey(code, name)')
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
       .limit(5),
 
     supabase
       .from('study_materials')
-      .select('id, title, content_type, week_number, created_at, courses(code, name)')
+      .select('id, title, content_type, week_number, created_at, courses!study_materials_course_id_fkey(code, name)')
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
       .limit(5),
