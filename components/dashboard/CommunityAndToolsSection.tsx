@@ -73,7 +73,7 @@ export default function CommunityAndToolsSection() {
         </div>
       </Link>
 
-      {/* Community & Tools — scrapbook collage (replaces the old diagonal duotone panel) */}
+      {/* Community & Tools — scrapbook collage: two straight, equal-size cards, staggered left and right */}
       <div>
         <div className="font-[family-name:var(--font-courier-prime)] font-bold text-[10px] tracking-[.1em] uppercase text-[#2F5A6B] mb-1.5">
           Stay connected
@@ -82,20 +82,19 @@ export default function CommunityAndToolsSection() {
           Community &amp; Tools
         </h3>
 
-        <div className="relative h-[180px]">
+        <div className="relative h-[196px]">
           <a
             href={CLASSROOM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute top-0 left-0 z-[2] w-[62%] bg-[#F6F1E3] p-4 block"
-            style={{ transform: 'rotate(-7deg)', boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
+            className="absolute top-2 left-0 z-[2] w-[62%] h-[74px] bg-[#F6F1E3] px-4 py-3 flex items-center"
+            style={{ boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
           >
             <span
               className="absolute -top-2 left-[18px] w-[46px] h-[18px] block"
               style={{
                 backgroundColor: 'rgba(143,193,203,0.65)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                transform: 'rotate(-8deg)',
               }}
             />
             <div className="flex items-center gap-2.5">
@@ -112,15 +111,14 @@ export default function CommunityAndToolsSection() {
           <button
             type="button"
             onClick={() => setShowGroupPicker(true)}
-            className="absolute top-[66px] right-0 z-[3] w-[62%] bg-[#F6F1E3] p-4 block text-left"
-            style={{ transform: 'rotate(6deg)', boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
+            className="absolute top-[104px] right-0 z-[3] w-[62%] h-[74px] bg-[#F6F1E3] px-4 py-3 flex items-center text-left"
+            style={{ boxShadow: '0 8px 16px rgba(23,35,63,0.28)' }}
           >
             <span
-              className="absolute -top-2 right-[18px] w-[46px] h-[18px] block"
+              className="absolute -bottom-2 right-[18px] w-[46px] h-[18px] block"
               style={{
                 backgroundColor: 'rgba(143,193,203,0.65)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                transform: 'rotate(6deg)',
               }}
             />
             <div className="flex items-center gap-2.5">
