@@ -60,7 +60,7 @@ export default async function LibraryPage() {
 
   return (
     <FullBleedShell background="bg-[#D8E4D3]">
-      <div className="w-full max-w-lg mx-auto px-4 pt-6 pb-10">
+      <div className="w-full max-w-lg lg:max-w-4xl mx-auto px-4 pt-6 pb-10">
         <div className="flex items-center gap-2 font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-navy mb-6">
           <span>←</span>
           <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
@@ -68,12 +68,8 @@ export default async function LibraryPage() {
           </Link>
         </div>
 
-        {/* Ink Stamp Box — full width, matching the card container below */}
-        <div className="relative border-[3px] border-navy px-6 py-5 mb-3 text-center">
-          <span className="absolute top-[-5px] left-[-5px] w-2 h-2 border-t-2 border-l-2 border-navy" />
-          <span className="absolute top-[-5px] right-[-5px] w-2 h-2 border-t-2 border-r-2 border-navy" />
-          <span className="absolute bottom-[-5px] left-[-5px] w-2 h-2 border-b-2 border-l-2 border-navy" />
-          <span className="absolute bottom-[-5px] right-[-5px] w-2 h-2 border-b-2 border-r-2 border-navy" />
+        {/* Heading — the ink-stamp rectangle around it has been removed */}
+        <div className="text-center mb-6">
           <div className={`${mono} font-bold text-[9px] tracking-[0.25em] text-gold mb-1`}>EX LIBRIS</div>
           <div className="font-display font-extrabold text-[22px] tracking-[0.03em] uppercase text-navy-deep">
             Distinction Library
@@ -93,7 +89,7 @@ export default async function LibraryPage() {
         {/* Resource cards — light sage, blended close to the sage page
             rather than a stark color block, on the same layout as the
             Contribute flow */}
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3.5 lg:grid lg:grid-cols-2 lg:gap-5">
           {RESOURCES.map((resource) => (
             <Link
               key={resource.title}
