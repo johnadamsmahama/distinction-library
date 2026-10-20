@@ -47,7 +47,7 @@ export default function TicketScreen({
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [ticket.name, ticket.code, ticket.packageName]);
+  }, [ticket.name, ticket.code, ticket.packageName, ticket.phone]);
 
   // Stop the page behind from scrolling while the ticket is open.
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function TicketScreen({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={url} alt={`Booking ticket ${ticket.code}`} className="w-full h-auto block" />
           ) : (
-            <div className="w-full aspect-[2/3] bg-white/5 animate-pulse" />
+            <div className="w-full aspect-[360/390] bg-white/5 animate-pulse" />
           )}
 
           <div className="grid grid-cols-2 gap-2 mt-4">
