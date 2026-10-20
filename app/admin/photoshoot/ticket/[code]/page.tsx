@@ -18,7 +18,7 @@ export default async function PhotoshootTicketPage({
 
   const { data } = await supabase
     .from('photoshoot_bookings')
-    .select('code, name, package_name')
+    .select('code, name, phone, package_name')
     .eq('code', code)
     .maybeSingle();
 
@@ -28,7 +28,7 @@ export default async function PhotoshootTicketPage({
 
   return (
     <TicketScreen
-      ticket={{ name: data.name, code: data.code, packageName: data.package_name }}
+      ticket={{ name: data.name, code: data.code, packageName: data.package_name, phone: data.phone }}
       backHref={backHref}
     />
   );
