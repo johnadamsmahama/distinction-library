@@ -23,3 +23,6 @@ export const waNumber = (phone: string) => {
 // Opens a WhatsApp chat with the number, message already typed.
 export const waLink = (text: string, phone?: string) =>
   `https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text)}`;
+
+// Shown on the ticket (from the flyer).
+export const BOOKING_NUMBERS = '0248111310 / 0596890553';
