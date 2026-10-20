@@ -301,7 +301,7 @@ export default function AudioSlidesBrowser() {
 
   return (
     <div
-      className="relative"
+      className="relative lg:w-screen lg:ml-[calc(50%-50vw)]"
       style={{
         backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(198,164,75,0.13) 0%, transparent 55%), ${GLD_BG}`,
         minHeight: '100%',
@@ -311,7 +311,7 @@ export default function AudioSlidesBrowser() {
         @keyframes audioWave { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
         @keyframes audioPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
       `}</style>
-      <div className="max-w-[480px] mx-auto px-4 pt-10 pb-10">
+      <div className="max-w-[480px] lg:max-w-[1156px] mx-auto px-4 lg:px-7 pt-10 pb-10">
         <div className={`uppercase tracking-[0.14em] font-bold mb-1.5 ${mono}`} style={{ fontSize: 9, color: GLD_ACCENT }}>
           Library
         </div>
@@ -322,8 +322,10 @@ export default function AudioSlidesBrowser() {
           Professionally recorded course audio, so you can study on the go.
         </p>
 
+        {/* Laptop: search + filters share one row. Below lg this wrapper has no effect. */}
+        <div className="lg:grid lg:grid-cols-[2fr_1fr_1fr] lg:gap-2 lg:items-center lg:pb-4">
         <div
-          className="flex items-center gap-3 px-3.5 py-2.5 mb-3"
+          className="flex items-center gap-3 px-3.5 py-2.5 mb-3 lg:mb-0"
           style={{ background: GLD_CARD, border: `1.5px solid ${GLD_ACCENT}59`, boxShadow: '0 2px 8px rgba(74,59,20,0.06)' }}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={GLD_ACCENT} strokeWidth="2.5" className="flex-shrink-0">
@@ -345,7 +347,7 @@ export default function AudioSlidesBrowser() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pb-4">
+        <div className="grid grid-cols-2 gap-2 pb-4 lg:contents lg:[&_select]:py-[10px]">
           <FilterSelect
             value={level}
             onChange={setLevel}
@@ -365,6 +367,7 @@ export default function AudioSlidesBrowser() {
             fontClassName={mono}
           />
         </div>
+        </div>
 
         {!loading && (
           <div className="flex items-center justify-between mb-3">
@@ -378,7 +381,7 @@ export default function AudioSlidesBrowser() {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="animate-pulse" style={{ aspectRatio: '1 / 1', background: 'rgba(74,59,20,0.06)' }} />
             ))}
@@ -386,7 +389,7 @@ export default function AudioSlidesBrowser() {
         ) : visibleRecordings.length === 0 ? (
           <EmptyState noneAtAll={recordings.length === 0} />
         ) : (
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-4">
             {visibleRecordings.map((r) => (
               <RecordingTile key={r.id} recording={r} />
             ))}
