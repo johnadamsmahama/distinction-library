@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { renderTicket, type TicketData } from '@/lib/photoshootTicket';
 import { confirmationMessage } from '@/lib/photoshoot';
 
@@ -9,7 +10,19 @@ export type Ticket = TicketData;
 // A clean full-screen page showing just the ticket, with buttons underneath.
 // The ticket is a real PNG image, so it can be screenshotted, saved, or sent
 // to ANY app or contact from the share sheet (no WhatsApp number needed).
-export default function TicketScreen({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
+//
+// Used as a real page (/admin/photoshoot/ticket/[code]). "Done" goes back to
+// the bookings screen. Pass onClose only if you want to use it as an overlay.
+export default function TicketScreen({
+  ticket,
+  onClose,
+  backHref = '/admin/photoshoot',
+}: {
+  ticket: Ticket;
+  onClose?: () => void;
+  backHref?: string;
+}) {
+  const router = useRouter();
   const [blob, setBlob] = useState<Blob | null>(null);
   const [url, setUrl] = useState('');
   const [note, setNote] = useState('');
@@ -46,6 +59,15 @@ export default function TicketScreen({ ticket, onClose }: { ticket: Ticket; onCl
   }, []);
 
   const fileName = `${ticket.code}-ticket.png`;
+
+  const close = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
+    router.push(backHref);
+    router.refresh(); // so the new booking shows in the list
+  };
 
   const save = () => {
     if (!url) return;
@@ -118,7 +140,7 @@ export default function TicketScreen({ ticket, onClose }: { ticket: Ticket; onCl
             <button type="button" onClick={copyMessage} className={`${action} bg-transparent text-white border-white/40`}>
               {copied ? 'Copied ✓' : 'Copy message'}
             </button>
-            <button type="button" onClick={onClose} className={`${action} bg-white text-navy border-white`}>
+            <button type="button" onClick={close} className={`${action} bg-white text-navy border-white`}>
               Done
             </button>
           </div>
