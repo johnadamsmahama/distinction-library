@@ -294,14 +294,14 @@ export default function RepositoryBrowser({
 
   return (
     <div
-      className="relative"
+      className="relative lg:w-screen lg:ml-[calc(50%-50vw)]"
       style={{
         backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(177,80,47,0.10) 0%, transparent 55%), ${MAT_BG}`,
         minHeight: '100%',
       }}
     >
       {/* ── HERO ── */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pt-10 pb-0">
+      <div className="relative px-4 sm:px-6 lg:px-8 lg:max-w-[1164px] lg:mx-auto pt-10 pb-0">
         <div className="mb-1">
           <div
             className="font-mono font-bold uppercase tracking-[0.14em] mb-1.5"
@@ -317,9 +317,11 @@ export default function RepositoryBrowser({
           </p>
         </div>
 
+        {/* Laptop: search + filters share one row. Below lg this wrapper has no effect. */}
+        <div className="lg:grid lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-2 lg:items-center lg:pb-4">
         {/* ── SEARCH ── */}
         <div
-          className="flex items-center gap-3 rounded-none px-3.5 py-2.5 mb-3"
+          className="flex items-center gap-3 rounded-none px-3.5 py-2.5 mb-3 lg:mb-0"
           style={{ background: MAT_CARD, border: `1.5px solid ${MAT_RUST}59`, boxShadow: '0 2px 8px rgba(23,35,63,0.06)' }}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={MAT_RUST} strokeWidth="2.5" className="flex-shrink-0">
@@ -339,7 +341,7 @@ export default function RepositoryBrowser({
         </div>
 
         {/* ── FILTER STRIP ── */}
-        <div className="grid grid-cols-3 gap-2 pb-4">
+        <div className="grid grid-cols-3 gap-2 pb-4 lg:contents lg:[&_select]:py-[10px]">
           <FilterSelect
             value={level}
             onChange={setLevel}
@@ -374,10 +376,11 @@ export default function RepositoryBrowser({
             activeText="#7A3A20"
           />
         </div>
+        </div>
       </div>
 
       {/* ── RESULTS ── */}
-      <div className="relative px-4 sm:px-6 lg:px-8 pb-10 pt-2">
+      <div className="relative px-4 sm:px-6 lg:px-8 lg:max-w-[1164px] lg:mx-auto pb-10 pt-2">
         {!loading && (
           <div className="flex items-center justify-between mb-3">
             <span className="font-mono uppercase tracking-wide" style={{ fontSize: 9, color: 'rgba(23,35,63,0.4)' }}>
@@ -390,7 +393,7 @@ export default function RepositoryBrowser({
         )}
 
         {loading ? (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2.5 lg:grid lg:grid-cols-3 lg:gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="rounded-none h-[72px] animate-pulse" style={{ background: 'rgba(23,35,63,0.06)' }} />
             ))}
@@ -398,7 +401,7 @@ export default function RepositoryBrowser({
         ) : materials.length === 0 ? (
           <MaterialEmptyState />
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2.5 lg:grid lg:grid-cols-3 lg:gap-4">
             {materials.map((m) => (
               <MaterialCard
                 key={`${m.id}-${m.courses.id}`}
