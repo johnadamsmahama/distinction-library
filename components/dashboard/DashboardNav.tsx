@@ -63,24 +63,24 @@ export default function DashboardNav({
 
   return (
     <nav className="sticky top-0 z-50 bg-navy-deep border-t-2 border-gold shadow-[0_4px_18px_rgba(6,15,30,.25)]">
-      <div className="max-w-content mx-auto h-[64px] px-7 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-[9px]">
+      <div className="max-w-[1280px] mx-auto h-[64px] px-7 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-[9px] flex-shrink-0">
           <div className="w-[32px] h-[32px] bg-gold rounded-none flex items-center justify-center font-display font-black text-[15px] text-navy shadow-[0_2px_6px_rgba(201,160,44,.4)]">
             D
           </div>
-          <div className="font-condensed font-bold text-[16px] hidden sm:block">
+          <div className="font-condensed font-bold text-[16px] hidden sm:block whitespace-nowrap">
             <span className="text-white">Distinction</span> <span className="text-gold-light">Library</span>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-none overflow-x-auto max-w-[52vw]">
+        <div className="hidden md:flex items-center gap-[2px] bg-white/5 p-[5px] rounded-none overflow-x-auto max-w-[52vw] lg:overflow-visible lg:max-w-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CORE_LINKS.map((link) => {
             const active = pathname === link.href || pathname?.startsWith(link.href + '/');
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-[15px] py-2 rounded-none font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-2.5 xl:px-[15px] py-2 rounded-none font-condensed font-semibold text-[13px] transition-colors whitespace-nowrap flex-shrink-0 ${
                   active ? 'bg-gold text-navy' : 'text-white/75 hover:text-white hover:bg-white/[.07]'
                 }`}
               >
@@ -90,16 +90,16 @@ export default function DashboardNav({
           })}
         </div>
 
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-2.5 xl:gap-3.5 flex-shrink-0">
           <Link
             href="/dashboard/settings"
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block whitespace-nowrap"
           >
             Settings
           </Link>
           <Link
             href="/support"
-            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block"
+            className="font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-white transition-colors hidden sm:block whitespace-nowrap"
           >
             Support
           </Link>
@@ -107,7 +107,7 @@ export default function DashboardNav({
           {isStaff && (
             <Link
               href="/moderate"
-              className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:text-gold-light transition-colors hidden sm:block"
+              className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:text-gold-light transition-colors hidden sm:block whitespace-nowrap"
             >
               Moderate
             </Link>
@@ -115,7 +115,7 @@ export default function DashboardNav({
           {isAdmin && (
             <Link
               href="/admin"
-              className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:text-gold-light transition-colors hidden sm:block"
+              className="font-condensed font-bold text-xs uppercase tracking-wide text-gold hover:text-gold-light transition-colors hidden sm:block whitespace-nowrap"
             >
               Admin
             </Link>
@@ -144,7 +144,7 @@ export default function DashboardNav({
             <div className="w-[30px] h-[30px] rounded-none bg-gold text-navy flex items-center justify-center font-condensed font-bold text-xs shadow-[0_0_0_2px_rgba(255,255,255,.15)]">
               {initials}
             </div>
-            <span className="font-condensed font-semibold text-xs text-white">
+            <span className="hidden xl:inline font-condensed font-semibold text-xs text-white">
               {fullName?.split(' ')[0] ?? 'Student'}
             </span>
           </Link>
@@ -153,7 +153,7 @@ export default function DashboardNav({
 
           <button
             onClick={handleLogout}
-            className="hidden md:block font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-gold-light transition-colors"
+            className="hidden md:block whitespace-nowrap font-condensed font-bold text-xs uppercase tracking-wide text-white/75 hover:text-gold-light transition-colors"
           >
             Log out
           </button>
