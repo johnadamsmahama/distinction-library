@@ -39,12 +39,12 @@ function WhatsAppIcon() {
   );
 }
 
-export default function CommunityAndToolsSection() {
-  const [showGroupPicker, setShowGroupPicker] = useState(false);
-
+// Buy Data banner and Community & Tools are exported separately so the dashboard
+// can place them in different columns on laptop. The default export below keeps
+// the original stacked behaviour, so nothing else that imports it changes.
+export function BuyDataBanner() {
   return (
-    <div className="space-y-12">
-
+    <>
       {/* Buy Data — live, teal "zine" panel */}
       <Link
         href="/buy-data"
@@ -72,7 +72,15 @@ export default function CommunityAndToolsSection() {
           </div>
         </div>
       </Link>
+    </>
+  );
+}
 
+export function CommunityAndTools() {
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
+
+  return (
+    <>
       {/* Community & Tools — scrapbook collage: two straight, equal-size cards, staggered left and right */}
       <div>
         <div className="font-[family-name:var(--font-courier-prime)] font-bold text-[10px] tracking-[.1em] uppercase text-[#2F5A6B] mb-1.5">
@@ -176,6 +184,15 @@ export default function CommunityAndToolsSection() {
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+export default function CommunityAndToolsSection() {
+  return (
+    <div className="space-y-12">
+      <BuyDataBanner />
+      <CommunityAndTools />
     </div>
   );
 }
