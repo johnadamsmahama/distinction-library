@@ -10,6 +10,28 @@ html {
 
 body {
   @apply text-g800 bg-white font-body;
+  /* Lets .bleed-x backgrounds run past the page edge without adding a horizontal scrollbar. */
+  overflow-x: hidden;
+}
+
+/* Edge-to-edge background for pages that colour their whole area (Library, Upload,
+   Past Questions...). The element keeps its own colour and size; this paints the same
+   colour out to both screen edges behind it, so a wide screen never shows off-white strips.
+   Needs `background` set on the element itself (class or inline style). */
+.bleed-x {
+  position: relative;
+  isolation: isolate;
+}
+.bleed-x::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -100vw;
+  right: -100vw;
+  background: inherit;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .eyebrow {
