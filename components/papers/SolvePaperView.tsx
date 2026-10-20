@@ -120,7 +120,7 @@ export default function SolvePaperView({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#e9dfc4' }} className="py-3 px-3 sm:py-6 sm:px-4">
+    <div style={{ minHeight: '100vh', background: '#e9dfc4' }} className="py-3 px-3 sm:py-6 sm:px-4 lg:w-screen lg:ml-[calc(50%-50vw)]">
       <div
         className="max-w-content mx-auto"
         style={{
