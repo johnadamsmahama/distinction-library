@@ -24,5 +24,17 @@ export const waNumber = (phone: string) => {
 export const waLink = (text: string, phone?: string) =>
   `https://wa.me/${phone ? waNumber(phone) : ''}?text=${encodeURIComponent(text)}`;
 
+// The same number typed different ways (0248111310, 024 811 1310,
+// +233 24 811 1310) gives the same key: its last 9 digits. Matches the
+// unique index in the database. Returns '' if it isn't a full Ghana number.
+export const phoneKey = (phone: string) => {
+  const digits = phone.replace(/\D/g, '');
+  const ok =
+    (digits.length === 10 && digits.startsWith('0')) ||
+    (digits.length === 12 && digits.startsWith('233')) ||
+    digits.length === 9;
+  return ok ? digits.slice(-9) : '';
+};
+
 // Shown on the ticket (from the flyer).
 export const BOOKING_NUMBERS = '0248111310 / 0596890553';
