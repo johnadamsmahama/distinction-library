@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { confirmationMessage, firstName, formatPrice, waLink } from '@/lib/photoshoot';
+import { formatPrice } from '@/lib/photoshoot';
+import TicketScreen, { type Ticket } from './TicketScreen';
 
 type BookingStatus = 'confirmed' | 'cancelled';
 
@@ -45,50 +46,6 @@ const goldBtn =
 const inputCls = 'w-full border border-navy px-3.5 py-3 text-sm font-body bg-white rounded-none';
 const labelCls = 'block font-condensed font-bold text-[11px] uppercase tracking-wide text-g600 mb-1';
 
-// The card you screenshot and send to the student.
-function ConfirmationCard({
-  name,
-  code,
-  phone,
-  copied,
-  onCopy,
-}: {
-  name: string;
-  code: string;
-  phone: string;
-  copied: boolean;
-  onCopy: () => void;
-}) {
-  return (
-    <div>
-      <div className="bg-white border-2 border-gold rounded-none p-4 mb-3">
-        <p className="font-condensed font-bold text-[11px] uppercase tracking-widest text-g600 mb-3">
-          Matriculation Photoshoot
-        </p>
-        <p className="font-display font-bold text-lg text-navy mb-1">Hello {firstName(name)}</p>
-        <p className="font-body text-sm text-g600 mb-4">Your Matriculation Photoshoot Booking is confirmed.</p>
-        <div className="border-2 border-dashed border-navy bg-[#F6F1E3] text-center py-4">
-          <div className="font-condensed text-[11px] uppercase tracking-widest text-g600 mb-1">Your code is</div>
-          <div className="font-display font-bold text-4xl tracking-[0.12em] text-navy leading-none">{code}</div>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={onCopy} className={btn}>
-          {copied ? 'Copied ✓' : 'Copy message'}
-        </button>
-        <a
-          href={waLink(confirmationMessage(name, code), phone)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={btn}
-        >
-          WhatsApp
-        </a>
-      </div>
-    </div>
-  );
-}
-
 export default function PhotoshootManager({
   bookings: initialBookings,
   packages: initialPackages,
@@ -103,35 +60,23 @@ export default function PhotoshootManager({
   const [bookings, setBookings] = useState(initialBookings);
   const [packages, setPackages] = useState(initialPackages);
   const [error, setError] = useState('');
-  const [copiedKey, setCopiedKey] = useState('');
 
   // Keep in step with fresh server data after a refresh.
   useEffect(() => setBookings(initialBookings), [initialBookings]);
   useEffect(() => setPackages(initialPackages), [initialPackages]);
-
-  const copy = async (key: string, text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedKey(key);
-      setTimeout(() => setCopiedKey(''), 2000);
-    } catch {
-      setError('Could not copy. Select the text and copy it manually.');
-    }
-  };
 
   // ── new booking ──
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
   const [creating, setCreating] = useState(false);
-  const [created, setCreated] = useState<{ name: string; phone: string; code: string } | null>(null);
+  const [ticket, setTicket] = useState<Ticket | null>(null);
 
   const activePackages = packages.filter((p) => p.active);
 
   const createBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setCreated(null);
     if (!name.trim() || !phone.trim() || !packageId) {
       setError('Fill in the name, number and package.');
       return;
@@ -152,7 +97,8 @@ export default function PhotoshootManager({
       setError(ERRORS[result.error ?? ''] ?? 'Something went wrong. Please try again.');
       return;
     }
-    setCreated({ name: name.trim(), phone, code: result.code });
+    const pkgName = packages.find((p) => p.id === packageId)?.name ?? '';
+    setTicket({ name: name.trim(), code: result.code, packageName: pkgName });
     setName('');
     setPhone('');
     setPackageId('');
@@ -162,7 +108,6 @@ export default function PhotoshootManager({
   // ── bookings ──
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'all' | BookingStatus>('all');
-  const [openCardId, setOpenCardId] = useState('');
 
   const counts = useMemo(() => {
     const c = { all: bookings.length, confirmed: 0, cancelled: 0 };
@@ -303,7 +248,7 @@ export default function PhotoshootManager({
         </button>
       </div>
       <p className="font-body text-sm text-g600 mb-4">
-        Enter a student after they pay, then send them their code. At the shoot, check that the code and name match.
+        Enter a student after they pay. A ticket opens that you can share or screenshot. At the shoot, check that the code and name match.
       </p>
 
       <div className="grid grid-cols-3 gap-1.5 mb-4">
@@ -386,16 +331,6 @@ export default function PhotoshootManager({
               </button>
             </form>
           )}
-
-          {created && (
-            <ConfirmationCard
-              name={created.name}
-              code={created.code}
-              phone={created.phone}
-              copied={copiedKey === 'created'}
-              onCopy={() => copy('created', confirmationMessage(created.name, created.code))}
-            />
-          )}
         </div>
       )}
 
@@ -459,10 +394,10 @@ export default function PhotoshootManager({
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     <button
                       type="button"
-                      onClick={() => setOpenCardId(openCardId === b.id ? '' : b.id)}
+                      onClick={() => setTicket({ name: b.name, code: b.code, packageName: b.package_name })}
                       className={btn}
                     >
-                      {openCardId === b.id ? 'Hide card' : 'Show card'}
+                      Ticket
                     </button>
                     <a href={`tel:${b.phone}`} className={btn}>
                       Call {b.phone}
@@ -482,18 +417,6 @@ export default function PhotoshootManager({
                       Delete
                     </button>
                   </div>
-
-                  {openCardId === b.id && (
-                    <div className="mt-3">
-                      <ConfirmationCard
-                        name={b.name}
-                        code={b.code}
-                        phone={b.phone}
-                        copied={copiedKey === `card-${b.id}`}
-                        onCopy={() => copy(`card-${b.id}`, confirmationMessage(b.name, b.code))}
-                      />
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -608,6 +531,8 @@ export default function PhotoshootManager({
           )}
         </div>
       )}
+
+      {ticket && <TicketScreen ticket={ticket} onClose={() => setTicket(null)} />}
     </div>
   );
 }
