@@ -34,7 +34,7 @@ const ERRORS: Record<string, string> = {
   invalid_name: 'Enter the full name (at least 3 letters).',
   invalid_phone: 'Enter a valid Ghana phone number.',
   invalid_package: 'Choose a package.',
-  duplicate: 'That number already has a booking. Search for it under Bookings.',
+  duplicate: 'This person is already booked with that number. Search for them under Bookings.',
   no_codes: 'No free codes left. Delete cancelled bookings to free some up.',
   not_allowed: 'Only admins can add bookings.',
 };
@@ -84,15 +84,19 @@ export default function PhotoshootManager({
       return;
     }
 
-    // One booking per number, however it is typed (0248…, 024 8…, +233 24 8…).
+    // A number can hold several bookings (each gets its own code). Only the
+    // exact same person (same number AND same name) is blocked, however the
+    // number is typed (0248…, 024 8…, +233 24 8…).
     const key = phoneKey(phone);
     if (!key) {
       setError(ERRORS.invalid_phone);
       return;
     }
-    const existing = bookings.find((b) => phoneKey(b.phone) === key);
+    const sameName = (a: string, b: string) =>
+      a.trim().replace(/\s+/g, ' ').toLowerCase() === b.trim().replace(/\s+/g, ' ').toLowerCase();
+    const existing = bookings.find((b) => phoneKey(b.phone) === key && sameName(b.name, name));
     if (existing) {
-      setError(`That number already has a booking (${existing.code}). Search for it under Bookings.`);
+      setError(`${existing.name} is already booked with that number (${existing.code}). Search for it under Bookings.`);
       return;
     }
 
@@ -159,7 +163,7 @@ export default function PhotoshootManager({
   };
 
   const removeBooking = async (b: Booking) => {
-    if (!window.confirm(`Delete ${b.code} (${b.name})? This frees their phone number to book again.`)) return;
+    if (!window.confirm(`Delete ${b.code} (${b.name})? This removes the booking and its code.`)) return;
     setError('');
     const before = bookings;
     setBookings((prev) => prev.filter((x) => x.id !== b.id));
