@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import PhotoshootManager from '@/components/admin/PhotoshootManager';
 
-export default async function AdminPhotoshootPage() {
+export default async function AdminPhotoshootPage({
+  searchParams,
+}: {
+  searchParams: { tab?: string };
+}) {
   const supabase = createClient();
 
   const [bookingsRes, packagesRes] = await Promise.all([
@@ -16,10 +20,14 @@ export default async function AdminPhotoshootPage() {
       .order('created_at', { ascending: true }),
   ]);
 
+  const initialTab =
+    searchParams.tab === 'bookings' || searchParams.tab === 'packages' ? searchParams.tab : 'new';
+
   return (
     <PhotoshootManager
       bookings={(bookingsRes.data as any) ?? []}
       packages={(packagesRes.data as any) ?? []}
+      initialTab={initialTab}
     />
   );
 }
