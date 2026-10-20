@@ -88,7 +88,7 @@ function CatalogCard({ paper }: { paper: Paper }) {
 
   return (
     <div
-      className="relative mb-3"
+      className="relative mb-3 lg:mb-0"
       style={{
         background: LIB_CARD,
         padding: '16px 14px 15px',
@@ -268,8 +268,8 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
   }, [filteredCourseOptions, courseId]);
 
   return (
-    <div className="relative" style={{ background: LIB_BG, minHeight: '100vh' }}>
-      <div className="max-w-[480px] mx-auto px-4 pt-6 pb-10">
+    <div className="bleed-x" style={{ background: LIB_BG, minHeight: '100vh' }}>
+      <div className="max-w-[480px] lg:max-w-[1156px] mx-auto px-4 lg:px-7 pt-6 pb-10">
         <div className={`flex items-center gap-2 mb-4 font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 13, color: LIB_INK }}>
           <a href="/dashboard" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
             <span>←</span>
@@ -300,8 +300,10 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
           Past Questions Bank
         </h1>
 
+        {/* Laptop: search + the three filters share one row. Below lg this wrapper has no effect. */}
+        <div className="lg:grid lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-2 lg:items-center lg:mb-3">
         <div
-          className="flex items-center gap-2 mb-2.5"
+          className="flex items-center gap-2 mb-2.5 lg:mb-0"
           style={{ background: LIB_CARD, border: `1.5px solid ${LIB_INK}33`, padding: '9px 12px' }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2F5A45" strokeWidth="2.5" className="flex-shrink-0">
@@ -322,7 +324,7 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5 mb-3">
+        <div className="grid grid-cols-3 gap-1.5 mb-3 lg:contents lg:[&_select]:py-[9px]">
           <FilterSelect
             value={level}
             onChange={setLevel}
@@ -355,6 +357,7 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
             fontClassName={mono}
           />
         </div>
+        </div>
 
         {!loading && (
           <div className="flex items-center justify-between mb-2.5">
@@ -368,7 +371,7 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
         )}
 
         {loading ? (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2.5 lg:grid lg:grid-cols-2 lg:gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse" style={{ height: 82, background: 'rgba(27,67,50,0.06)' }} />
             ))}
@@ -376,7 +379,7 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
         ) : papers.length === 0 ? (
           <EmptyState noneAtAll={papers.length === 0 && !debouncedSearch && !level && !courseId && !examType} />
         ) : (
-          <div>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
             {papers.map((p) => (
               // A shared paper appears once per course, so the key must
               // include the course as well as the paper id.
