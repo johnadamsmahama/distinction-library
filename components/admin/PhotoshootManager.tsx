@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { formatPrice } from '@/lib/photoshoot';
-import TicketScreen, { type Ticket } from './TicketScreen';
+import { formatPrice, phoneKey } from '@/lib/photoshoot';
 
 type BookingStatus = 'confirmed' | 'cancelled';
 
@@ -49,14 +49,16 @@ const labelCls = 'block font-condensed font-bold text-[11px] uppercase tracking-
 export default function PhotoshootManager({
   bookings: initialBookings,
   packages: initialPackages,
+  initialTab = 'new',
 }: {
   bookings: Booking[];
   packages: PhotoPackage[];
+  initialTab?: Tab;
 }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const [tab, setTab] = useState<Tab>('new');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [bookings, setBookings] = useState(initialBookings);
   const [packages, setPackages] = useState(initialPackages);
   const [error, setError] = useState('');
@@ -70,39 +72,54 @@ export default function PhotoshootManager({
   const [phone, setPhone] = useState('');
   const [packageId, setPackageId] = useState('');
   const [creating, setCreating] = useState(false);
-  const [ticket, setTicket] = useState<Ticket | null>(null);
 
   const activePackages = packages.filter((p) => p.active);
 
   const createBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (creating) return;
     setError('');
     if (!name.trim() || !phone.trim() || !packageId) {
       setError('Fill in the name, number and package.');
       return;
     }
+
+    // One booking per number, however it is typed (0248…, 024 8…, +233 24 8…).
+    const key = phoneKey(phone);
+    if (!key) {
+      setError(ERRORS.invalid_phone);
+      return;
+    }
+    const existing = bookings.find((b) => phoneKey(b.phone) === key);
+    if (existing) {
+      setError(`That number already has a booking (${existing.code}). Search for it under Bookings.`);
+      return;
+    }
+
     setCreating(true);
     const { data, error: err } = await supabase.rpc('admin_create_photoshoot_booking', {
       p_name: name,
       p_phone: phone,
       p_package_id: packageId,
     });
-    setCreating(false);
     if (err || !data) {
+      setCreating(false);
       setError('Something went wrong. Please try again.');
       return;
     }
     const result = data as { ok: boolean; code?: string; error?: string };
     if (!result.ok || !result.code) {
+      setCreating(false);
       setError(ERRORS[result.error ?? ''] ?? 'Something went wrong. Please try again.');
       return;
     }
-    const pkgName = packages.find((p) => p.id === packageId)?.name ?? '';
-    setTicket({ name: name.trim(), code: result.code, packageName: pkgName });
+
+    // Open the ticket on its own page. The button stays disabled until the
+    // page changes, so a second tap can't send a second booking.
     setName('');
     setPhone('');
     setPackageId('');
-    router.refresh();
+    router.push(`/admin/photoshoot/ticket/${encodeURIComponent(result.code)}`);
   };
 
   // ── bookings ──
@@ -248,7 +265,7 @@ export default function PhotoshootManager({
         </button>
       </div>
       <p className="font-body text-sm text-g600 mb-4">
-        Enter a student after they pay. A ticket opens that you can share or screenshot. At the shoot, check that the code and name match.
+        Enter a student after they pay. Tap Generate ticket and the ticket opens on its own page, ready to share or save as an image. At the shoot, check that the code and name match.
       </p>
 
       <div className="grid grid-cols-3 gap-1.5 mb-4">
@@ -327,7 +344,7 @@ export default function PhotoshootManager({
               </select>
 
               <button type="submit" disabled={creating} className={goldBtn}>
-                {creating ? 'Creating…' : 'Create booking'}
+                {creating ? 'Generating…' : 'Generate ticket'}
               </button>
             </form>
           )}
@@ -356,7 +373,7 @@ export default function PhotoshootManager({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search e.g. JM2K1, Ama, 0248111310"
+            placeholder="Search e.g. JM2K7, Ama, 0248111310"
             className={`${inputCls} mb-4`}
           />
 
@@ -392,13 +409,12 @@ export default function PhotoshootManager({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 mt-3">
-                    <button
-                      type="button"
-                      onClick={() => setTicket({ name: b.name, code: b.code, packageName: b.package_name })}
+                    <Link
+                      href={`/admin/photoshoot/ticket/${encodeURIComponent(b.code)}?from=bookings`}
                       className={btn}
                     >
                       Ticket
-                    </button>
+                    </Link>
                     <a href={`tel:${b.phone}`} className={btn}>
                       Call {b.phone}
                     </a>
@@ -531,8 +547,6 @@ export default function PhotoshootManager({
           )}
         </div>
       )}
-
-      {ticket && <TicketScreen ticket={ticket} onClose={() => setTicket(null)} />}
     </div>
   );
 }
