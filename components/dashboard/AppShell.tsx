@@ -36,7 +36,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
     <div className="min-h-screen bg-off-white">
       <InactivityLogout />
       <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
-      <main className="max-w-content mx-auto px-5 sm:px-7 py-8">
+      <main className="max-w-[1280px] mx-auto px-5 sm:px-7 py-8">
         <HomeButtonGate />
         {children}
       </main>
