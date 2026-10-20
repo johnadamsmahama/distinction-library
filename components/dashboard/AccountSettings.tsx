@@ -188,9 +188,9 @@ export default function AccountSettings({
   };
 
   return (
-    <div className="space-y-4 max-w-2xl">
+    <div className="space-y-4 max-w-2xl lg:max-w-none lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
       {/* vault dial */}
-      <div className="w-14 h-14 rounded-none mx-auto mb-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
+      <div className="w-14 h-14 rounded-none mx-auto mb-2 lg:mb-0 lg:col-span-2 bg-gradient-to-br from-navy to-navy-deep flex items-center justify-center shadow-[0_10px_22px_rgba(13,43,94,0.3)] relative">
         <div className="absolute inset-1.5 rounded-none border border-dashed border-gold-light/40" />
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[22px] h-[22px] stroke-gold-light">
           <rect x="3" y="11" width="18" height="10" rx="2" />
@@ -198,214 +198,218 @@ export default function AccountSettings({
         </svg>
       </div>
 
-      {/* Profile */}
-      <form onSubmit={saveProfile} className={panelClass}>
-        <div className={panelTexture} />
-        <div className={panelHead}>
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
-            <circle cx="12" cy="8" r="4" />
-            <path d="M20 21a8 8 0 1 0-16 0" />
-          </svg>
-          <h2 className={panelTitle}>Identity Record</h2>
-        </div>
-        <div className="space-y-3 relative">
-          <div>
-            <label className={labelClass}>Full name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Ama Serwaa"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Department / Programme</label>
-            <input
-              type="text"
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Marketing"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Level</label>
-            <select value={level} onChange={(e) => setLevel(e.target.value)} className={selectClass}>
-              <option value="">Not set</option>
-              {LEVELS.map((l) => (
-                <option key={l} value={l}>
-                  Level {l}
-                </option>
-              ))}
-            </select>
-          </div>
-          {profileError && <p className="font-body text-sm text-red-300">{profileError}</p>}
-          {profileSaved && <p className="font-body text-sm text-green-300">Saved successfully.</p>}
-          <button type="submit" disabled={profileLoading} className={btnGold}>
-            {profileLoading ? 'Saving…' : 'Save changes'}
-          </button>
-        </div>
-      </form>
-
-      {/* Email verification status + change email */}
-      <form onSubmit={changeEmail} className={panelClass}>
-        <div className={panelTexture} />
-        <div className={panelHead}>
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
-            <path d="M4 4h16v16H4z" />
-            <path d="m4 4 8 8 8-8" />
-          </svg>
-          <h2 className={`${panelTitle} flex-1`}>Access Email</h2>
-          <span
-            className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-none border ${
-              emailConfirmed
-                ? 'text-green-300 bg-green-400/10 border-green-400/30'
-                : 'text-amber-300 bg-amber-400/10 border-amber-400/30'
-            }`}
-          >
-            {emailConfirmed ? '✓ Verified' : 'Not verified'}
-          </span>
-        </div>
-        <div className="space-y-3 relative">
-          <div>
-            <label className={labelClass}>Current UPSA email</label>
-            <input type="text" value={userEmail} disabled className={`${inputClass} opacity-55`} />
-          </div>
-          <div>
-            <label className={labelClass}>New email</label>
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className={inputClass}
-              placeholder="you@st.upsamail.edu.gh"
-            />
-          </div>
-          {emailError && <p className="font-body text-sm text-red-300">{emailError}</p>}
-          {emailSent && (
-            <p className="font-body text-sm text-green-300">
-              Check both your old and new inbox to confirm the change.
-            </p>
-          )}
-          <button type="submit" disabled={emailLoading} className={btnGhost}>
-            {emailLoading ? 'Sending…' : 'Change email'}
-          </button>
-        </div>
-      </form>
-
-      {/* Change password */}
-      <form onSubmit={changePassword} className={panelClass}>
-        <div className={panelTexture} />
-        <div className={panelHead}>
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
-            <rect x="3" y="11" width="18" height="10" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          <h2 className={panelTitle}>Access Credentials</h2>
-        </div>
-        <div className="space-y-3 relative">
-          <div>
-            <label className={labelClass}>New password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className={inputClass}
-              placeholder="At least 8 characters"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Confirm new password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          {passwordError && <p className="font-body text-sm text-red-300">{passwordError}</p>}
-          {passwordSaved && <p className="font-body text-sm text-green-300">Password updated.</p>}
-          <button type="submit" disabled={passwordLoading} className={btnGhost}>
-            {passwordLoading ? 'Updating…' : 'Change password'}
-          </button>
-        </div>
-      </form>
-
-      {/* Privacy */}
-      <div className={panelClass}>
-        <div className={panelTexture} />
-        <div className={panelHead}>
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
-            <path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z" />
-          </svg>
-          <h2 className={panelTitle}>Privacy Shield</h2>
-        </div>
-        <div className="flex items-start gap-3 relative">
-          <div className="w-[38px] h-[38px] rounded-none bg-gold-light/10 border border-gold-light/30 flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-gold-light">
-              <path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z" />
+      <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-col lg:gap-4">
+        {/* Profile */}
+        <form onSubmit={saveProfile} className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <circle cx="12" cy="8" r="4" />
+              <path d="M20 21a8 8 0 1 0-16 0" />
             </svg>
+            <h2 className={panelTitle}>Identity Record</h2>
           </div>
-          <div className="flex-1">
-            <div className="font-body font-semibold text-[13.5px] text-[#F0F2F8]">
-              Hide me from the Leaderboard
+          <div className="space-y-3 relative">
+            <div>
+              <label className={labelClass}>Full name</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. Ama Serwaa"
+              />
             </div>
-            <div className="font-body text-[11.5px] text-[#8593B8] mt-0.5 leading-relaxed">
-              Your uploads still count, but your name won't appear in the public rankings.
+            <div>
+              <label className={labelClass}>Department / Programme</label>
+              <input
+                type="text"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. Marketing"
+              />
             </div>
+            <div>
+              <label className={labelClass}>Level</label>
+              <select value={level} onChange={(e) => setLevel(e.target.value)} className={selectClass}>
+                <option value="">Not set</option>
+                {LEVELS.map((l) => (
+                  <option key={l} value={l}>
+                    Level {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {profileError && <p className="font-body text-sm text-red-300">{profileError}</p>}
+            {profileSaved && <p className="font-body text-sm text-green-300">Saved successfully.</p>}
+            <button type="submit" disabled={profileLoading} className={btnGold}>
+              {profileLoading ? 'Saving…' : 'Save changes'}
+            </button>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={leaderboardOptOut}
-            onClick={togglePrivacy}
-            disabled={privacyLoading}
-            className={`w-10 h-[23px] rounded-none flex-shrink-0 mt-0.5 relative transition-colors disabled:opacity-60 ${
-              leaderboardOptOut ? 'bg-gold' : 'bg-white/15'
-            }`}
-          >
+        </form>
+
+        {/* Email verification status + change email */}
+        <form onSubmit={changeEmail} className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <path d="M4 4h16v16H4z" />
+              <path d="m4 4 8 8 8-8" />
+            </svg>
+            <h2 className={`${panelTitle} flex-1`}>Access Email</h2>
             <span
-              className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-none bg-white transition-all ${
-                leaderboardOptOut ? 'left-[19px]' : 'left-[2.5px]'
+              className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-none border ${
+                emailConfirmed
+                  ? 'text-green-300 bg-green-400/10 border-green-400/30'
+                  : 'text-amber-300 bg-amber-400/10 border-amber-400/30'
               }`}
-            />
-          </button>
-        </div>
+            >
+              {emailConfirmed ? '✓ Verified' : 'Not verified'}
+            </span>
+          </div>
+          <div className="space-y-3 relative">
+            <div>
+              <label className={labelClass}>Current UPSA email</label>
+              <input type="text" value={userEmail} disabled className={`${inputClass} opacity-55`} />
+            </div>
+            <div>
+              <label className={labelClass}>New email</label>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className={inputClass}
+                placeholder="you@st.upsamail.edu.gh"
+              />
+            </div>
+            {emailError && <p className="font-body text-sm text-red-300">{emailError}</p>}
+            {emailSent && (
+              <p className="font-body text-sm text-green-300">
+                Check both your old and new inbox to confirm the change.
+              </p>
+            )}
+            <button type="submit" disabled={emailLoading} className={btnGhost}>
+              {emailLoading ? 'Sending…' : 'Change email'}
+            </button>
+          </div>
+        </form>
       </div>
 
-      {/* Account deletion / data export */}
-      <div className={panelClass}>
-        <div className={panelTexture} />
-        <div className={panelHead}>
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
-            <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2m18 0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2m18 0v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" />
-          </svg>
-          <h2 className={panelTitle}>Vault Requests</h2>
-        </div>
-        <p className="font-body text-[11.5px] text-[#8593B8] mb-3 relative leading-relaxed">
-          These are handled as requests reviewed by our team, not instant actions.
-        </p>
-        <div className="space-y-2.5 relative">
-          <div className="flex items-center justify-between bg-gold-light/5 border border-dashed border-gold-light/35 rounded-none px-3.5 py-3">
-            <span className="font-body font-semibold text-[12.5px] text-[#F0F2F8]">Data Export</span>
-            <button
-              onClick={() => submitRequest('export')}
-              disabled={requestLoading !== null}
-              className="font-condensed font-bold text-[10.5px] text-gold-light border border-gold-light/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
-            >
-              {requestLoading === 'export' ? 'Sending…' : requestSent === 'export' ? 'Requested ✓' : 'Request'}
+      <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-col lg:gap-4">
+        {/* Change password */}
+        <form onSubmit={changePassword} className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <rect x="3" y="11" width="18" height="10" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <h2 className={panelTitle}>Access Credentials</h2>
+          </div>
+          <div className="space-y-3 relative">
+            <div>
+              <label className={labelClass}>New password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className={inputClass}
+                placeholder="At least 8 characters"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Confirm new password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            {passwordError && <p className="font-body text-sm text-red-300">{passwordError}</p>}
+            {passwordSaved && <p className="font-body text-sm text-green-300">Password updated.</p>}
+            <button type="submit" disabled={passwordLoading} className={btnGhost}>
+              {passwordLoading ? 'Updating…' : 'Change password'}
             </button>
           </div>
-          <div className="flex items-center justify-between bg-red-500/5 border border-dashed border-red-400/35 rounded-none px-3.5 py-3">
-            <span className="font-body font-semibold text-[12.5px] text-[#E28A8A]">Account Deletion</span>
+        </form>
+
+        {/* Privacy */}
+        <div className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z" />
+            </svg>
+            <h2 className={panelTitle}>Privacy Shield</h2>
+          </div>
+          <div className="flex items-start gap-3 relative">
+            <div className="w-[38px] h-[38px] rounded-none bg-gold-light/10 border border-gold-light/30 flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-gold-light">
+                <path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="font-body font-semibold text-[13.5px] text-[#F0F2F8]">
+                Hide me from the Leaderboard
+              </div>
+              <div className="font-body text-[11.5px] text-[#8593B8] mt-0.5 leading-relaxed">
+                Your uploads still count, but your name won't appear in the public rankings.
+              </div>
+            </div>
             <button
-              onClick={() => submitRequest('delete')}
-              disabled={requestLoading !== null}
-              className="font-condensed font-bold text-[10.5px] text-[#E28A8A] border border-[#E28A8A]/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
+              type="button"
+              role="switch"
+              aria-checked={leaderboardOptOut}
+              onClick={togglePrivacy}
+              disabled={privacyLoading}
+              className={`w-10 h-[23px] rounded-none flex-shrink-0 mt-0.5 relative transition-colors disabled:opacity-60 ${
+                leaderboardOptOut ? 'bg-gold' : 'bg-white/15'
+              }`}
             >
-              {requestLoading === 'delete' ? 'Sending…' : requestSent === 'delete' ? 'Requested ✓' : 'Request'}
+              <span
+                className={`absolute top-[2.5px] w-[18px] h-[18px] rounded-none bg-white transition-all ${
+                  leaderboardOptOut ? 'left-[19px]' : 'left-[2.5px]'
+                }`}
+              />
             </button>
+          </div>
+        </div>
+
+        {/* Account deletion / data export */}
+        <div className={panelClass}>
+          <div className={panelTexture} />
+          <div className={panelHead}>
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" className={lockIcon}>
+              <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2m18 0a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2m18 0v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" />
+            </svg>
+            <h2 className={panelTitle}>Vault Requests</h2>
+          </div>
+          <p className="font-body text-[11.5px] text-[#8593B8] mb-3 relative leading-relaxed">
+            These are handled as requests reviewed by our team, not instant actions.
+          </p>
+          <div className="space-y-2.5 relative">
+            <div className="flex items-center justify-between bg-gold-light/5 border border-dashed border-gold-light/35 rounded-none px-3.5 py-3">
+              <span className="font-body font-semibold text-[12.5px] text-[#F0F2F8]">Data Export</span>
+              <button
+                onClick={() => submitRequest('export')}
+                disabled={requestLoading !== null}
+                className="font-condensed font-bold text-[10.5px] text-gold-light border border-gold-light/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
+              >
+                {requestLoading === 'export' ? 'Sending…' : requestSent === 'export' ? 'Requested ✓' : 'Request'}
+              </button>
+            </div>
+            <div className="flex items-center justify-between bg-red-500/5 border border-dashed border-red-400/35 rounded-none px-3.5 py-3">
+              <span className="font-body font-semibold text-[12.5px] text-[#E28A8A]">Account Deletion</span>
+              <button
+                onClick={() => submitRequest('delete')}
+                disabled={requestLoading !== null}
+                className="font-condensed font-bold text-[10.5px] text-[#E28A8A] border border-[#E28A8A]/40 px-3 py-1.5 rounded-none disabled:opacity-60 flex-shrink-0 ml-3"
+              >
+                {requestLoading === 'delete' ? 'Sending…' : requestSent === 'delete' ? 'Requested ✓' : 'Request'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
