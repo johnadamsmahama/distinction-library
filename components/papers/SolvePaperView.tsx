@@ -1,5 +1,3 @@
-// File: components/papers/SolvePaperView.tsx  (replace the whole file)
-
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -23,6 +21,19 @@ type ViewState = 'checking' | 'not_ready' | 'solving' | 'ready' | 'error';
 // keeps each line of writing sitting on its ruled line.
 const ROW = 32;
 
+// How tall one "page" of the script may be, measured in screen heights.
+// 1 = exactly one screen (one long question per page on a phone).
+// 2 = about two screens of content per page (several questions per page).
+// Raise it for more questions per page, lower it for fewer.
+const PAGE_SCREENS = 2;
+
+// Never build a page shorter than this many ruled rows.
+const MIN_PAGE_ROWS = 16;
+
+// Height of the site header above the booklet, used so a short page does not
+// force the document to scroll past the end of the paper.
+const SITE_HEADER_OFFSET = '4.25rem';
+
 // ---------------------------------------------------------------------------
 // Styles for the answer booklet. The paper fills the whole page (no frame),
 // has ONE red margin line, and the writing sits on the ruled lines.
@@ -40,7 +51,8 @@ const BOOKLET_CSS = `
   --sb-muted: #8A7A5C;
   --sb-margin-x: 40px;
   --sb-gap: 16px;
-  min-height: 100vh;
+  min-height: calc(100vh - ${SITE_HEADER_OFFSET});
+  min-height: calc(100dvh - ${SITE_HEADER_OFFSET});
   background-color: var(--sb-paper);
   background-image: linear-gradient(to bottom,
     transparent 0, transparent var(--sb-rule-y),
@@ -52,8 +64,8 @@ const BOOKLET_CSS = `
 }
 @media (min-width: 640px) { .sb-paper { --sb-margin-x: 56px; --sb-gap: 20px; } }
 .sb-col {
-  position: relative; max-width: 720px; margin: 0 auto; min-height: 100vh;
-  padding: 0 20px 96px calc(var(--sb-margin-x) + var(--sb-gap));
+  position: relative; max-width: 720px; margin: 0 auto;
+  padding: 0 20px 64px calc(var(--sb-margin-x) + var(--sb-gap));
 }
 .sb-margin {
   position: absolute; top: 0; bottom: 0; left: var(--sb-margin-x);
@@ -376,31 +388,49 @@ function NotReadyState({
 }
 
 /**
- * Paginates solved questions into physical "pages" that fit the screen, like
- * a real answer script — never a question+answer pair split across two pages.
+ * Paginates solved questions into "pages" of an answer script — never a
+ * question+answer pair split across two pages.
  *
  * Every block is rendered once, off-screen, to measure its real height.
- * Blocks are then packed into pages. The first page also carries the title
+ * Blocks are then packed into pages up to PAGE_SCREENS screen-heights tall,
+ * so several questions share a page. The first page also carries the title
  * block; later pages carry a one-row running header. Heights are whole
  * multiples of the ruled row, so the writing always sits on the lines.
+ *
+ * The measuring layer uses position: fixed (parked off-screen). Unlike an
+ * absolutely positioned layer, a fixed one never adds to the document's
+ * scrollable height — that was what created the blank scroll space.
  */
 function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; heading: Heading }) {
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
   const titleMeasureRef = useRef<HTMLDivElement | null>(null);
+  const measureLayerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [pages, setPages] = useState<SolvedQuestion[][] | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
 
   useLayoutEffect(() => {
+    let cancelled = false;
+
     function measureAndPaginate() {
       const container = containerRef.current;
-      if (!container) return;
+      const layer = measureLayerRef.current;
+      if (!container || !layer) return;
+
+      // Give the off-screen layer the same width as the real column so
+      // wrapped lines (and therefore heights) match exactly.
+      layer.style.width = `${container.offsetWidth}px`;
 
       const snap = (h: number) => Math.ceil(h / ROW) * ROW;
       const top = container.getBoundingClientRect().top + window.scrollY;
-      // Room left on the screen after whatever sits above the booklet, minus
-      // the footer (reviewed line + nav = 3 rows) and one row of breathing space.
-      const roomForPage = Math.max(window.innerHeight - top - ROW * 4, ROW * 8);
+
+      // Height of one page: PAGE_SCREENS screens, minus whatever sits above
+      // the booklet, minus the footer (reviewed line + nav = 3 rows) and one
+      // row of breathing space.
+      const roomForPage = Math.max(
+        window.innerHeight * PAGE_SCREENS - top - ROW * 4,
+        ROW * MIN_PAGE_ROWS,
+      );
       const titleH = snap(titleMeasureRef.current?.offsetHeight ?? ROW * 5);
       const heights = measureRefs.current.map((el) => snap(el ? el.offsetHeight : ROW * 4));
 
@@ -428,7 +458,19 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
 
     measureAndPaginate();
     window.addEventListener('resize', measureAndPaginate);
-    return () => window.removeEventListener('resize', measureAndPaginate);
+
+    // Web fonts can change line wrapping after first paint — measure again
+    // once they have loaded so pages are not mis-sized.
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (!cancelled) measureAndPaginate();
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', measureAndPaginate);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions]);
 
@@ -443,10 +485,13 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Hidden measurement pass — real markup, off-screen, so heights match exactly */}
+      {/* Hidden measurement pass — real markup, parked off-screen, so heights
+          match exactly. position: fixed keeps it out of the page's scroll
+          height, so it cannot create blank space below the paper. */}
       <div
-        className="absolute pointer-events-none"
-        style={{ top: 0, left: 0, right: 0, visibility: 'hidden' }}
+        ref={measureLayerRef}
+        className="pointer-events-none"
+        style={{ position: 'fixed', top: 0, left: '-10000px', visibility: 'hidden' }}
         aria-hidden
       >
         <div ref={titleMeasureRef}>
