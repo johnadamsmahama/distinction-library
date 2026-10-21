@@ -1,3 +1,5 @@
+// File: app/.../solutions/[paperId]/page.tsx  (replace the existing file at the path you copied it from)
+
 import { createClient } from '@supabase/supabase-js';
 import SolvePaperView from '@/components/papers/SolvePaperView';
 
@@ -13,7 +15,7 @@ export default async function SolutionsPage({
 
   const { data: paper } = await supabase
     .from('past_papers')
-    .select('id, year, exam_type, courses(code, name)')
+    .select('id, year, exam_type, courses!past_papers_course_id_fkey(code, name)')
     .eq('id', params.paperId)
     .single();
 
