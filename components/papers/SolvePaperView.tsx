@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import BackLink from '@/components/shared/BackLink';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 type SolvedQuestion = {
@@ -16,11 +16,152 @@ type SolvedQuestion = {
 
 type ViewState = 'checking' | 'not_ready' | 'solving' | 'ready' | 'error';
 
-const PAGE_PADDING = 48;
-const BLOCK_GAP = 24;
+// One ruled row = one line of writing. Every height inside the booklet is a
+// multiple of this (it must match --sb-row in the CSS below), which is what
+// keeps each line of writing sitting on its ruled line.
+const ROW = 32;
 
-const RULED_PAPER =
-  'repeating-linear-gradient(#fbf5e6 0px, #fbf5e6 27px, #e3d6b4 28px)';
+// ---------------------------------------------------------------------------
+// Styles for the answer booklet. The paper fills the whole page (no frame),
+// has ONE red margin line, and the writing sits on the ruled lines.
+// ---------------------------------------------------------------------------
+const BOOKLET_CSS = `
+.sb-paper {
+  --sb-row: 32px;
+  --sb-rule-y: 23px;
+  --sb-paper: #FBF6E8;
+  --sb-rule: #D9CDA8;
+  --sb-margin-ink: #C0504D;
+  --sb-ink: #2A2418;
+  --sb-pen: #24477A;
+  --sb-red: #8A2E2E;
+  --sb-muted: #8A7A5C;
+  --sb-margin-x: 40px;
+  --sb-gap: 16px;
+  min-height: 100vh;
+  background-color: var(--sb-paper);
+  background-image: linear-gradient(to bottom,
+    transparent 0, transparent var(--sb-rule-y),
+    var(--sb-rule) var(--sb-rule-y), var(--sb-rule) calc(var(--sb-rule-y) + 1px),
+    transparent calc(var(--sb-rule-y) + 1px));
+  background-size: 100% var(--sb-row);
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--sb-ink);
+}
+@media (min-width: 640px) { .sb-paper { --sb-margin-x: 56px; --sb-gap: 20px; } }
+.sb-col {
+  position: relative; max-width: 720px; margin: 0 auto; min-height: 100vh;
+  padding: 0 20px 96px calc(var(--sb-margin-x) + var(--sb-gap));
+}
+.sb-margin {
+  position: absolute; top: 0; bottom: 0; left: var(--sb-margin-x);
+  width: 2px; background: var(--sb-margin-ink); opacity: 0.8;
+}
+.sb-row { height: var(--sb-row); line-height: var(--sb-row); }
+.sb-sm {
+  font-weight: 600; font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--sb-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  position: relative; top: 2px;
+}
+.sb-back { display: block; color: var(--sb-red); text-decoration: none; }
+.sb-back:hover { text-decoration: underline; }
+
+.sb-title { position: relative; }
+.sb-title h1 {
+  margin: 0; font-weight: 800; font-size: 25px; line-height: var(--sb-row);
+  color: #1B1710; position: relative; top: -3px; padding-right: 92px;
+}
+.sb-sub { font-style: italic; font-size: 14px; color: #6B5D3F; }
+.sb-divider { position: relative; height: var(--sb-row); }
+.sb-divider::before {
+  content: ''; position: absolute; left: 0; right: 0; top: calc(var(--sb-rule-y) - 1px);
+  border-top: 2px solid var(--sb-red); opacity: 0.85;
+}
+.sb-stamp {
+  position: absolute; right: 0; top: 36px; border: 2px solid var(--sb-red); color: var(--sb-red);
+  font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 9px; transform: rotate(5deg); background: rgba(251,246,232,0.9);
+}
+
+.sb-qhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; height: var(--sb-row); line-height: var(--sb-row); }
+.sb-qhead b { font-size: 16px; }
+.sb-meta { display: flex; gap: 8px; align-items: center; font-size: 12px; font-style: italic; color: var(--sb-muted); }
+.sb-badge {
+  font-style: normal; font-weight: 700; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #3A3020; background: rgba(226,190,90,0.2); border: 1px solid #E2BE5A; padding: 0 6px; line-height: 17px;
+}
+.sb-qtext { margin: 0; font-size: 15.5px; line-height: var(--sb-row); overflow-wrap: anywhere; }
+.sb-label {
+  font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sb-red);
+  height: var(--sb-row); line-height: var(--sb-row); position: relative; top: 2px;
+}
+.sb-ans { margin: 0; font-size: 15px; line-height: var(--sb-row); color: var(--sb-pen); white-space: pre-wrap; overflow-wrap: anywhere; }
+.sb-gap { height: var(--sb-row); }
+
+.sb-reviewed { font-style: italic; font-size: 12.5px; color: var(--sb-muted); height: var(--sb-row); line-height: var(--sb-row); }
+.sb-nav { display: flex; align-items: center; justify-content: space-between; height: calc(var(--sb-row) * 2); }
+.sb-nav button {
+  font-weight: 700; font-size: 13px; letter-spacing: 0.08em; height: 40px; padding: 0 18px; border-radius: 0; cursor: pointer;
+}
+.sb-prev { background: var(--sb-paper); color: var(--sb-red); border: 1px solid var(--sb-red); }
+.sb-next { background: var(--sb-red); color: #F6EFDC; border: 1px solid var(--sb-red); }
+.sb-nav button:disabled { opacity: 0.3; cursor: default; }
+.sb-count { font-style: italic; font-size: 12.5px; color: var(--sb-muted); }
+
+.sb-lead { margin: 0; font-size: 18px; line-height: var(--sb-row); color: #3A3020; }
+.sb-note {
+  margin: 0; font-weight: 600; font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #7A6A4A; line-height: var(--sb-row);
+}
+.sb-error { margin: 0; font-size: 15px; line-height: var(--sb-row); color: var(--sb-red); }
+.sb-strokes .sb-row { position: relative; }
+.sb-stroke {
+  position: absolute; left: 0; top: 14px; height: 3px; border-radius: 2px;
+  background: var(--sb-pen); width: 0; opacity: 0; animation: sb-write 4.2s ease-in-out infinite;
+}
+@keyframes sb-write {
+  0% { width: 0; opacity: 0; }
+  8% { opacity: 0.55; }
+  45% { width: var(--w); opacity: 0.55; }
+  85% { width: var(--w); opacity: 0.55; }
+  100% { width: var(--w); opacity: 0; }
+}
+.sb-dots span { display: inline-block; width: 7px; height: 7px; background: var(--sb-red); margin-right: 6px; animation: sb-pulse 1.2s infinite; }
+.sb-dots span:nth-child(2) { animation-delay: 0.2s; }
+.sb-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes sb-pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+.sb-notify {
+  font-weight: 700; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--sb-red); color: #F6EFDC; border: 0; border-radius: 0; height: 44px; padding: 0 22px; cursor: pointer;
+}
+.sb-notify:disabled { opacity: 0.6; cursor: default; }
+@media (prefers-reduced-motion: reduce) {
+  .sb-stroke { animation: none; width: var(--w); opacity: 0.5; }
+  .sb-dots span { animation: none; opacity: 0.7; }
+}
+`;
+
+// "SOCIAL PSYCHOLOGY" -> "Social Psychology" (keeps roman numerals and common acronyms).
+const SMALL_WORDS = new Set(['and', 'of', 'the', 'to', 'in', 'for', 'a', 'an', 'on', 'at', 'by']);
+const ACRONYMS = new Set(['IT', 'ICT', 'PR', 'HR', 'NGO', 'NGOS', 'TQM', 'MIS', 'GPA', 'CSR', 'ERP', 'CRM', 'SME', 'SMES', 'VAT']);
+function titleCase(input: string): string {
+  return input
+    .trim()
+    .split(/\s+/)
+    .map((word, i) => {
+      const bare = word.replace(/[^A-Za-z]/g, '');
+      if (/^(I|II|III|IV|V|VI)$/i.test(bare) && bare.length > 0 && word === word.toUpperCase()) return word.toUpperCase();
+      if (ACRONYMS.has(bare.toUpperCase()) && word === word.toUpperCase()) return word;
+      const lower = word.toLowerCase();
+      if (i > 0 && SMALL_WORDS.has(lower)) return lower;
+      return lower.replace(/(^|[-(/])([a-z])/g, (_, p, c) => p + c.toUpperCase());
+    })
+    .join(' ');
+}
+
+function examLabelFor(examType: string): string {
+  return examType === 'mid_semester' ? 'Mid-Semester Examination' : 'End of Semester Examination';
+}
 
 export default function SolvePaperView({
   paperId,
@@ -33,7 +174,7 @@ export default function SolvePaperView({
   courseCode: string;
   courseName: string;
   examType: string;
-  year: number;
+  year: number | null;
 }) {
   const [state, setState] = useState<ViewState>('checking');
   const [questions, setQuestions] = useState<SolvedQuestion[]>([]);
@@ -119,121 +260,91 @@ export default function SolvePaperView({
     }
   }
 
+  const heading = {
+    courseCode,
+    courseName: titleCase(courseName || ''),
+    examLabel: examLabelFor(examType),
+    year,
+  };
+
   return (
-    <div style={{ minHeight: '100vh', background: '#e9dfc4' }} className="py-3 px-3 sm:py-6 sm:px-4 lg:w-screen lg:ml-[calc(50%-50vw)]">
-      <div
-        className="max-w-content mx-auto"
-        style={{
-          maxWidth: 720,
-          boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
-          border: '1px solid #d8d2bd',
-          overflow: 'hidden',
-        }}
-      >
-        <PaperHeader
-          courseCode={courseCode}
-          courseName={courseName}
-          examType={examType}
-          year={year}
-          solved={state === 'ready'}
-        />
-
-        <div style={{ background: RULED_PAPER, backgroundPosition: '0 4px' }} className="px-5 sm:px-8 pt-6 pb-2">
-          {state === 'checking' && <ChromeSpinner label="Loading paper…" />}
-          {state === 'solving' && <SolvingState />}
-          {state === 'not_ready' && (
-            <NotReadyState notifyState={notifyState} onNotifyMe={handleNotifyMe} />
-          )}
-          {state === 'error' && (
-            <div
-              style={{ fontFamily: 'Georgia, serif', color: '#8a2e2e', borderColor: '#8a2e2e' }}
-              className="text-[13px] border-l-[3px] pl-4 py-2 mb-4"
-            >
-              {errorMsg}
-            </div>
-          )}
-          {state === 'ready' && questions.length > 0 && <PaginatedScript questions={questions} />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PaperHeader({
-  courseCode,
-  courseName,
-  examType,
-  year,
-  solved,
-}: {
-  courseCode: string;
-  courseName: string;
-  examType: string;
-  year: number;
-  solved: boolean;
-}) {
-  return (
-    <div style={{ background: '#f6efdc', borderBottom: '2px solid #8a2e2e' }} className="px-5 sm:px-8 pt-5 pb-4">
-      <BackLink href="/papers" label="Library" colorClassName="text-[#8a2e2e]" className="py-1" />
-
-      <div className="flex items-start justify-between mt-3.5 gap-3">
-        <div>
-          <div
-            style={{ color: '#8a7a5c' }}
-            className="font-condensed font-semibold text-[10px] uppercase tracking-[0.12em]"
-          >
-            {courseCode} · {courseName.toUpperCase()}
-          </div>
-          <div
-            style={{ color: '#8a7a5c' }}
-            className="font-condensed text-[9.5px] uppercase tracking-[0.1em] mt-1"
-          >
-            {examType === 'mid_semester' ? 'Mid-Semester Examination' : 'End of Semester Examination'} · {year}
-          </div>
+    <div className="sb-paper">
+      <style>{BOOKLET_CSS}</style>
+      <div className="sb-col">
+        <div className="sb-margin" aria-hidden="true" />
+        <div className="sb-row sb-sm font-condensed">
+          <Link href="/papers" className="sb-back">
+            ← Library
+          </Link>
         </div>
 
-        {/* Only stamp the paper as "Solved" once it genuinely has solved
-            questions to show — never during loading, a not-ready wait,
-            or an extraction failure. A stamp that shows regardless of
-            outcome is misleading. */}
-        {solved && (
-          <div
-            style={{
-              border: '2px solid #8a2e2e',
-              color: '#8a2e2e',
-              transform: 'rotate(6deg)',
-              fontFamily: 'Georgia, serif',
-            }}
-            className="text-[9.5px] font-bold uppercase tracking-[0.08em] px-2 py-1 whitespace-nowrap shrink-0"
-          >
-            Solved
-          </div>
+        {state === 'ready' && questions.length > 0 ? (
+          <PaginatedScript questions={questions} heading={heading} />
+        ) : (
+          <>
+            <TitleBlock {...heading} solved={false} />
+            {state === 'checking' && <CheckingState />}
+            {state === 'solving' && <SolvingState />}
+            {state === 'not_ready' && <NotReadyState notifyState={notifyState} onNotifyMe={handleNotifyMe} />}
+            {state === 'error' && <p className="sb-error">{errorMsg}</p>}
+          </>
         )}
       </div>
     </div>
   );
 }
 
-function ChromeSpinner({ label }: { label: string }) {
+type Heading = { courseCode: string; courseName: string; examLabel: string; year: number | null };
+
+/** The heading shown before the answers (and while the paper loads). */
+function TitleBlock({ courseCode, courseName, examLabel, year, solved }: Heading & { solved: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#8a2e2e]/25 border-t-[#8a2e2e] animate-spin" />
-      <div style={{ color: '#7a6a4a' }} className="font-condensed text-[12px] uppercase tracking-wide text-center">
-        {label}
+    <section className="sb-title">
+      <div className="sb-row sb-sm font-condensed">
+        {[courseCode, examLabel, year ? String(year) : null].filter(Boolean).join(' · ')}
+      </div>
+      <h1 className="font-display">{courseName || courseCode}</h1>
+      <div className="sb-row sb-sub">Model answer script · solved by the Distinction Tutoring Team</div>
+      <div className="sb-divider" aria-hidden="true" />
+      {/* Only stamp the paper as "Solved" once it genuinely has solved
+          questions to show — never during loading or a failure. */}
+      {solved && <div className="sb-stamp">Solved</div>}
+    </section>
+  );
+}
+
+function CheckingState() {
+  return (
+    <div aria-live="polite">
+      <p className="sb-lead">Opening the booklet…</p>
+      <div className="sb-row sb-dots" aria-hidden="true">
+        <span />
+        <span />
+        <span />
       </div>
     </div>
   );
 }
 
 function SolvingState() {
+  const strokes = [
+    { w: '78%', d: '0s' },
+    { w: '92%', d: '0.5s' },
+    { w: '64%', d: '1s' },
+    { w: '86%', d: '1.5s' },
+    { w: '50%', d: '2s' },
+    { w: '72%', d: '2.5s' },
+  ];
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-      <div style={{ borderRadius: 0 }} className="w-8 h-8 border-2 border-[#8a2e2e]/25 border-t-[#8a2e2e] animate-spin" />
-      <div style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-lg max-w-sm">
-        Solving this paper for the first time
-      </div>
-      <div style={{ color: '#7a6a4a' }} className="font-condensed text-[12px] uppercase tracking-wide max-w-xs">
-        This page will update automatically once it&apos;s ready — no need to refresh.
+    <div aria-live="polite">
+      <p className="sb-lead">Solving this paper for the first time…</p>
+      <p className="sb-note font-condensed">This page will update automatically — no need to refresh.</p>
+      <div className="sb-strokes" aria-hidden="true">
+        {strokes.map((s, i) => (
+          <div key={i} className="sb-row">
+            <span className="sb-stroke" style={{ '--w': s.w, animationDelay: s.d } as React.CSSProperties} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -247,37 +358,33 @@ function NotReadyState({
   onNotifyMe: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center text-center py-16 gap-6 max-w-md mx-auto">
-      <div style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-lg leading-snug">
-        The Distinction Library Team, in partnership with Distinction Tutors, is currently
-        solving this paper.
+    <div>
+      <p className="sb-lead">
+        The Distinction Library Team, in partnership with Distinction Tutors, is currently solving this paper.
+      </p>
+      <div className="sb-gap" />
+      <p className="sb-note font-condensed">Check back soon.</p>
+      <div style={{ height: ROW * 2, display: 'flex', alignItems: 'center' }}>
+        <button onClick={onNotifyMe} disabled={notifyState !== 'idle'} className="sb-notify font-condensed">
+          {notifyState === 'saved' ? 'We\u2019ll notify you' : notifyState === 'saving' ? 'Saving…' : 'Notify me when ready'}
+        </button>
       </div>
-      <div style={{ color: '#7a6a4a' }} className="font-body text-[13px]">
-        Check back soon.
-      </div>
-      <button
-        onClick={onNotifyMe}
-        disabled={notifyState !== 'idle'}
-        style={{ borderRadius: 0, background: '#8a2e2e', color: '#f6efdc', border: 'none' }}
-        className="font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] px-6 py-3 disabled:opacity-60 transition-colors"
-      >
-        {notifyState === 'saved' ? 'We\u2019ll notify you' : notifyState === 'saving' ? 'Saving…' : 'Notify me when ready'}
-      </button>
     </div>
   );
 }
 
 /**
- * Paginates solved questions into physical "pages" that fit the available
- * space, like a real answer script — never one-question-per-screen, and
- * never a question+answer pair split across two pages.
+ * Paginates solved questions into physical "pages" that fit the screen, like
+ * a real answer script — never a question+answer pair split across two pages.
  *
- * Approach: render every question+answer block once, off-screen, to measure
- * its real rendered height. Then greedily pack blocks into pages against an
- * estimated page budget. Re-measures on window resize.
+ * Every block is rendered once, off-screen, to measure its real height.
+ * Blocks are then packed into pages. The first page also carries the title
+ * block; later pages carry a one-row running header. Heights are whole
+ * multiples of the ruled row, so the writing always sits on the lines.
  */
-function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
+function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; heading: Heading }) {
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const titleMeasureRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [pages, setPages] = useState<SolvedQuestion[][] | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
@@ -287,22 +394,29 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
       const container = containerRef.current;
       if (!container) return;
 
-      const availableHeight = Math.max(window.innerHeight - PAGE_PADDING * 2, 400);
-      const heights = measureRefs.current.map((el) => (el ? el.offsetHeight : 0));
+      const snap = (h: number) => Math.ceil(h / ROW) * ROW;
+      const top = container.getBoundingClientRect().top + window.scrollY;
+      // Room left on the screen after whatever sits above the booklet, minus
+      // the footer (reviewed line + nav = 3 rows) and one row of breathing space.
+      const roomForPage = Math.max(window.innerHeight - top - ROW * 4, ROW * 8);
+      const titleH = snap(titleMeasureRef.current?.offsetHeight ?? ROW * 5);
+      const heights = measureRefs.current.map((el) => snap(el ? el.offsetHeight : ROW * 4));
 
       const built: SolvedQuestion[][] = [];
       let current: SolvedQuestion[] = [];
-      let currentHeight = 0;
+      let used = 0;
+      let budget = Math.max(roomForPage - titleH, ROW * 4); // first page carries the title block
 
       questions.forEach((q, i) => {
-        const h = heights[i] + BLOCK_GAP;
-        if (current.length > 0 && currentHeight + h > availableHeight) {
+        const h = heights[i];
+        if (current.length > 0 && used + h > budget) {
           built.push(current);
           current = [];
-          currentHeight = 0;
+          used = 0;
+          budget = Math.max(roomForPage - ROW, ROW * 4); // later pages carry a 1-row running header
         }
         current.push(q);
-        currentHeight += h;
+        used += h;
       });
       if (current.length > 0) built.push(current);
 
@@ -318,25 +432,30 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
 
   const currentPage = pages?.[pageIndex] ?? [];
   const totalPages = pages?.length ?? 1;
+  const isFirstPage = pageIndex === 0;
+
+  function goTo(next: number) {
+    setPageIndex(next);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  }
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Red margin rule, like the ruled line down real exam script paper */}
-      <div style={{ position: 'absolute', left: '1.8rem', top: 0, bottom: 0, width: 1, background: '#e0a5a5' }} />
-
       {/* Hidden measurement pass — real markup, off-screen, so heights match exactly */}
       <div
-        className="absolute opacity-0 pointer-events-none -z-10"
-        style={{ top: 0, left: 0, width: '100%' }}
+        className="absolute pointer-events-none"
+        style={{ top: 0, left: 0, right: 0, visibility: 'hidden' }}
         aria-hidden
       >
+        <div ref={titleMeasureRef}>
+          <TitleBlock {...heading} solved />
+        </div>
         {questions.map((q, i) => (
           <div
             key={q.id}
             ref={(el) => {
               measureRefs.current[i] = el;
             }}
-            className="mb-6"
           >
             <ScriptBlock question={q} />
           </div>
@@ -344,46 +463,38 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
       </div>
 
       {pages === null ? (
-        <ChromeSpinner label="Laying out the script…" />
+        <CheckingState />
       ) : (
-        <div className="pl-6 sm:pl-8">
-          <div className="flex flex-col gap-6">
-            {currentPage.map((q) => (
-              <ScriptBlock key={q.id} question={q} />
-            ))}
-          </div>
+        <>
+          {isFirstPage ? (
+            <TitleBlock {...heading} solved />
+          ) : (
+            <div className="sb-row sb-sm font-condensed">
+              {heading.courseCode} · {heading.courseName} — continued
+            </div>
+          )}
 
-          <div
-            style={{ borderTop: '1px dashed #b8a878' }}
-            className="mt-4 pt-3.5 flex items-center justify-between"
-          >
-            <span style={{ fontFamily: 'Georgia, serif', color: '#7a6a4a' }} className="text-[10.5px] italic">
-              Solved — reviewed by the Distinction Tutoring Team
-            </span>
-          </div>
+          {currentPage.map((q) => (
+            <ScriptBlock key={q.id} question={q} />
+          ))}
 
-          <div className="mt-3 flex items-center justify-between pb-4">
-            <button
-              onClick={() => setPageIndex((p) => Math.max(p - 1, 0))}
-              disabled={pageIndex === 0}
-              style={{ borderRadius: 0, border: '1px solid #8a2e2e', color: '#8a2e2e', background: 'transparent' }}
-              className="font-condensed font-semibold text-[10.5px] px-4 py-2 disabled:opacity-30 transition-opacity"
-            >
+          <div className="sb-reviewed">Solved — reviewed by the Distinction Tutoring Team</div>
+          <div className="sb-nav">
+            <button className="sb-prev font-condensed" onClick={() => goTo(Math.max(pageIndex - 1, 0))} disabled={pageIndex === 0}>
               ← PREV
             </button>
-            <span style={{ fontFamily: 'Georgia, serif', color: '#7a6a4a' }} className="text-[11px] italic">
+            <span className="sb-count">
               Page {pageIndex + 1} of {totalPages}
             </span>
             <button
-              onClick={() => setPageIndex((p) => Math.min(p + 1, totalPages - 1))}
+              className="sb-next font-condensed"
+              onClick={() => goTo(Math.min(pageIndex + 1, totalPages - 1))}
               disabled={pageIndex >= totalPages - 1}
-              style={{ borderRadius: 0, background: '#8a2e2e', color: '#f6efdc', border: 'none' }}
-              className="font-condensed font-semibold text-[10.5px] px-4 py-2 disabled:opacity-30 transition-opacity"
             >
               NEXT →
             </button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -392,48 +503,17 @@ function PaginatedScript({ questions }: { questions: SolvedQuestion[] }) {
 function ScriptBlock({ question }: { question: SolvedQuestion }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-3">
-        <span style={{ fontFamily: 'Georgia, serif', color: '#3a3020' }} className="text-[15px] font-bold">
-          Question {question.order_index}.
+      <div className="sb-qhead">
+        <b>Question {question.order_index}.</b>
+        <span className="sb-meta">
+          {question.is_predicted && <span className="sb-badge font-condensed">Predicted</span>}
+          {question.marks != null && <span>[{question.marks} marks]</span>}
         </span>
-        <div className="flex items-center gap-2 shrink-0">
-          {question.is_predicted && (
-            <span
-              style={{ borderRadius: 0, background: 'rgba(226,190,90,0.18)', border: '1px solid #E2BE5A', color: '#3a3020' }}
-              className="font-condensed font-semibold uppercase tracking-wide text-[9.5px] px-2 py-0.5"
-            >
-              Predicted
-            </span>
-          )}
-          {question.marks != null && (
-            <span style={{ color: '#8a7a5c', fontStyle: 'italic' }} className="text-[10.5px]">
-              [{question.marks} marks]
-            </span>
-          )}
-        </div>
       </div>
-
-      <div
-        style={{ fontFamily: 'Georgia, serif', color: '#2a2418', lineHeight: '28px' }}
-        className="text-[13.5px] mt-0.5"
-      >
-        {question.question_text}
-      </div>
-
-      <div style={{ borderLeft: '3px solid #8a2e2e' }} className="mt-1.5 pl-3.5">
-        <div
-          style={{ color: '#8a2e2e' }}
-          className="font-condensed font-bold uppercase tracking-[0.08em] text-[9.5px] mb-0.5"
-        >
-          Model answer
-        </div>
-        <div
-          style={{ fontFamily: 'Georgia, serif', color: '#4a3f2a', lineHeight: '28px' }}
-          className="text-[12.5px] whitespace-pre-wrap"
-        >
-          {question.answer_text}
-        </div>
-      </div>
+      <p className="sb-qtext">{question.question_text}</p>
+      <div className="sb-label font-condensed">Model answer</div>
+      <p className="sb-ans">{question.answer_text}</p>
+      <div className="sb-gap" />
     </div>
   );
 }
