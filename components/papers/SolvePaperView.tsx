@@ -1,3 +1,5 @@
+// File: components/papers/SolvePaperView.tsx  (replace the whole file)
+
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -90,7 +92,7 @@ const BOOKLET_CSS = `
   font-style: normal; font-weight: 700; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
   color: #3A3020; background: rgba(226,190,90,0.2); border: 1px solid #E2BE5A; padding: 0 6px; line-height: 17px;
 }
-.sb-qtext { margin: 0; font-size: 15.5px; line-height: var(--sb-row); overflow-wrap: anywhere; }
+.sb-qtext { margin: 0; font-size: 15.5px; line-height: var(--sb-row); white-space: pre-wrap; overflow-wrap: anywhere; }
 .sb-label {
   font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sb-red);
   height: var(--sb-row); line-height: var(--sb-row); position: relative; top: 2px;
