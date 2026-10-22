@@ -11,18 +11,21 @@ export default async function ModeratePage() {
   if (!user) redirect('/login');
   if (!isStaffRole(profile?.role)) redirect('/dashboard');
 
+  // The course is embedded through its direct foreign key (course_id) by name.
+  // past_paper_courses / study_material_courses junction tables also link these
+  // tables to courses, so a bare courses(...) embed is ambiguous and fails.
   const [papersRes, materialsRes, coursesRes] = await Promise.all([
     supabase
       .from('past_papers')
       .select(
-        'id, year, exam_type, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
+        'id, year, exam_type, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses!past_papers_course_id_fkey(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
       )
       .eq('status', 'pending')
       .order('created_at', { ascending: true }),
     supabase
       .from('study_materials')
       .select(
-        'id, title, suggested_title, content_type, week_number, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
+        'id, title, suggested_title, content_type, week_number, file_url, created_at, uploaded_by, course_id, detected_type, type_mismatch, classification_notes, courses!study_materials_course_id_fkey(id, code, name), profiles!uploaded_by(id, student_id, full_name)'
       )
       .eq('status', 'pending')
       .order('created_at', { ascending: true }),
