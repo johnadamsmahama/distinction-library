@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { CourseOption } from '@/lib/papers-data';
 import FilterSelect from '../library/FilterSelect';
+import FullBleedShell from './FullBleedShell';
 
 type MaterialResult = {
   id: string;
@@ -293,11 +294,11 @@ export default function RepositoryBrowser({
   const resultCount = materials.length;
 
   return (
-    <div
-      className="relative lg:w-screen lg:ml-[calc(50%-50vw)]"
+    <FullBleedShell
+      afterBreadcrumb
+      background=""
       style={{
         backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(177,80,47,0.10) 0%, transparent 55%), ${MAT_BG}`,
-        minHeight: '100%',
       }}
     >
       {/* ── HERO ── */}
@@ -416,6 +417,6 @@ export default function RepositoryBrowser({
           </div>
         )}
       </div>
-    </div>
+    </FullBleedShell>
   );
 }
