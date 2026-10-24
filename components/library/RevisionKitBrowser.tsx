@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import FilterSelect from './FilterSelect';
+import FullBleedShell from '../papers/FullBleedShell';
 
 type Kit = {
   id: string;
@@ -211,11 +212,11 @@ export default function RevisionKitBrowser() {
   }, [kits, level, courseId, semester, debouncedSearch]);
 
   return (
-    <div
-      className="relative lg:w-screen lg:ml-[calc(50%-50vw)]"
+    <FullBleedShell
+      afterBreadcrumb
+      background=""
       style={{
         backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(193,116,31,0.13) 0%, transparent 55%), ${AMB_BG}`,
-        minHeight: '100%',
       }}
     >
       <div className="max-w-[480px] lg:max-w-[1156px] mx-auto px-4 lg:px-7 pt-10 pb-10">
@@ -320,6 +321,6 @@ export default function RevisionKitBrowser() {
           </div>
         )}
       </div>
-    </div>
+    </FullBleedShell>
   );
 }
