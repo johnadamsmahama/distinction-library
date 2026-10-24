@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import FilterSelect from './FilterSelect';
+import FullBleedShell from '../papers/FullBleedShell';
 
 type Paper = {
   id: string;
@@ -268,7 +269,7 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
   }, [filteredCourseOptions, courseId]);
 
   return (
-    <div className="bleed-x" style={{ background: LIB_BG, minHeight: '100vh' }}>
+    <FullBleedShell background="" style={{ background: LIB_BG }}>
       <div className="max-w-[480px] lg:max-w-[1156px] mx-auto px-4 lg:px-7 pt-6 pb-10">
         <div className={`flex items-center gap-2 mb-4 font-bold uppercase tracking-wide ${mono}`} style={{ fontSize: 13, color: LIB_INK }}>
           <a href="/dashboard" className="flex items-center gap-2 hover:opacity-70 transition-opacity">
@@ -388,6 +389,6 @@ export default function PastQuestionsBrowser({ initialCourse }: { initialCourse?
           </div>
         )}
       </div>
-    </div>
+    </FullBleedShell>
   );
 }
