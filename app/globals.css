@@ -6,12 +6,17 @@
 
 html {
   scroll-behavior: smooth;
+  /* `clip` (unlike `hidden`) never turns the page into a sideways-scrolling box, so
+     nothing can be dragged out to the right on a phone. `hidden` is the fallback. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
   @apply text-g800 bg-white font-body;
   /* Lets .bleed-x backgrounds run past the page edge without adding a horizontal scrollbar. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Edge-to-edge background for pages that colour their whole area (Library, Upload,
@@ -27,8 +32,10 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -100vw;
-  right: -100vw;
+  /* Exactly the width of the screen, centred on the element — NOT 100vw beyond each
+     side, which created a huge invisible-but-draggable area on the right. */
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
   background: inherit;
   z-index: -1;
   pointer-events: none;
