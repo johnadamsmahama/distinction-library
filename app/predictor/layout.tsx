@@ -37,12 +37,15 @@ export default async function PredictorLayout({ children }: { children: React.Re
   }
 
   return (
-    <>
+    // The whole page (top bar + back link + content) is ONE screen-tall column.
+    // The pages below fill what's left (flex-1) instead of each claiming a full
+    // screen on top of the top bar, which left a blank strip to scroll into.
+    <div className="flex flex-col bg-navy-deep" style={{ minHeight: '100dvh' }}>
       <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
       <div className="px-4 pt-3">
         <BackToDashboard />
       </div>
       {children}
-    </>
+    </div>
   );
 }
