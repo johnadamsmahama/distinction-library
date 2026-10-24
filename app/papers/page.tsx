@@ -24,8 +24,6 @@ export default async function PapersPage({
   const courses = await getCourseOptions(supabase);
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-4 sm:-mt-6 lg:-mt-8 -mb-4 sm:-mb-6 lg:-mb-8">
-      <RepositoryBrowser courses={courses} initialCourseId={searchParams.course} title="Lecture Slides" />
-    </div>
+    <RepositoryBrowser courses={courses} initialCourseId={searchParams.course} title="Lecture Slides" />
   );
 }
