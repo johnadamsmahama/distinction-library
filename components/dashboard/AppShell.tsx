@@ -33,7 +33,7 @@ export default async function AppShell({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="min-h-screen bg-off-white" style={{ minHeight: '100dvh' }}>
       <InactivityLogout />
       <DashboardNav fullName={fullName} unreadCount={unreadCount} isStaff={isStaff} isAdmin={isAdmin} />
       <main className="max-w-[1280px] mx-auto px-5 sm:px-7 py-8">
