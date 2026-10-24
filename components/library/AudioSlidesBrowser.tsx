@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import FilterSelect from './FilterSelect';
+import FullBleedShell from '../papers/FullBleedShell';
 
 type Recording = {
   id: string;
@@ -300,11 +301,11 @@ export default function AudioSlidesBrowser() {
   }, [recordings, level, courseId, debouncedSearch]);
 
   return (
-    <div
-      className="relative lg:w-screen lg:ml-[calc(50%-50vw)]"
+    <FullBleedShell
+      afterBreadcrumb
+      background=""
       style={{
         backgroundImage: `radial-gradient(140% 90% at 15% -10%, rgba(198,164,75,0.13) 0%, transparent 55%), ${GLD_BG}`,
-        minHeight: '100%',
       }}
     >
       <style>{`
@@ -396,7 +397,7 @@ export default function AudioSlidesBrowser() {
           </div>
         )}
       </div>
-    </div>
+    </FullBleedShell>
   );
 }
 
