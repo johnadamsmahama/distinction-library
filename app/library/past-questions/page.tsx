@@ -27,8 +27,6 @@ export default async function PastQuestionsPage({
   }
 
   return (
-    <div className="-mx-5 sm:-mx-7 -mt-8 -mb-8">
-      <PastQuestionsBrowser initialCourse={initialCourse} />
-    </div>
+    <PastQuestionsBrowser initialCourse={initialCourse} />
   );
 }
