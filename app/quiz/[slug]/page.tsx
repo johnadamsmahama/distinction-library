@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { createAdminClient } from '@/lib/supabase/admin';
 import QuizTaker from '@/components/quiz/QuizTaker';
-import type { StoredQuestion } from '@/lib/quiz/server';
+import type { StoredQuestion, StoredTheory } from '@/lib/quiz/server';
 
 // Always fresh: a closed quiz must not keep showing from a cache.
 export const dynamic = 'force-dynamic';
@@ -22,7 +22,7 @@ function Notice({ title, text }: { title: string; text: string }) {
 export default async function QuizPage({ params }: { params: { slug: string } }) {
   const { data: quiz } = await createAdminClient()
     .from('quizzes')
-    .select('title, questions, shuffle, time_limit_minutes, closes_at, published')
+    .select('title, questions, theory, shuffle, time_limit_minutes, closes_at, published')
     .eq('slug', params.slug)
     .single();
 
@@ -40,11 +40,15 @@ export default async function QuizPage({ params }: { params: { slug: string } })
     options: q.options.map((text, i) => ({ i, text })),
   }));
 
+  // Model answers stay on the server until the student has submitted.
+  const theory = ((quiz.theory ?? []) as StoredTheory[]).map((t) => ({ id: t.id, text: t.text }));
+
   return (
     <QuizTaker
       slug={params.slug}
       title={quiz.title}
       questions={questions}
+      theory={theory}
       shuffle={quiz.shuffle}
       timeLimitMinutes={quiz.time_limit_minutes}
     />
