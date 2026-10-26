@@ -22,7 +22,6 @@ type Result = {
   theory: TheoryReview[] | null;
   reason: string | null;
 };
-type Step = { kind: 'mcq'; q: PublicQuestion } | { kind: 'theory'; t: PublicTheory };
 
 const LETTERS = 'ABCDEFGH';
 const RATINGS: { value: string; label: string }[] = [
@@ -56,7 +55,7 @@ const PAPER_CSS = `
 .qp-lock{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.qp-lock textarea{-webkit-user-select:text;user-select:text}
 :where(.qp) button,:where(.qp) input,:where(.qp) textarea{font:inherit;color:inherit}.qp button{cursor:pointer}
 .qp-top{height:56px;padding:0 40px;display:flex;justify-content:space-between;align-items:center}
-.qp-brand{max-width:230px;line-height:28px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.qp-orgsm{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--mut)}.qp-orgsm .qp-x{font-size:13px;line-height:12px;padding:0 4px}
 .qp-timer{font:700 14px/24px Georgia,serif;border:1px solid var(--red);color:var(--red);padding:0 8px;background:var(--paper);font-variant-numeric:tabular-nums}.qp-timer.low{background:var(--red);color:var(--paper)}
 .qp-m{padding:0 40px}.qp-intro{padding-top:28px}
 .qp-cap,.qp-lbl{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
@@ -74,14 +73,15 @@ const PAPER_CSS = `
 .qp-red{background:var(--red);color:#F6EFDC}.qp-out{background:var(--paper);color:var(--red);border:1px solid var(--red)}.qp-wide{width:100%}
 .qp-fine{font-size:13px;font-style:italic}
 .qp-head{display:flex;justify-content:space-between;flex-wrap:wrap;column-gap:12px;line-height:28px}
-.qp-prog{height:28px;display:flex;align-items:center;gap:4px}.qp-prog i{flex:1;height:3px;background:var(--rule)}.qp-prog i.done{background:var(--red)}.qp-prog i.on{background:var(--pen)}
-.qp-track{flex:1;height:3px;background:var(--rule)}.qp-track span{display:block;height:3px;background:var(--red)}
 .qp-q{font:600 19px/28px Georgia,serif;color:#1B1710;margin-bottom:28px}
 .qp-opts{margin-bottom:28px;display:flex;flex-direction:column}
 .qp-opt{display:flex;gap:10px;width:100%;padding:0;border:0;background:none;text-align:left;font:16px/28px Georgia,serif;color:var(--ink)}
-.qp-opt b{flex:none;width:28px;text-align:center;font-weight:400}.qp-opt b::before{content:'('}.qp-opt b::after{content:')'}
-.qp-opt.sel{color:var(--pen);font-weight:700}.qp-opt.sel b{color:var(--pen);outline:1.5px solid var(--pen);outline-offset:-5px;border-radius:50%}
+.qp-opt b{flex:none;align-self:flex-start;width:28px;height:28px;text-align:center;font-weight:400}.qp-opt b::before{content:'('}.qp-opt b::after{content:')'}
+.qp-opt.sel{color:var(--pen);font-weight:700}.qp-opt.sel b{color:var(--pen);outline:1.5px solid var(--pen);outline-offset:-3px;border-radius:50%}.qp-opt.sel b::before,.qp-opt.sel b::after{content:''}
 .qp-ta{display:block;width:100%;height:224px;resize:none;padding:0;border:0;background:transparent;font:15px/28px Georgia,serif;color:var(--pen);outline:0;margin-bottom:28px}.qp-ta::placeholder{color:var(--mut);font-style:italic}
+.qp-stky{position:sticky;top:0;z-index:3;background:var(--paper);border-bottom:2px solid var(--red)}.qp-gap{height:28px}
+.qb{position:relative;margin-bottom:28px}.qb .qp-q{display:flex;gap:6px;font-size:17px;margin-bottom:0}.qb .qp-q .n{flex:none;width:22px;color:var(--red)}.qb .qp-opts{margin:0}.qb .qp-ta{margin:28px 0 0}
+.qp-flash{animation:qpfl 1.6s ease-out}@keyframes qpfl{0%,60%{box-shadow:inset 3px 0 0 var(--red)}100%{box-shadow:none}}
 .qp-nav{display:flex;gap:10px;height:56px;align-items:center}.qp-nav .qp-btn{margin:0}.qp-nav .qp-grow{flex:1}
 .qp-ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.7)}
 .qp-dlg{max-width:360px;width:100%;padding:24px;background:var(--paper);border-top:4px solid var(--red);line-height:24px;color:var(--ink)}.qp-dlg h3{font-size:19px;font-weight:700;color:var(--red)}.qp-dlg p{margin:8px 0 18px}.qp-dlg .qp-btn{margin:0}
@@ -126,7 +126,8 @@ export default function QuizTaker({
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [deadline, setDeadline] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
-  const [index, setIndex] = useState(0);
+  const [checked, setChecked] = useState(false); // the student tapped Submit once with questions still unanswered
+  const [flashId, setFlashId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [theoryAnswers, setTheoryAnswers] = useState<Record<string, string>>({});
   const [ratings, setRatings] = useState<Record<string, string>>({});
@@ -146,10 +147,6 @@ export default function QuizTaker({
     if (!shuffle) return;
     setOrdered(shuffled(questions).map((q) => ({ ...q, options: shuffled(q.options) })));
   }, [questions, shuffle]);
-
-  const steps: Step[] = (ordered.map((q) => ({ kind: 'mcq', q }) as Step)).concat(
-    theory.map((t) => ({ kind: 'theory', t }) as Step)
-  );
 
   // Pick up an attempt in progress after a refresh.
   useEffect(() => {
@@ -205,7 +202,7 @@ export default function QuizTaker({
     setAttemptId(null);
     setDeadline(null);
     setSecondsLeft(null);
-    setIndex(0);
+    setChecked(false);
     setAnswers({});
     setTheoryAnswers({});
     setRatings({});
@@ -281,9 +278,9 @@ export default function QuizTaker({
       saveResult(data, {});
       setPhase('done');
     } catch (e: any) {
-      setError(reason === 'time' ? `${e.message} Go to the last question and tap Submit to try again.` : e.message);
+      setError(reason === 'time' ? `${e.message} Scroll down and tap Submit to try again.` : e.message);
       submittingRef.current = false;
-      if (reason === 'time') setIndex(Math.max(0, steps.length - 1));
+      if (reason === 'time') window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     } finally {
       setBusy(false);
     }
@@ -326,7 +323,10 @@ export default function QuizTaker({
   }, [phase, attemptId, answers, deadline, name]);
 
   function choose(qid: string, optionIndex: number) {
-    const next = { ...answers, [qid]: optionIndex };
+    // Tapping the circled answer again clears it.
+    const next = { ...answers };
+    if (next[qid] === optionIndex) delete next[qid];
+    else next[qid] = optionIndex;
     setAnswers(next);
     if (attemptId) persist({ attemptId, name, answers: next, deadline });
   }
@@ -352,10 +352,25 @@ export default function QuizTaker({
     });
   }
 
-  const step = steps[index];
+  const totalSteps = ordered.length + theory.length;
   const answeredCount =
     Object.keys(answers).length + theory.filter((t) => (theoryAnswers[t.id] || '').trim() !== '').length;
-  const last = index === steps.length - 1;
+  // Questions still unanswered, in paper order. The first Submit tap goes to the first of these instead of submitting.
+  const missing = [
+    ...ordered.filter((q) => answers[q.id] === undefined).map((q) => q.id),
+    ...theory.filter((t) => (theoryAnswers[t.id] || '').trim() === '').map((t) => t.id),
+  ];
+
+  function askSubmit() {
+    if (missing.length > 0 && !checked) {
+      setChecked(true);
+      setFlashId(missing[0]);
+      setTimeout(() => setFlashId(null), 1800);
+      document.getElementById(`q-${missing[0]}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
+    submit(null);
+  }
 
   const block = (e: React.SyntheticEvent) => e.preventDefault();
 
@@ -374,9 +389,13 @@ export default function QuizTaker({
     </div>
   );
 
-  const topBar = (withTimer: boolean) => (
-    <header className="qp-top">
-      <span className="qp-brand">The Distinction Library × Distinction Programme</span>
+  const topBar = (withTimer: boolean, sticky = false) => (
+    <header className={`qp-top${sticky ? ' qp-stky' : ''}`}>
+      <p className="qp-org qp-orgsm">
+        The Distinction Library<span className="qp-x">×</span>
+        <br />
+        Distinction Programme
+      </p>
       {withTimer && secondsLeft !== null && (
         <span className={`qp-timer${secondsLeft <= 60 ? ' low' : ''}`} aria-live="off">
           {fmt(secondsLeft)}
@@ -542,7 +561,7 @@ export default function QuizTaker({
     );
   }
 
-  if (!step) return shell(<p className="qp-m">Loading...</p>);
+  if (totalSteps === 0) return shell(<p className="qp-m">This quiz has no questions yet.</p>);
 
   return shell(
     <>
@@ -560,35 +579,30 @@ export default function QuizTaker({
           </div>
         </div>
       )}
-      {topBar(true)}
+      {topBar(true, true)}
       <main className="qp-m">
         <div className="qp-head">
-          <span className="qp-cap">{step.kind === 'theory' ? 'Section B · Theory' : theory.length > 0 ? 'Section A · Objectives' : 'Objectives'}</span>
+          <span className="qp-cap">{theory.length > 0 ? 'Section A · Objectives' : 'Objectives'}</span>
           <span className="qp-cap">
-            {step.kind === 'theory' ? 'Theory' : 'Question'} {index + 1} of {steps.length}
+            {answeredCount} of {totalSteps} answered
           </span>
         </div>
-        <div className="qp-prog" aria-hidden="true">
-          {steps.length <= 12 ? (
-            steps.map((_, k) => <i key={k} className={k < index ? 'done' : k === index ? 'on' : ''} />)
-          ) : (
-            <div className="qp-track">
-              <span style={{ width: `${((index + 1) / steps.length) * 100}%` }} />
-            </div>
-          )}
-        </div>
-        {step.kind === 'mcq' ? (
-          <>
-            <h2 className="qp-q">{step.q.text}</h2>
-            <div className="qp-opts" role="radiogroup" aria-label="Answer options">
-              {step.q.options.map((o, pos) => {
-                const selected = answers[step.q.id] === o.i;
+        <div className="qp-gap" />
+        {ordered.map((q, n) => (
+          <section key={q.id} id={`q-${q.id}`} className={`qb${flashId === q.id ? ' qp-flash' : ''}`}>
+            <h2 className="qp-q">
+              <span className="n">{n + 1}.</span>
+              <span>{q.text}</span>
+            </h2>
+            <div className="qp-opts" role="radiogroup" aria-label={`Answer options for question ${n + 1}`}>
+              {q.options.map((o, pos) => {
+                const selected = answers[q.id] === o.i;
                 return (
                   <button
                     key={o.i}
                     role="radio"
                     aria-checked={selected}
-                    onClick={() => choose(step.q.id, o.i)}
+                    onClick={() => choose(q.id, o.i)}
                     className={`qp-opt${selected ? ' sel' : ''}`}
                   >
                     <b>{LETTERS[pos]}</b>
@@ -597,39 +611,45 @@ export default function QuizTaker({
                 );
               })}
             </div>
-          </>
-        ) : (
+            {checked && answers[q.id] === undefined && <p className="qp-err">Not answered yet</p>}
+          </section>
+        ))}
+        {theory.length > 0 && (
           <>
-            <h2 className="qp-q">{step.t.text}</h2>
-            <label htmlFor={`th-${step.t.id}`} className="sr-only">
-              Your answer
-            </label>
-            <textarea
-              id={`th-${step.t.id}`}
-              value={theoryAnswers[step.t.id] || ''}
-              onChange={(e) => typeTheory(step.t.id, e.target.value)}
-              onPaste={block}
-              rows={8}
-              maxLength={5000}
-              placeholder="Type your answer here. You will compare it with the model answer after you submit."
-              className="qp-ta"
-            />
+            <div className="qp-head">
+              <span className="qp-cap">Section B · Theory</span>
+            </div>
+            {theory.map((t, n) => (
+              <section key={t.id} id={`q-${t.id}`} className={`qb${flashId === t.id ? ' qp-flash' : ''}`}>
+                <h2 className="qp-q">
+                  {theory.length > 1 && <span className="n">{n + 1}.</span>}
+                  <span>{t.text}</span>
+                </h2>
+                <label htmlFor={`th-${t.id}`} className="sr-only">
+                  Your answer
+                </label>
+                <textarea
+                  id={`th-${t.id}`}
+                  value={theoryAnswers[t.id] || ''}
+                  onChange={(e) => typeTheory(t.id, e.target.value)}
+                  onPaste={block}
+                  rows={8}
+                  maxLength={5000}
+                  placeholder="Type your answer here. You will compare it with the model answer after you submit."
+                  className="qp-ta"
+                />
+                {checked && !(theoryAnswers[t.id] || '').trim() && <p className="qp-err">Not answered yet</p>}
+              </section>
+            ))}
           </>
         )}
         {error && <p className="qp-err">{error}</p>}
         <div className="qp-nav">
-          <button onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0} className="qp-btn qp-out">
-            Back
+          <button onClick={askSubmit} disabled={busy} className="qp-btn qp-red qp-grow">
+            {busy
+              ? 'Submitting...'
+              : `${checked && missing.length > 0 ? 'Submit anyway' : 'Submit'} (${answeredCount}/${totalSteps} answered)`}
           </button>
-          {last ? (
-            <button onClick={() => submit(null)} disabled={busy} className="qp-btn qp-red qp-grow">
-              {busy ? 'Submitting...' : `Submit (${answeredCount}/${steps.length} answered)`}
-            </button>
-          ) : (
-            <button onClick={() => setIndex((i) => i + 1)} className="qp-btn qp-red qp-grow">
-              Next
-            </button>
-          )}
         </div>
       </main>
     </>,
