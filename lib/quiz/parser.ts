@@ -111,8 +111,11 @@ export function parseQuestions(rawText: string): ParseResult {
   // Answer key at the end of the document.
   const key = new Map<number, number>();
   const keyText = keyLines.join(' ');
-  for (const m of keyText.matchAll(/(\d{1,3})\s*[.):\-–]?\s*\(?([A-Ha-h])\)?(?![A-Za-z])/g)) {
-    key.set(parseInt(m[1], 10), LETTERS.indexOf(m[2].toUpperCase()));
+  // exec loop instead of matchAll: the project's tsconfig targets es5, which cannot iterate matchAll.
+  const keyRe = /(\d{1,3})\s*[.):\-–]?\s*\(?([A-Ha-h])\)?(?![A-Za-z])/g;
+  let km: RegExpExecArray | null;
+  while ((km = keyRe.exec(keyText)) !== null) {
+    key.set(parseInt(km[1], 10), LETTERS.indexOf(km[2].toUpperCase()));
   }
 
   const questions: ParsedQuestion[] = [];
