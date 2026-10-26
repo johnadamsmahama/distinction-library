@@ -19,12 +19,12 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (!quiz) return NextResponse.json({ error: 'Quiz not found.' }, { status: 404 });
   const { data: attempts } = await db
     .from('quiz_attempts')
-    .select('participant_name, score, total, started_at, submitted_at')
+    .select('participant_name, score, total, started_at, submitted_at, tab_switches, submit_reason')
     .eq('quiz_id', params.id)
     .not('submitted_at', 'is', null)
     .order('score', { ascending: false });
 
-  const rows = [['Name', 'Score', 'Out of', 'Percent', 'Minutes taken', 'Submitted at']];
+  const rows = [['Name', 'Score', 'Out of', 'Percent', 'Minutes taken', 'Submitted at', 'Times left quiz', 'Submission note']];
   for (const a of attempts ?? []) {
     const mins = Math.round(((new Date(a.submitted_at).getTime() - new Date(a.started_at).getTime()) / 60000) * 10) / 10;
     rows.push([
@@ -34,6 +34,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       a.total ? Math.round((a.score / a.total) * 100) : 0,
       mins,
       a.submitted_at,
+      a.tab_switches ?? 0,
+      a.submit_reason === 'cheating' ? 'Attempted cheating' : a.submit_reason === 'time' ? 'Time ran out' : '',
     ] as unknown as string[]);
   }
   const csv = rows.map((r) => r.map((c) => cell(c as string)).join(',')).join('\r\n');
