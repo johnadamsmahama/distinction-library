@@ -191,7 +191,7 @@ function UploadRow({
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span
-              className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
+              className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none ${
                 STATUS_STYLES[status] ?? 'bg-g100 text-g600'
               }`}
             >
