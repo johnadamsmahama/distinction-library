@@ -148,7 +148,7 @@ export function CommunityAndTools() {
           onClick={() => setShowGroupPicker(false)}
         >
           <div
-            className="w-full sm:max-w-[380px] bg-[#F6F1E3] rounded-t-2xl sm:rounded-2xl p-5 pb-[calc(20px+env(safe-area-inset-bottom))]"
+            className="w-full sm:max-w-[380px] bg-[#F6F1E3] rounded-none sm:rounded-none p-5 pb-[calc(20px+env(safe-area-inset-bottom))]"
             style={{ boxShadow: '0 -8px 30px rgba(23,35,63,0.35)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -172,9 +172,9 @@ export function CommunityAndTools() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setShowGroupPicker(false)}
-                  className="flex items-center gap-3 bg-white/60 hover:bg-white rounded-xl px-4 py-3.5 transition-colors"
+                  className="flex items-center gap-3 bg-white/60 hover:bg-white rounded-none px-4 py-3.5 transition-colors"
                 >
-                  <div className="w-[34px] h-[34px] flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB] rounded-md">
+                  <div className="w-[34px] h-[34px] flex-shrink-0 flex items-center justify-center bg-[#12333D] text-[#8FC1CB] rounded-none">
                     <WhatsAppIcon />
                   </div>
                   <span className="font-condensed font-bold text-[14px] text-navy-deep">{group.label}</span>
