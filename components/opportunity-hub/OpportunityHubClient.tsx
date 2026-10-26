@@ -166,7 +166,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                       <div className="flex items-start justify-between gap-3 mb-1">
                         <h2 className="font-display font-bold text-[15px] text-white">{o.title}</h2>
                         {o.featured && (
-                          <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded">
+                          <span className="flex-shrink-0 font-condensed font-bold text-[10px] uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded-none">
                             Featured
                           </span>
                         )}
@@ -176,7 +176,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                         <span>{o.organization}</span>
                         <span>·</span>
                         <span
-                          className="font-bold uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded"
+                          className="font-bold uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded-none"
                           style={{ color: cat.color, backgroundColor: `${cat.color}22` }}
                         >
                           {cat.label}
@@ -190,7 +190,7 @@ export default function OpportunityHubClient({ opportunities }: { opportunities:
                             <span>Deadline: {new Date(o.deadline).toLocaleDateString()}</span>
                             {dl && (
                               <span
-                                className="font-bold px-1.5 py-0.5 rounded"
+                                className="font-bold px-1.5 py-0.5 rounded-none"
                                 style={{ color: dl.color, backgroundColor: dl.bg }}
                               >
                                 {dl.label}
