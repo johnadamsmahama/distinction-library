@@ -46,7 +46,7 @@ export default function MultiSelect({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-none border border-g100 bg-white font-condensed font-medium text-[13px] text-g800 outline-none focus:border-gold transition-colors"
       >
         <span className={values.length ? '' : 'text-g600'}>{summary}</span>
         <svg
@@ -59,7 +59,7 @@ export default function MultiSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-lg shadow-lg">
+        <div className="absolute z-50 mt-1.5 w-full max-h-64 overflow-y-auto bg-white border border-g100 rounded-none shadow-lg">
           {options.length === 0 && (
             <div className="px-3.5 py-2.5 font-body text-[13px] text-g600">No courses yet.</div>
           )}
@@ -75,7 +75,7 @@ export default function MultiSelect({
                 }`}
               >
                 <span
-                  className={`w-4 h-4 flex-shrink-0 rounded border flex items-center justify-center ${
+                  className={`w-4 h-4 flex-shrink-0 rounded-none border flex items-center justify-center ${
                     checked ? 'bg-gold border-gold' : 'border-g100'
                   }`}
                 >
