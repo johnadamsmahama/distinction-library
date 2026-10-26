@@ -17,13 +17,23 @@ export type ParsedQuestion = {
   explanation: string | null;
 };
 
-export type ParseResult = { questions: ParsedQuestion[]; warnings: string[] };
+export type ParsedTheory = {
+  id: string;
+  text: string;
+  modelAnswer: string; // empty = admin still has to add one
+};
+
+export type ParseResult = { questions: ParsedQuestion[]; theory: ParsedTheory[]; warnings: string[] };
 
 const LETTERS = 'ABCDEFGH';
 
 const QUESTION_START = /^\s*(?:question\s*|q\s*)?(\d{1,3})\s*[.):\-]\s*(.*)$/i;
 const OPTION_START = /^\s*\(?([A-Ha-h])\s*[.)]\s+(.*)$/;
 const ANSWER_LINE = /^\s*(?:correct\s+)?(?:answer|ans)\s*[:.\-–]?\s*\(?([A-Ha-h])\b\)?/i;
+// Theory questions: "Model answer: ..." (can continue over several lines).
+const MODEL_LINE = /^\s*model\s+answer\s*[:\-–]\s*(.*)$/i;
+// "Section B", "Section B: Theory", "Part 2", "Objectives", "Theory" on their own line are headings, not question text.
+const SECTION_HEADING = /^\s*(?:(?:section|part)\s+[a-z0-9]{1,2}\b.*|objectives?|theory(?:\s+questions?)?|essay(?:\s+questions?)?)\s*[:\-–]?\s*$/i;
 const EXPLANATION_LINE = /^\s*(?:explanation|reason|rationale)\s*[:\-–]\s*(.*)$/i;
 const KEY_HEADING = /^\s*(?:answers?|answer\s*key|marking\s*scheme|key)\s*[:\-–]?\s*$/i;
 
@@ -62,7 +72,7 @@ export function parseQuestions(rawText: string): ParseResult {
   const keyLines = keyStart >= 0 ? lines.slice(keyStart + 1) : [];
   const body = keyStart >= 0 ? lines.slice(0, keyStart) : lines;
 
-  type Draft = { text: string[]; options: string[]; answer: number | null; expl: string[]; mode: 'q' | 'o' | 'e' };
+  type Draft = { text: string[]; options: string[]; answer: number | null; expl: string[]; model: string[]; mode: 'q' | 'o' | 'e' | 'm' };
   const drafts: Draft[] = [];
   let cur: Draft | null = null;
 
@@ -71,8 +81,15 @@ export function parseQuestions(rawText: string): ParseResult {
     const om = line.match(OPTION_START);
     const am = line.match(ANSWER_LINE);
     const em = line.match(EXPLANATION_LINE);
+    const mm = line.match(MODEL_LINE);
 
-    if (am && cur) {
+    if (SECTION_HEADING.test(line) && !qm) continue;
+    if (mm && cur) {
+      cur.mode = 'm';
+      if (mm[1]) cur.model.push(mm[1]);
+      continue;
+    }
+    if (am && cur && cur.mode !== 'm') {
       cur.answer = LETTERS.indexOf(am[1].toUpperCase());
       cur.mode = 'q';
       const tail = line.replace(ANSWER_LINE, '').replace(/^[\s).:\-–]+/, '').trim();
@@ -88,7 +105,7 @@ export function parseQuestions(rawText: string): ParseResult {
     // A new numbered line starts a new question unless we are mid-options and it
     // could only be a wrapped option line (it never starts with a letter marker).
     if (qm && !om) {
-      cur = { text: [qm[2]], options: [], answer: null, expl: [], mode: 'q' };
+      cur = { text: [qm[2]], options: [], answer: null, expl: [], model: [], mode: 'q' };
       drafts.push(cur);
       continue;
     }
@@ -106,6 +123,7 @@ export function parseQuestions(rawText: string): ParseResult {
     if (cur.mode === 'q') cur.text.push(line);
     else if (cur.mode === 'o' && cur.options.length) cur.options[cur.options.length - 1] += ' ' + line;
     else if (cur.mode === 'e') cur.expl.push(line);
+    else if (cur.mode === 'm') cur.model.push(line);
   }
 
   // Answer key at the end of the document.
@@ -119,10 +137,16 @@ export function parseQuestions(rawText: string): ParseResult {
   }
 
   const questions: ParsedQuestion[] = [];
+  const theory: ParsedTheory[] = [];
   drafts.forEach((d, i) => {
     const text = clean(d.text.join(' '));
     const options = d.options.map(clean).filter(Boolean);
     if (!text) return;
+    // No options at all: a theory question (a "Model answer:" line is expected).
+    if (options.length === 0) {
+      theory.push({ id: `t${theory.length + 1}`, text, modelAnswer: d.model.join('\n').trim() });
+      return;
+    }
     if (options.length < 2) {
       warnings.push(`Question ${i + 1} ("${text.slice(0, 40)}...") has fewer than 2 options and was skipped.`);
       return;
@@ -142,7 +166,7 @@ export function parseQuestions(rawText: string): ParseResult {
     });
   });
 
-  if (questions.length === 0) {
+  if (questions.length === 0 && theory.length === 0) {
     // Word's automatic numbering is not real text, so the numbers (and letters) may be missing.
     // Try to work out the questions from the layout instead.
     const guessed = guessFromLayout(body, key);
@@ -150,13 +174,13 @@ export function parseQuestions(rawText: string): ParseResult {
       warnings.push(
         'No question numbers were found (Word list numbering is not readable). The questions were worked out from the layout. Please check every question and answer carefully.'
       );
-      return { questions: guessed, warnings };
+      return { questions: guessed, theory, warnings };
     }
     warnings.push(
       'No questions were found. Number each question (1. 2. 3.) and put options on their own lines starting A. B. C. D.'
     );
   }
-  return { questions, warnings };
+  return { questions, theory, warnings };
 }
 
 // Fallback for papers whose numbers/letters came from Word's list buttons.
