@@ -3,6 +3,8 @@ import { randomBytes } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentProfile, isAdminRole } from '@/lib/auth-helpers';
 
+export type StoredTheory = { id: string; text: string; modelAnswer: string };
+
 export type StoredQuestion = {
   id: string;
   text: string;
@@ -29,8 +31,8 @@ export function makeSlug(length = 6) {
 }
 
 // Validates questions sent from the admin editor. Returns clean questions or an error message.
-export function validateQuestions(input: unknown): { questions: StoredQuestion[] } | { error: string } {
-  if (!Array.isArray(input) || input.length === 0) return { error: 'Add at least one question.' };
+export function validateQuestions(input: unknown, allowEmpty = false): { questions: StoredQuestion[] } | { error: string } {
+  if (!Array.isArray(input) || input.length === 0) return allowEmpty ? { questions: [] } : { error: 'Add at least one question.' };
   if (input.length > 200) return { error: 'A quiz can have at most 200 questions.' };
   const out: StoredQuestion[] = [];
   for (let i = 0; i < input.length; i++) {
@@ -50,4 +52,21 @@ export function validateQuestions(input: unknown): { questions: StoredQuestion[]
     out.push({ id: `q${i + 1}`, text, options, answer, explanation });
   }
   return { questions: out };
+}
+
+// Validates theory questions from the admin editor.
+export function validateTheory(input: unknown): { theory: StoredTheory[] } | { error: string } {
+  if (input === undefined || input === null) return { theory: [] };
+  if (!Array.isArray(input)) return { error: 'Theory questions are not valid.' };
+  if (input.length > 50) return { error: 'A quiz can have at most 50 theory questions.' };
+  const out: StoredTheory[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const t = input[i] as Record<string, unknown>;
+    const text = typeof t?.text === 'string' ? t.text.trim() : '';
+    const modelAnswer = typeof t?.modelAnswer === 'string' ? t.modelAnswer.trim() : '';
+    if (!text || text.length > 1500) return { error: `Theory question ${i + 1} needs text (up to 1500 characters).` };
+    if (!modelAnswer || modelAnswer.length > 3000) return { error: `Theory question ${i + 1} needs a model answer (up to 3000 characters).` };
+    out.push({ id: `t${i + 1}`, text, modelAnswer });
+  }
+  return { theory: out };
 }
