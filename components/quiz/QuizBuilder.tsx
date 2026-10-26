@@ -4,12 +4,15 @@ import { useRef, useState } from 'react';
 
 type Q = { id: string; text: string; options: string[]; answer: number | null; explanation: string | null };
 
+type T = { id: string; text: string; modelAnswer: string };
+
 const LETTERS = 'ABCDEFGH';
 
 export default function QuizBuilder() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [pasted, setPasted] = useState('');
   const [questions, setQuestions] = useState<Q[] | null>(null);
+  const [theory, setTheory] = useState<T[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [filename, setFilename] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -32,6 +35,7 @@ export default function QuizBuilder() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not read the file.');
       setQuestions(data.questions);
+      setTheory(data.theory || []);
       setWarnings(data.warnings || []);
       setFilename(data.filename);
       if (!title) setTitle((data.filename || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '));
@@ -55,6 +59,7 @@ export default function QuizBuilder() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not read the text.');
       setQuestions(data.questions);
+      setTheory(data.theory || []);
       setWarnings(data.warnings || []);
     } catch (e: any) {
       setError(e.message);
@@ -87,15 +92,26 @@ export default function QuizBuilder() {
   function removeQuestion(i: number) {
     setQuestions((qs) => qs && qs.filter((_, n) => n !== i));
   }
+  function updateTheory(i: number, patch: Partial<T>) {
+    setTheory((ts) => ts.map((t, n) => (n === i ? { ...t, ...patch } : t)));
+  }
+  function addTheory() {
+    setTheory((ts) => ts.concat([{ id: '', text: '', modelAnswer: '' }]));
+  }
+  function removeTheory(i: number) {
+    setTheory((ts) => ts.filter((_, n) => n !== i));
+  }
   function addQuestion() {
     setQuestions((qs) => [...(qs ?? []), { id: '', text: '', options: ['', '', '', ''], answer: null, explanation: null }]);
   }
 
   const missing = questions ? questions.filter((q) => q.answer === null).length : 0;
   const incomplete = questions ? questions.filter((q) => !q.text.trim() || q.options.some((o) => !o.trim())).length : 0;
+  const theoryIncomplete = theory.filter((t) => !t.text.trim() || !t.modelAnswer.trim()).length;
   const timeTrim = timeLimit.trim();
   const timeValid = timeTrim === '' || (/^\d+$/.test(timeTrim) && parseInt(timeTrim, 10) >= 1 && parseInt(timeTrim, 10) <= 300);
-  const canPublish = !!questions?.length && !!title.trim() && missing === 0 && incomplete === 0 && timeValid && !busy;
+  const canPublish =
+    ((questions?.length ?? 0) + theory.length > 0) && !!title.trim() && missing === 0 && incomplete === 0 && theoryIncomplete === 0 && timeValid && !busy;
 
   async function publish() {
     if (!questions) return;
@@ -108,6 +124,7 @@ export default function QuizBuilder() {
         body: JSON.stringify({
           title,
           questions,
+          theory,
           timeLimitMinutes: timeLimit.trim() === '' ? null : parseInt(timeLimit, 10),
           closesAt: closesAt ? new Date(closesAt).toISOString() : null,
           shuffle,
@@ -135,6 +152,7 @@ export default function QuizBuilder() {
 
   function reset() {
     setQuestions(null);
+    setTheory([]);
     setWarnings([]);
     setFilename(null);
     setTitle('');
@@ -221,6 +239,7 @@ export default function QuizBuilder() {
       )}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] items-start">
         <div className="flex flex-col gap-3">
+          <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold">Section A · Objectives ({questions.length})</p>
           {questions.map((q, i) => (
             <div key={i} className="bg-white p-4 border-l-[3px]" style={{ borderLeftColor: q.answer === null ? '#B4402F' : '#C9A02C' }}>
               <div className="flex justify-between items-center mb-2">
@@ -261,7 +280,28 @@ export default function QuizBuilder() {
             </div>
           ))}
           <button onClick={addQuestion} className="border border-dashed border-gold text-navy font-condensed font-bold uppercase tracking-[.1em] text-[13px] py-3">
-            Add a question
+            Add an objective question
+          </button>
+
+          <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold mt-4">Section B · Theory ({theory.length})</p>
+          <p className="text-sm text-g600 -mt-1">
+            Students type an answer, then compare it with your model answer and judge themselves. Nothing here is marked.
+          </p>
+          {theory.map((t, i) => (
+            <div key={i} className="bg-white p-4 border-l-[3px]" style={{ borderLeftColor: t.modelAnswer.trim() ? '#C9A02C' : '#B4402F' }}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] text-gold">Theory {i + 1}</span>
+                {!t.modelAnswer.trim() && <span className="text-[12px] font-semibold text-red-700">Add a model answer.</span>}
+              </div>
+              <label htmlFor={`tt${i}`} className={label}>Question</label>
+              <textarea id={`tt${i}`} value={t.text} onChange={(e) => updateTheory(i, { text: e.target.value })} rows={2} className={`${input} mb-2`} />
+              <label htmlFor={`tm${i}`} className={label}>Model answer (shown to students after they submit)</label>
+              <textarea id={`tm${i}`} value={t.modelAnswer} onChange={(e) => updateTheory(i, { modelAnswer: e.target.value })} rows={4} className={input} />
+              <button onClick={() => removeTheory(i)} className="text-sm text-red-700 underline mt-2">Delete theory question</button>
+            </div>
+          ))}
+          <button onClick={addTheory} className="border border-dashed border-gold text-navy font-condensed font-bold uppercase tracking-[.1em] text-[13px] py-3">
+            Add a theory question
           </button>
         </div>
 
@@ -291,15 +331,16 @@ export default function QuizBuilder() {
             Shuffle questions and options
           </label>
           <p className="text-[12px] text-g600 mb-3">Anyone with the link can take it. They enter their name and see their score and answers after submitting.</p>
-          {(missing > 0 || incomplete > 0) && (
+          {(missing > 0 || incomplete > 0 || theoryIncomplete > 0) && (
             <p className="text-sm text-red-700 mb-2">
               {missing > 0 && `${missing} question${missing > 1 ? 's' : ''} still need an answer ticked. `}
-              {incomplete > 0 && `${incomplete} question${incomplete > 1 ? 's have' : ' has'} empty text or options.`}
+              {incomplete > 0 && `${incomplete} question${incomplete > 1 ? 's have' : ' has'} empty text or options. `}
+              {theoryIncomplete > 0 && `${theoryIncomplete} theory question${theoryIncomplete > 1 ? 's need' : ' needs'} text and a model answer.`}
             </p>
           )}
           {error && <p className="text-sm text-red-700 mb-2">{error}</p>}
           <button onClick={publish} disabled={!canPublish} className="w-full bg-gold text-navy-deep font-condensed font-bold uppercase tracking-[.1em] py-3 disabled:opacity-50">
-            {busy ? 'Working...' : `Publish quiz (${questions.length} questions)`}
+            {busy ? 'Working...' : `Publish quiz (${questions.length} objective, ${theory.length} theory)`}
           </button>
         </div>
       </div>
