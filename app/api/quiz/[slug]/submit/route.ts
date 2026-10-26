@@ -11,9 +11,11 @@ const GRACE_SECONDS = 90; // covers slow networks when the timer auto-submits
 // Public. Marks on the server, saves the result, and returns the score with the
 // correct answers. This is the only place the answers ever leave the server.
 export async function POST(request: Request, { params }: { params: { slug: string } }) {
-  const { attemptId, answers } = (await request.json()) as {
+  const { attemptId, answers, switches, reason } = (await request.json()) as {
     attemptId?: string;
     answers?: Record<string, unknown>;
+    switches?: number;
+    reason?: string | null;
   };
   if (!attemptId || typeof answers !== 'object' || answers === null) {
     return NextResponse.json({ error: 'Missing answers.' }, { status: 400 });
@@ -44,16 +46,19 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   }
 
   const { score, total, review } = markAttempt(quiz.questions as StoredQuestion[], answers);
+  const submitReason = reason === 'cheating' || reason === 'time' ? reason : null;
+  const tabSwitches = typeof switches === 'number' && switches >= 0 ? Math.min(Math.floor(switches), 50) : 0;
 
   // The "is null" condition means two quick taps cannot submit twice.
   const { data: saved, error } = await db
     .from('quiz_attempts')
-    .update({ submitted_at: new Date().toISOString(), score, total, answers })
+    .update({ submitted_at: new Date().toISOString(), score, total, answers, tab_switches: tabSwitches, submit_reason: submitReason })
     .eq('id', attempt.id)
     .is('submitted_at', null)
     .select('id');
   if (error || !saved?.length) {
     return NextResponse.json({ error: 'Could not save your result. Try again.' }, { status: 500 });
   }
-  return NextResponse.json({ score, total, review });
+  // Someone caught cheating still sees their score but not the correct answers.
+  return NextResponse.json({ score, total, reason: submitReason, review: submitReason === 'cheating' ? null : review });
 }
