@@ -93,7 +93,9 @@ export default function QuizBuilder() {
 
   const missing = questions ? questions.filter((q) => q.answer === null).length : 0;
   const incomplete = questions ? questions.filter((q) => !q.text.trim() || q.options.some((o) => !o.trim())).length : 0;
-  const canPublish = !!questions?.length && !!title.trim() && missing === 0 && incomplete === 0 && !busy;
+  const timeTrim = timeLimit.trim();
+  const timeValid = timeTrim === '' || (/^\d+$/.test(timeTrim) && parseInt(timeTrim, 10) >= 1 && parseInt(timeTrim, 10) <= 300);
+  const canPublish = !!questions?.length && !!title.trim() && missing === 0 && incomplete === 0 && timeValid && !busy;
 
   async function publish() {
     if (!questions) return;
@@ -106,7 +108,7 @@ export default function QuizBuilder() {
         body: JSON.stringify({
           title,
           questions,
-          timeLimitMinutes: timeLimit === 'none' ? null : parseInt(timeLimit, 10),
+          timeLimitMinutes: timeLimit.trim() === '' ? null : parseInt(timeLimit, 10),
           closesAt: closesAt ? new Date(closesAt).toISOString() : null,
           shuffle,
         }),
@@ -267,11 +269,21 @@ export default function QuizBuilder() {
           <h3 className="font-display font-bold text-lg text-navy mb-3">Quiz settings</h3>
           <label htmlFor="qz-title" className={label}>Title</label>
           <input id="qz-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} className={`${input} mb-3`} />
-          <label htmlFor="qz-time" className={label}>Time limit</label>
-          <select id="qz-time" value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} className={`${input} mb-3`}>
-            {['10', '15', '20', '30', '45', '60', '90', '120'].map((m) => <option key={m} value={m}>{m} minutes</option>)}
-            <option value="none">No time limit</option>
-          </select>
+          <label htmlFor="qz-time" className={label}>Time limit in minutes (leave empty for none)</label>
+          <input
+            id="qz-time"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={300}
+            step={1}
+            value={timeLimit}
+            onChange={(e) => setTimeLimit(e.target.value)}
+            placeholder="e.g. 25"
+            className={`${input} mb-1`}
+          />
+          {!timeValid && <p className="text-[12px] text-red-700 mb-2">Enter a whole number from 1 to 300, or leave it empty.</p>}
+          <div className="mb-3" />
           <label htmlFor="qz-close" className={label}>Closes on (optional)</label>
           <input id="qz-close" type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} className={`${input} mb-3`} />
           <label className="flex items-center gap-2 text-sm mb-1">
