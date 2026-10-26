@@ -183,16 +183,16 @@ export default function VaultList({ items: initialItems, courses }: { items: Vau
                 className="min-w-0 text-left flex-1"
               >
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-condensed font-bold text-[10px] uppercase tracking-wide text-gold bg-gold/10 px-2 py-0.5 rounded flex-shrink-0">
+                  <span className="font-condensed font-bold text-[10px] uppercase tracking-wide text-gold bg-gold/10 px-2 py-0.5 rounded-none flex-shrink-0">
                     {TYPE_LABEL[item.item_type]}
                   </span>
                   {item.courses?.code && (
-                    <span className="font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-navy/10 text-navy flex-shrink-0">
+                    <span className="font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded-none bg-navy/10 text-navy flex-shrink-0">
                       {item.courses.code}
                     </span>
                   )}
                   {item.folder_name && (
-                    <span className="font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-g100 text-g600 flex-shrink-0">
+                    <span className="font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded-none bg-g100 text-g600 flex-shrink-0">
                       📁 {item.folder_name}
                     </span>
                   )}
