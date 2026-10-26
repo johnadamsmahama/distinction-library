@@ -47,6 +47,63 @@ function fmt(s: number) {
   return `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
+const PAPER_CSS = `
+.qp-bg{--paper:#FBF6E8;--rule:#D9CDA8;--red:#8A2E2E;--ink:#2A2418;--pen:#24477A;--mut:#8A7A5C;--green:#2E6B4A;min-height:100vh;background:var(--paper) linear-gradient(transparent 31px,var(--rule) 31px) 0 3px/100% 32px;color:var(--ink);font:15px/32px Georgia,'Times New Roman',serif}
+.qp{position:relative;max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:32px}
+.qp::before,.qp::after{content:'';position:absolute;top:0;bottom:0;width:2px;background:#C0504D;opacity:.8;pointer-events:none}
+.qp::before{left:28px}.qp::after{right:28px}
+.qp *{box-sizing:border-box;border-radius:0}
+.qp-lock{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.qp-lock textarea{-webkit-user-select:text;user-select:text}
+:where(.qp) button,:where(.qp) input,:where(.qp) textarea{font:inherit;color:inherit}.qp button{cursor:pointer}
+.qp-top{height:64px;padding:0 40px;display:flex;justify-content:space-between;align-items:center}
+.qp-brand{max-width:230px;line-height:32px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.qp-timer{font:700 14px/24px Georgia,serif;border:1px solid var(--red);color:var(--red);padding:0 8px;background:var(--paper);font-variant-numeric:tabular-nums}.qp-timer.low{background:var(--red);color:var(--paper)}
+.qp-m{padding:0 40px}.qp-intro{padding-top:32px}
+.qp-cap,.qp-lbl{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.qp-hd{position:relative;text-align:center}.qp-hd::after{content:'';position:absolute;left:0;right:0;top:100%;height:4px;border-top:3px double var(--red)}
+.qp-org{position:relative;font-size:15px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1B1710}
+.qp-x{position:absolute;left:50%;top:32px;transform:translate(-50%,-50%);font-size:18px;line-height:16px;font-weight:700;letter-spacing:0;background:var(--paper);padding:0 6px}
+.qp-title{font:800 21px/32px Georgia,serif;color:#1B1710;text-transform:uppercase;letter-spacing:.05em}
+.qp-meta{text-align:center;font-style:italic;font-size:14px;color:#6B5D3F}
+.qp-ins{margin-top:32px;font-size:13px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--red);text-align:center}
+.qp-rules{margin-bottom:32px;counter-reset:r;list-style:none;padding:0}.qp-rules li{counter-increment:r;display:flex;gap:4px;line-height:32px;color:var(--red);font-weight:600}.qp-rules li::before{content:counter(r) '.';flex:none;width:22px;font-weight:800}
+.qp-label{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.qp-input{display:block;width:100%;height:35px;margin-bottom:-3px;padding:0;border:0;border-bottom:2px solid var(--pen);background:transparent;font-size:19px;color:var(--pen);outline:0}.qp-input::placeholder{color:var(--mut);font-style:italic}
+.qp-err{color:var(--red);font-style:italic;line-height:32px}
+.qp-btn{height:40px;margin:12px 0;padding:0 18px;border:0;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.qp-btn:disabled{opacity:.4;cursor:default}
+.qp-red{background:var(--red);color:#F6EFDC}.qp-out{background:var(--paper);color:var(--red);border:1px solid var(--red)}.qp-wide{width:100%}
+.qp-fine{font-size:13px;font-style:italic}
+.qp-head{display:flex;justify-content:space-between;flex-wrap:wrap;column-gap:12px;line-height:32px}
+.qp-prog{height:32px;display:flex;align-items:center;gap:4px}.qp-prog i{flex:1;height:3px;background:var(--rule)}.qp-prog i.done{background:var(--red)}.qp-prog i.on{background:var(--pen)}
+.qp-track{flex:1;height:3px;background:var(--rule)}.qp-track span{display:block;height:3px;background:var(--red)}
+.qp-q{font:600 19px/32px Georgia,serif;color:#1B1710;margin-bottom:32px}
+.qp-opts{margin-bottom:32px;display:flex;flex-direction:column}
+.qp-opt{display:flex;gap:10px;width:100%;padding:0;border:0;background:none;text-align:left;font:16px/32px Georgia,serif;color:var(--ink)}
+.qp-opt b{flex:none;width:32px;text-align:center;font-weight:400}.qp-opt b::before{content:'('}.qp-opt b::after{content:')'}
+.qp-opt.sel{color:var(--pen);font-weight:700}.qp-opt.sel b{color:var(--pen);outline:1.5px solid var(--pen);outline-offset:-5px;border-radius:50%}
+.qp-ta{display:block;width:100%;height:256px;resize:none;padding:0;border:0;background:transparent;font:15px/32px Georgia,serif;color:var(--pen);outline:0;margin-bottom:32px}.qp-ta::placeholder{color:var(--mut);font-style:italic}
+.qp-nav{display:flex;gap:10px;height:64px;align-items:center}.qp-nav .qp-btn{margin:0}.qp-nav .qp-grow{flex:1}
+.qp-ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.7)}
+.qp-dlg{max-width:360px;width:100%;padding:24px;background:var(--paper);border-top:4px solid var(--red);line-height:24px;color:var(--ink)}.qp-dlg h3{font-size:19px;font-weight:700;color:var(--red)}.qp-dlg p{margin:8px 0 18px}.qp-dlg .qp-btn{margin:0}
+.qp-score{position:relative}.qp-big{height:64px}.qp-big b{display:inline-block;background:var(--paper);padding:0 8px;font:800 64px/56px Georgia,serif;color:var(--red);border-bottom:3px double var(--red);transform:rotate(-3deg);margin-right:10px}.qp-big span{font-size:22px}
+.qp-big2{font:800 24px/32px Georgia,serif;color:var(--red)}
+.qp-pct{font-style:italic}
+.qp-stamp{position:absolute;right:0;top:36px;background:var(--paper);border:2px solid var(--red);color:var(--red);font-weight:700;font-size:11px;line-height:18px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;transform:rotate(5deg)}
+.qp-note{border-left:2px solid var(--red);padding-left:12px;margin-bottom:32px}.qp-note.time{border-color:var(--mut)}.qp-note b{color:var(--red);display:block}
+.qp-sec{margin-top:32px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.qp-rv{position:relative;margin-bottom:32px}.qp-rv::before{position:absolute;left:-38px;top:0;font-size:22px;color:var(--red)}.qp-rv.ok::before{content:'\\2713';color:var(--green)}.qp-rv.no::before{content:'\\2717'}.qp-rv.th::before{content:none}
+.qp-rl{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.qp-rq{font-size:15.5px;font-weight:600}
+.qp-rv li{font-size:15px}.qp-rv li b{font-weight:400;margin-right:6px}.qp-rv li em{font-style:normal;white-space:nowrap}
+.qp-rv li.ans{color:var(--green);font-weight:700}.qp-rv li.ans em{font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-left:4px}
+.qp-rv li.wr em{color:var(--red);font-weight:700;font-size:13px;margin-left:4px}
+.qp-ex,.qp-lead,.qp-foot{font-style:italic;font-size:14px;color:#6B5D3F}.qp-lead{margin-bottom:32px}
+.qp-yours{color:var(--pen);white-space:pre-wrap;word-break:break-word;margin-bottom:32px}
+.qp-model{color:var(--red);border-left:2px solid var(--red);padding-left:12px;white-space:pre-wrap;word-break:break-word;margin-bottom:32px}.qp-lbl.g{color:var(--red)}
+.qp-rate{display:flex;gap:8px;margin:12px 0}.qp-rate button{flex:1;height:40px;border:1px solid var(--red);background:var(--paper);color:var(--red);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.qp-rate button[aria-pressed=true]{background:var(--red);color:var(--paper)}
+.qp-foot{margin-top:32px}.qp-lnk{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;font-size:14px;color:var(--red)}
+`;
+
 export default function QuizTaker({
   slug,
   title,
@@ -300,30 +357,64 @@ export default function QuizTaker({
     Object.keys(answers).length + theory.filter((t) => (theoryAnswers[t.id] || '').trim() !== '').length;
   const last = index === steps.length - 1;
 
-  const shell = (children: React.ReactNode) => (
-    <div className="min-h-screen bg-off-white font-body text-g800">
-      <div className="max-w-[560px] mx-auto px-4 py-6">{children}</div>
+  const block = (e: React.SyntheticEvent) => e.preventDefault();
+
+  const shell = (children: React.ReactNode, locked = false) => (
+    <div className="qp-bg">
+      <style>{PAPER_CSS}</style>
+      <div
+        className={`qp${locked ? ' qp-lock' : ''}`}
+        onCopy={locked ? block : undefined}
+        onCut={locked ? block : undefined}
+        onContextMenu={locked ? block : undefined}
+        onDragStart={locked ? block : undefined}
+      >
+        {children}
+      </div>
     </div>
+  );
+
+  const topBar = (withTimer: boolean) => (
+    <header className="qp-top">
+      <span className="qp-brand">The Distinction Library × Distinction Programme</span>
+      {withTimer && secondsLeft !== null && (
+        <span className={`qp-timer${secondsLeft <= 60 ? ' low' : ''}`} aria-live="off">
+          {fmt(secondsLeft)}
+        </span>
+      )}
+    </header>
   );
 
   if (phase === 'intro') {
     const parts: string[] = [];
     if (questions.length) parts.push(`${questions.length} objective question${questions.length > 1 ? 's' : ''}`);
     if (theory.length) parts.push(`${theory.length} theory question${theory.length > 1 ? 's' : ''}`);
+    const rules: string[] = [];
+    if (questions.length > 0) rules.push('Objectives are marked for you when you submit.');
+    if (theory.length > 0) rules.push('For theory, type your answer, then compare it with the model answer and judge yourself.');
+    rules.push('After you start, do not switch tabs or apps. Leaving the quiz twice submits it automatically.');
     return shell(
-      <div className="bg-white border-t-4 border-gold p-6 shadow-[0_2px_12px_rgba(13,43,94,0.08)]">
-        <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold mb-2">Distinction Programme</p>
-        <h1 className="font-display font-bold text-[26px] leading-tight text-navy mb-3">{title}</h1>
-        <p className="text-sm text-g600 mb-3">
+      <main className="qp-m qp-intro">
+        <div className="qp-hd">
+          <p className="qp-org">
+            The Distinction Library<span className="qp-x">×</span>
+            <br />
+            Distinction Programme
+          </p>
+          <h1 className="qp-title">{title}</h1>
+        </div>
+        <p className="qp-meta">
           {parts.join(' and ')}
-          {timeLimitMinutes ? ` · ${timeLimitMinutes} minutes` : ' · no time limit'}.
+          <br />
+          {timeLimitMinutes ? `Time allowed: ${timeLimitMinutes} minutes` : 'No time limit'}
         </p>
-        <p className="text-sm text-g600 mb-5">
-          {questions.length > 0 && 'Objectives are marked for you when you submit. '}
-          {theory.length > 0 && 'For theory, you type your answer and then compare it with the model answer and judge yourself. '}
-          Do not leave this page during the quiz. Leaving twice submits it automatically as attempted cheating.
-        </p>
-        <label htmlFor="pname" className="block font-condensed font-semibold text-[12px] uppercase tracking-[.1em] text-g600 mb-1">
+        <h2 className="qp-ins">Instructions</h2>
+        <ol className="qp-rules">
+          {rules.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ol>
+        <label htmlFor="pname" className="qp-label">
           Your full name
         </label>
         <input
@@ -332,18 +423,15 @@ export default function QuizTaker({
           onChange={(e) => setName(e.target.value)}
           maxLength={60}
           autoComplete="name"
-          className="w-full border border-[#D5DBE8] px-3 py-3 text-base mb-3 focus:outline-none focus:border-navy"
-          placeholder="e.g. Ama Mensah"
+          className="qp-input"
+          placeholder="John Adams Mahama"
         />
-        {error && <p className="text-sm text-red-700 mb-3">{error}</p>}
-        <button
-          onClick={start}
-          disabled={busy}
-          className="w-full bg-gold text-navy-deep font-condensed font-bold uppercase tracking-[.1em] py-3.5 disabled:opacity-60"
-        >
-          {busy ? 'Starting...' : timeLimitMinutes ? 'Start quiz. The timer begins now.' : 'Start quiz'}
+        {error && <p className="qp-err">{error}</p>}
+        <button onClick={start} disabled={busy} className="qp-btn qp-red qp-wide">
+          {busy ? 'Starting...' : 'Start quiz'}
         </button>
-      </div>
+        {timeLimitMinutes ? <p className="qp-fine">The timer begins as soon as you tap Start.</p> : null}
+      </main>
     );
   }
 
@@ -351,158 +439,148 @@ export default function QuizTaker({
     const pct = result.total ? Math.round((result.score / result.total) * 100) : 0;
     const first = name.split(' ')[0];
     return shell(
-      <div className="flex flex-col gap-4">
-        <div className="bg-white border-t-4 border-gold p-6 text-center shadow-[0_2px_12px_rgba(13,43,94,0.08)]">
-          {result.total > 0 ? (
-            <>
-              <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold mb-1">
-                {theory.length > 0 ? 'Section A score' : 'Your score'}
-              </p>
-              <p className="font-display font-bold text-[56px] leading-none text-navy">
-                {result.score} / {result.total}
-              </p>
-              <p className="text-g600 mt-2">{pct}%. Well done for finishing, {first}.</p>
-            </>
-          ) : (
-            <>
-              <p className="font-display font-bold text-[26px] text-navy">Submitted, {first}</p>
-              <p className="text-g600 mt-2">Your theory answers have been sent.</p>
-            </>
-          )}
-        </div>
-        {result.reason === 'cheating' && (
-          <div className="bg-red-50 border-l-[3px] border-red-700 p-4 text-sm text-red-900">
-            <p className="font-bold mb-1">Submitted automatically: attempted cheating</p>
-            <p>You left the quiz twice, so it was submitted for you. Your lecturer can see this. The correct and model answers are not shown for this attempt.</p>
-          </div>
-        )}
-        {result.reason === 'time' && (
-          <div className="bg-[#FBF3E1] border-l-[3px] border-gold p-4 text-sm text-g800">Time ran out, so the quiz was submitted for you.</div>
-        )}
+      <>
+        {topBar(false)}
+        <main className="qp-m">
+          <section className="qp-score">
+            {result.total > 0 ? (
+              <>
+                <p className="qp-cap">{theory.length > 0 ? 'Section A score' : 'Your score'}</p>
+                <p className="qp-big">
+                  <b>{result.score}</b>
+                  <span>/ {result.total}</span>
+                </p>
+                <p className="qp-pct">
+                  {pct}%. Well done for finishing, {first}.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="qp-big2">Submitted, {first}</p>
+                <p className="qp-pct">Your theory answers have been sent.</p>
+              </>
+            )}
+            <span className="qp-stamp">Submitted</span>
+          </section>
 
-        {(result.review ?? []).map((r, n) => (
-          <div key={r.id} className="bg-white p-4 border-l-[3px]" style={{ borderLeftColor: r.correct ? '#4F8271' : '#B4402F' }}>
-            <p className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] mb-1" style={{ color: r.correct ? '#4F8271' : '#B4402F' }}>
-              Question {n + 1} · {r.chosen === null ? 'Not answered' : r.correct ? 'Correct' : 'Wrong'}
-            </p>
-            <p className="font-medium mb-2">{r.text}</p>
-            <ul className="flex flex-col gap-1 text-[15px]">
-              {r.options.map((o, oi) => {
-                const isAnswer = oi === r.answer;
-                const isChosen = oi === r.chosen;
-                return (
-                  <li
-                    key={oi}
-                    className={`px-2 py-1.5 border ${isAnswer ? 'border-mint-deep bg-mint-light/40 font-semibold' : isChosen ? 'border-red-300 bg-red-50' : 'border-transparent'}`}
-                  >
-                    <span className="font-condensed font-bold mr-2">{LETTERS[oi]}</span>
-                    {o}
-                    {isAnswer && <span className="text-mint-deep"> ✓ correct</span>}
-                    {isChosen && !isAnswer && <span className="text-red-700"> your answer</span>}
-                  </li>
-                );
-              })}
-            </ul>
-            {r.explanation && <p className="text-sm text-g600 mt-2">{r.explanation}</p>}
-          </div>
-        ))}
-
-        {result.theory && result.theory.length > 0 && (
-          <>
-            <div className="mt-2">
-              <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold mb-1">Section B · Theory</p>
-              <p className="text-sm text-g600">
-                Compare your answer with the model answer, then tell yourself honestly how you did. These are not marked for you.
+          {result.reason === 'cheating' && (
+            <div className="qp-note">
+              <b>Submitted automatically: attempted cheating</b>
+              <p>
+                You left the quiz twice, so it was submitted for you. Your lecturer can see this. The correct and model answers are not shown
+                for this attempt.
               </p>
             </div>
-            {result.theory.map((t, n) => (
-              <div key={t.id} className="bg-white p-4 border-l-[3px] border-gold">
-                <p className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] text-gold mb-1">Theory {n + 1}</p>
-                <p className="font-medium mb-3">{t.text}</p>
-                <p className="font-condensed font-semibold text-[11px] uppercase tracking-[.1em] text-g600 mb-1">Your answer</p>
-                <p className="text-[15px] bg-g100 px-3 py-2 mb-3 whitespace-pre-wrap break-words">
-                  {t.yourAnswer || <span className="text-g500">No answer typed.</span>}
-                </p>
-                <p className="font-condensed font-semibold text-[11px] uppercase tracking-[.1em] text-mint-deep mb-1">Model answer</p>
-                <p className="text-[15px] bg-mint-light/40 border border-mint-deep px-3 py-2 mb-3 whitespace-pre-wrap break-words">{t.modelAnswer}</p>
-                <p className="font-condensed font-semibold text-[11px] uppercase tracking-[.1em] text-g600 mb-1.5">How did you do?</p>
-                <div className="flex gap-2" role="group" aria-label={`Rate your answer to theory question ${n + 1}`}>
-                  {RATINGS.map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => rate(t.id, r.value)}
-                      aria-pressed={ratings[t.id] === r.value}
-                      className={`flex-1 py-2.5 border font-condensed font-bold uppercase tracking-[.08em] text-[13px] ${ratings[t.id] === r.value ? 'bg-navy text-[#F6F1E3] border-navy' : 'bg-white text-navy border-[#D5DBE8]'}`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </>
-        )}
+          )}
+          {result.reason === 'time' && (
+            <div className="qp-note time">
+              <p>Time ran out, so the quiz was submitted for you.</p>
+            </div>
+          )}
 
-        <div className="bg-white p-4 text-sm text-g600 border-t border-g100">
-          <p className="mb-2">
-            Your result is kept on this phone. Open this same link again on this phone to review your score and answers.
-            If you clear your browser data, it will be gone, so take a screenshot of anything you want to keep.
+          {(result.review ?? []).length > 0 && <h3 className="qp-sec">{theory.length > 0 ? 'Section A · Review' : 'Review'}</h3>}
+          {(result.review ?? []).map((r, n) => (
+            <article key={r.id} className={`qp-rv ${r.correct ? 'ok' : 'no'}`}>
+              <p className="qp-rl">
+                Question {n + 1} · {r.chosen === null ? 'Not answered' : r.correct ? 'Correct' : 'Wrong'}
+              </p>
+              <p className="qp-rq">{r.text}</p>
+              <ul>
+                {r.options.map((o, oi) => {
+                  const isAnswer = oi === r.answer;
+                  const isChosen = oi === r.chosen;
+                  return (
+                    <li key={oi} className={isAnswer ? 'ans' : isChosen ? 'wr' : ''}>
+                      <b>{LETTERS[oi]}</b>
+                      {o}
+                      {isAnswer && <em>✓ correct</em>}
+                      {isChosen && !isAnswer && <em>✗</em>}
+                    </li>
+                  );
+                })}
+              </ul>
+              {r.explanation && <p className="qp-ex">{r.explanation}</p>}
+            </article>
+          ))}
+
+          {result.theory && result.theory.length > 0 && (
+            <>
+              <h3 className="qp-sec">Section B · Theory</h3>
+              <p className="qp-lead">
+                Compare your answer with the model answer, then tell yourself honestly how you did. These are not marked for you.
+              </p>
+              {result.theory.map((t, n) => (
+                <article key={t.id} className="qp-rv th">
+                  <p className="qp-rl">Theory {n + 1}</p>
+                  <p className="qp-rq">{t.text}</p>
+                  <p className="qp-lbl">Your answer</p>
+                  <p className="qp-yours">{t.yourAnswer || 'No answer typed.'}</p>
+                  <p className="qp-lbl g">Model answer</p>
+                  <p className="qp-model">{t.modelAnswer}</p>
+                  <p className="qp-lbl">How did you do?</p>
+                  <div className="qp-rate" role="group" aria-label={`Rate your answer to theory question ${n + 1}`}>
+                    {RATINGS.map((r) => (
+                      <button key={r.value} onClick={() => rate(t.id, r.value)} aria-pressed={ratings[t.id] === r.value}>
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </>
+          )}
+
+          <p className="qp-foot">
+            Your result is kept on this phone. Open this same link again on this phone to review your score and answers. If you clear your
+            browser data, it will be gone, so take a screenshot of anything you want to keep.
           </p>
-          <button onClick={retake} className="text-navy underline font-semibold">Start the quiz again</button>
-        </div>
-      </div>
+          <button onClick={retake} className="qp-lnk">
+            Start the quiz again
+          </button>
+        </main>
+      </>
     );
   }
 
-  if (!step) return shell(<p>Loading...</p>);
+  if (!step) return shell(<p className="qp-m">Loading...</p>);
 
-  const block = (e: React.SyntheticEvent) => e.preventDefault();
   return shell(
-    <div
-      className="bg-white shadow-[0_2px_12px_rgba(13,43,94,0.08)] select-none"
-      style={{ WebkitTouchCallout: 'none' } as React.CSSProperties}
-      onCopy={block}
-      onCut={block}
-      onContextMenu={block}
-      onDragStart={block}
-    >
+    <>
       {warning && (
-        <div role="alertdialog" aria-modal="true" aria-labelledby="warn-title" className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4">
-          <div className="bg-white max-w-[360px] w-full p-6 border-t-4 border-red-700">
-            <p id="warn-title" className="font-display font-bold text-[20px] text-navy mb-2">Warning: you left the quiz</p>
-            <p className="text-sm text-g800 mb-4">
-              Leaving the quiz is not allowed. If you leave it one more time, your quiz will be submitted automatically
-              and marked as attempted cheating.
+        <div role="alertdialog" aria-modal="true" aria-labelledby="warn-title" className="qp-ov">
+          <div className="qp-dlg">
+            <h3 id="warn-title">Warning: you left the quiz</h3>
+            <p>
+              Leaving the quiz is not allowed. If you leave it one more time, your quiz will be submitted automatically and marked as
+              attempted cheating.
             </p>
-            <button onClick={() => setWarning(false)} className="w-full bg-navy text-[#F6F1E3] font-condensed font-bold uppercase tracking-[.1em] py-3">
+            <button onClick={() => setWarning(false)} className="qp-btn qp-red qp-wide">
               I understand. Continue quiz
             </button>
           </div>
         </div>
       )}
-      <div className="bg-navy text-[#F6F1E3] px-4 py-3">
-        <div className="flex justify-between items-center font-condensed font-semibold text-[13px] uppercase tracking-[.12em] mb-2">
-          <span>
+      {topBar(true)}
+      <main className="qp-m">
+        <div className="qp-head">
+          <span className="qp-cap">{step.kind === 'theory' ? 'Section B · Theory' : theory.length > 0 ? 'Section A · Objectives' : 'Objectives'}</span>
+          <span className="qp-cap">
             {step.kind === 'theory' ? 'Theory' : 'Question'} {index + 1} of {steps.length}
           </span>
-          {secondsLeft !== null && (
-            <span className={`px-2 py-0.5 tabular-nums ${secondsLeft <= 60 ? 'bg-red-600 text-white' : 'bg-gold text-navy-deep'}`} aria-live="off">
-              {fmt(secondsLeft)}
-            </span>
+        </div>
+        <div className="qp-prog" aria-hidden="true">
+          {steps.length <= 12 ? (
+            steps.map((_, k) => <i key={k} className={k < index ? 'done' : k === index ? 'on' : ''} />)
+          ) : (
+            <div className="qp-track">
+              <span style={{ width: `${((index + 1) / steps.length) * 100}%` }} />
+            </div>
           )}
         </div>
-        <div className="h-[5px] bg-white/25">
-          <div className="h-full bg-gold transition-all" style={{ width: `${((index + 1) / steps.length) * 100}%` }} />
-        </div>
-      </div>
-      <div className="p-4 flex flex-col gap-4">
         {step.kind === 'mcq' ? (
           <>
-            {theory.length > 0 && (
-              <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold -mb-2">Section A · Objectives</p>
-            )}
-            <p className="font-display font-semibold text-[20px] leading-snug text-navy">{step.q.text}</p>
-            <div className="flex flex-col gap-2.5" role="radiogroup" aria-label="Answer options">
+            <h2 className="qp-q">{step.q.text}</h2>
+            <div className="qp-opts" role="radiogroup" aria-label="Answer options">
               {step.q.options.map((o, pos) => {
                 const selected = answers[step.q.id] === o.i;
                 return (
@@ -511,9 +589,9 @@ export default function QuizTaker({
                     role="radio"
                     aria-checked={selected}
                     onClick={() => choose(step.q.id, o.i)}
-                    className={`flex gap-3 text-left w-full px-3 py-3.5 border-[1.5px] text-base ${selected ? 'border-navy bg-[#E9EFF6] shadow-[inset_4px_0_0_#0D2B5E]' : 'border-[#D5DBE8] bg-white'}`}
+                    className={`qp-opt${selected ? ' sel' : ''}`}
                   >
-                    <span className="font-condensed font-bold text-gold w-4 flex-none">{LETTERS[pos]}</span>
+                    <b>{LETTERS[pos]}</b>
                     <span>{o.text}</span>
                   </button>
                 );
@@ -522,9 +600,10 @@ export default function QuizTaker({
           </>
         ) : (
           <>
-            <p className="font-condensed font-bold text-[11px] uppercase tracking-[.14em] text-gold -mb-2">Section B · Theory</p>
-            <p className="font-display font-semibold text-[20px] leading-snug text-navy">{step.t.text}</p>
-            <label htmlFor={`th-${step.t.id}`} className="sr-only">Your answer</label>
+            <h2 className="qp-q">{step.t.text}</h2>
+            <label htmlFor={`th-${step.t.id}`} className="sr-only">
+              Your answer
+            </label>
             <textarea
               id={`th-${step.t.id}`}
               value={theoryAnswers[step.t.id] || ''}
@@ -533,37 +612,27 @@ export default function QuizTaker({
               rows={8}
               maxLength={5000}
               placeholder="Type your answer here. You will compare it with the model answer after you submit."
-              className="w-full border-[1.5px] border-[#D5DBE8] px-3 py-3 text-base select-text focus:outline-none focus:border-navy"
+              className="qp-ta"
             />
           </>
         )}
-        {error && <p className="text-sm text-red-700">{error}</p>}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIndex((i) => Math.max(0, i - 1))}
-            disabled={index === 0}
-            className="px-4 py-3.5 border border-navy text-navy font-condensed font-bold uppercase tracking-[.1em] disabled:opacity-40"
-          >
+        {error && <p className="qp-err">{error}</p>}
+        <div className="qp-nav">
+          <button onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0} className="qp-btn qp-out">
             Back
           </button>
           {last ? (
-            <button
-              onClick={() => submit(null)}
-              disabled={busy}
-              className="flex-1 bg-gold text-navy-deep font-condensed font-bold uppercase tracking-[.1em] py-3.5 disabled:opacity-60"
-            >
+            <button onClick={() => submit(null)} disabled={busy} className="qp-btn qp-red qp-grow">
               {busy ? 'Submitting...' : `Submit (${answeredCount}/${steps.length} answered)`}
             </button>
           ) : (
-            <button
-              onClick={() => setIndex((i) => i + 1)}
-              className="flex-1 bg-navy text-[#F6F1E3] font-condensed font-bold uppercase tracking-[.1em] py-3.5"
-            >
+            <button onClick={() => setIndex((i) => i + 1)} className="qp-btn qp-red qp-grow">
               Next
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </main>
+    </>,
+    true
   );
 }
