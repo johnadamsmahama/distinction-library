@@ -209,7 +209,7 @@ export default function TutorManager({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
+      <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-none p-6 space-y-4 h-fit">
         <div className="flex items-center justify-between mb-1">
           <h2 className="font-display font-bold text-lg text-navy">
             {isEditing ? 'Edit tutor' : 'Add a peer tutor'}
@@ -334,7 +334,7 @@ export default function TutorManager({
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {saving ? 'Saving…' : isEditing ? 'Save changes' : 'Add tutor'}
         </button>
@@ -347,7 +347,7 @@ export default function TutorManager({
             <p className="font-body text-sm text-g600">No tutors added yet.</p>
           )}
           {tutors.map((t) => (
-            <div key={t.id} className="bg-white border border-g100 rounded-xl p-4">
+            <div key={t.id} className="bg-white border border-g100 rounded-none p-4">
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 flex-shrink-0 rounded-full bg-navy overflow-hidden flex items-center justify-center">
                   {t.photo_url ? (
@@ -361,7 +361,7 @@ export default function TutorManager({
                   <div className="flex items-center gap-2">
                     <div className="font-condensed font-semibold text-sm text-g800 truncate">{t.full_name}</div>
                     <span
-                      className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-none flex-shrink-0 ${
                         t.is_active ? 'bg-green-50 text-green-700' : 'bg-g100 text-g600'
                       }`}
                     >
@@ -378,20 +378,20 @@ export default function TutorManager({
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => startEdit(t)}
-                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-lg py-2 hover:border-gold transition-colors"
+                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-none py-2 hover:border-gold transition-colors"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => toggleActive(t)}
-                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-lg py-2 hover:border-gold transition-colors"
+                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-none py-2 hover:border-gold transition-colors"
                 >
                   {t.is_active ? 'Deactivate' : 'Activate'}
                 </button>
                 <button
                   onClick={() => deleteTutor(t.id)}
                   aria-label={`Delete ${t.full_name}`}
-                  className="w-9 flex-shrink-0 flex items-center justify-center rounded-lg text-g600 hover:text-red-500 hover:bg-red-50 transition-colors border border-g100"
+                  className="w-9 flex-shrink-0 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors border border-g100"
                 >
                   ✕
                 </button>
@@ -406,4 +406,4 @@ export default function TutorManager({
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
