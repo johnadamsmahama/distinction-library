@@ -14,6 +14,9 @@ const SECTIONS: Record<string, { label: string; href: string }> = {
   library: { label: 'Library', href: '/library' },
   vault: { label: 'Study Vault', href: '/vault' },
   'ai-tools': { label: 'AI Tools', href: '/ai-tools' },
+  // Admin sections open as their own pages, so every /admin/... page gets
+  // a Home / Admin crumb that leads back to the Admin hub.
+  admin: { label: 'Admin', href: '/admin' },
 };
 
 // /papers is now always a dedicated destination reached through the
