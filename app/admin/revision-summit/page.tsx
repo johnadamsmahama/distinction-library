@@ -51,23 +51,23 @@ export default async function AdminRevisionSummitPage({
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-        <div className="bg-white rounded p-3 border-l-[3px] border-gold">
+        <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{rows.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Total signups</div>
         </div>
-        <div className="bg-white rounded p-3 border-l-[3px] border-gold">
+        <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{inPerson.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">In-person</div>
         </div>
-        <div className="bg-white rounded p-3 border-l-[3px] border-gold">
+        <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{online.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Online</div>
         </div>
-        <div className="bg-white rounded p-3 border-l-[3px] border-gold">
+        <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{needTransport.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Need transport</div>
         </div>
-        <div className="bg-white rounded p-3 border-l-[3px] border-gold">
+        <div className="bg-white rounded-none p-3 border-l-[3px] border-gold">
           <div className="font-display font-bold text-2xl text-navy mb-0.5">{needStipend.length}</div>
           <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">Need data stipend</div>
         </div>
@@ -78,7 +78,7 @@ export default async function AdminRevisionSummitPage({
           <a
             key={tab.key}
             href={tab.key === 'all' ? '?' : `?filter=${tab.key}`}
-            className="font-condensed text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full transition-colors"
+            className="font-condensed text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-none transition-colors"
             style={{
               background: activeFilter === tab.key ? '#0D2B5E' : '#E9EFF6',
               color: activeFilter === tab.key ? '#FFFFFF' : '#0D2B5E',
@@ -96,14 +96,14 @@ export default async function AdminRevisionSummitPage({
           {filteredRows.map((r) => {
             const isInPerson = r.preferred_format === 'in_person';
             return (
-              <div key={r.id} className="bg-white rounded p-4 border-l-[3px] border-gold">
+              <div key={r.id} className="bg-white rounded-none p-4 border-l-[3px] border-gold">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="font-condensed font-semibold text-[14px] text-navy">{r.full_name}</p>
                     <p className="font-body text-xs text-g600">{r.course_level}</p>
                   </div>
                   <span
-                    className="font-condensed text-[10px] uppercase tracking-wide px-2 py-1 rounded"
+                    className="font-condensed text-[10px] uppercase tracking-wide px-2 py-1 rounded-none"
                     style={{
                       background: isInPerson ? '#E9F2EA' : '#E9EFF6',
                       color: '#0D2B5E',
