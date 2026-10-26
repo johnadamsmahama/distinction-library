@@ -96,19 +96,19 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
   return (
     <div>
       {/* Search bar */}
-      <div className="bg-white border border-g100 rounded-lg p-4 mb-4 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white border border-g100 rounded-none p-4 mb-4 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           value={courseInput}
           onChange={(e) => setCourseInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && runSearch()}
           placeholder="Search by course (e.g. BGEC102)…"
-          className="flex-1 px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
+          className="flex-1 px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
+          className="px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-navy transition-colors"
         >
           <option value="all">All statuses</option>
           <option value="approved">Approved (live)</option>
@@ -119,14 +119,14 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
           <button
             onClick={runSearch}
             disabled={isSearching}
-            className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg text-white bg-navy hover:bg-navy-deep transition-colors disabled:opacity-60 whitespace-nowrap"
+            className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none text-white bg-navy hover:bg-navy-deep transition-colors disabled:opacity-60 whitespace-nowrap"
           >
             {isSearching ? 'Searching…' : 'Search'}
           </button>
           {hasSearched && (
             <button
               onClick={clearSearch}
-              className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-lg border border-g100 text-g600 whitespace-nowrap"
+              className="font-condensed font-bold text-xs uppercase px-4 py-2 rounded-none border border-g100 text-g600 whitespace-nowrap"
             >
               Clear
             </button>
@@ -143,15 +143,15 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
           {rows.map((r) => {
             const isDeleteOpen = deleteTarget?.id === r.id && deleteTarget.kind === r.kind;
             return (
-              <div key={`${r.kind}-${r.id}`} className="bg-white border border-g100 rounded-lg px-4 py-3">
+              <div key={`${r.kind}-${r.id}`} className="bg-white border border-g100 rounded-none px-4 py-3">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-g100 text-navy">
+                      <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none bg-g100 text-navy">
                         {r.kind}
                       </span>
                       <span
-                        className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${
+                        className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none ${
                           STATUS_STYLES[r.status] ?? 'bg-g100 text-g600'
                         }`}
                       >
@@ -173,7 +173,7 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
                     </div>
                     <button
                       onClick={() => setDeleteTarget(isDeleteOpen ? null : { id: r.id, kind: r.kind })}
-                      className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                      className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-none border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
                     >
                       Delete
                     </button>
@@ -191,13 +191,13 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
                       onChange={(e) => setDeleteReason(e.target.value)}
                       placeholder="Reason (optional, sent to the uploader)…"
                       rows={2}
-                      className="w-full px-3 py-2 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
+                      className="w-full px-3 py-2 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-red-400 transition-colors mb-2"
                     />
                     <div className="flex gap-2">
                       <button
                         disabled={busyId === r.id}
                         onClick={() => deleteItem(r)}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-60"
                       >
                         {busyId === r.id ? 'Deleting…' : 'Confirm delete'}
                       </button>
@@ -206,7 +206,7 @@ export default function ModerationLogList({ rows: initialRows }: { rows: Row[] }
                           setDeleteTarget(null);
                           setDeleteReason('');
                         }}
-                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-lg border border-g100 text-g600"
+                        className="font-condensed font-bold text-xs uppercase px-3.5 py-2 rounded-none border border-g100 text-g600"
                       >
                         Cancel
                       </button>
