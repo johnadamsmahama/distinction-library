@@ -39,7 +39,7 @@ export default async function NewOpportunityPage() {
         queue.
       </p>
 
-      <form action={createOpportunity} className="space-y-5 bg-white border border-g100 rounded-2xl p-6">
+      <form action={createOpportunity} className="space-y-5 bg-white border border-g100 rounded-none p-6">
         <div>
           <label htmlFor="title" className="block font-condensed text-xs font-bold uppercase tracking-wide text-g600 mb-1">
             Title *
@@ -49,7 +49,7 @@ export default async function NewOpportunityPage() {
             name="title"
             type="text"
             required
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -62,7 +62,7 @@ export default async function NewOpportunityPage() {
             name="organization"
             type="text"
             required
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default async function NewOpportunityPage() {
             name="category"
             required
             defaultValue=""
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm bg-white"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm bg-white"
           >
             <option value="" disabled>
               Select a category
@@ -96,7 +96,7 @@ export default async function NewOpportunityPage() {
             id="description"
             name="description"
             rows={4}
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -108,7 +108,7 @@ export default async function NewOpportunityPage() {
             id="eligibility"
             name="eligibility"
             rows={3}
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -121,7 +121,7 @@ export default async function NewOpportunityPage() {
               id="deadline"
               name="deadline"
               type="date"
-              className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+              className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
             />
           </div>
           <div>
@@ -133,7 +133,7 @@ export default async function NewOpportunityPage() {
               name="remote_or_onsite"
               type="text"
               placeholder="e.g. Remote, Onsite, Hybrid"
-              className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+              className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
             />
           </div>
         </div>
@@ -146,7 +146,7 @@ export default async function NewOpportunityPage() {
             id="location"
             name="location"
             type="text"
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -158,7 +158,7 @@ export default async function NewOpportunityPage() {
             id="benefits"
             name="benefits"
             rows={3}
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -170,7 +170,7 @@ export default async function NewOpportunityPage() {
             id="required_documents"
             name="required_documents"
             rows={3}
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -182,7 +182,7 @@ export default async function NewOpportunityPage() {
             id="application_process"
             name="application_process"
             rows={3}
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -195,7 +195,7 @@ export default async function NewOpportunityPage() {
             name="application_link"
             type="url"
             placeholder="https://..."
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
@@ -207,24 +207,24 @@ export default async function NewOpportunityPage() {
             id="contact_info"
             name="contact_info"
             type="text"
-            className="w-full border border-g200 rounded-lg px-3 py-2 font-body text-sm"
+            className="w-full border border-g200 rounded-none px-3 py-2 font-body text-sm"
           />
         </div>
 
         <div className="flex items-center gap-6 pt-2">
           <label htmlFor="verified" className="flex items-center gap-2 font-body text-sm text-navy">
-            <input id="verified" name="verified" type="checkbox" className="rounded border-g200" />
+            <input id="verified" name="verified" type="checkbox" className="rounded-none border-g200" />
             Verified
           </label>
           <label htmlFor="featured" className="flex items-center gap-2 font-body text-sm text-navy">
-            <input id="featured" name="featured" type="checkbox" className="rounded border-g200" />
+            <input id="featured" name="featured" type="checkbox" className="rounded-none border-g200" />
             Featured
           </label>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-navy text-white font-condensed font-bold uppercase tracking-wide text-sm rounded-lg py-3 hover:bg-navy/90 transition-colors"
+          className="w-full bg-navy text-white font-condensed font-bold uppercase tracking-wide text-sm rounded-none py-3 hover:bg-navy/90 transition-colors"
         >
           Publish Opportunity
         </button>
