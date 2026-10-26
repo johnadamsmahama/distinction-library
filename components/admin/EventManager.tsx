@@ -195,7 +195,7 @@ export default function EventManager({ events: initialEvents }: { events: EventI
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
+      <form onSubmit={handleSubmit} className="bg-white border border-g100 rounded-none p-6 space-y-4 h-fit">
         <div className="flex items-center justify-between mb-1">
           <h2 className="font-display font-bold text-lg text-navy">
             {isEditing ? 'Edit event' : 'Add an event'}
@@ -234,13 +234,13 @@ export default function EventManager({ events: initialEvents }: { events: EventI
             type="file"
             accept={IMAGE_ACCEPT}
             onChange={handleCoverChange}
-            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-none file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
           />
           <p className="font-body text-xs text-g600 mt-1">JPEG, PNG, WebP, or GIF.</p>
           {displayedCoverUrl && (
             <div className="relative mt-2 w-fit">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={displayedCoverUrl} alt="" className="w-full max-w-[240px] h-28 object-cover rounded-lg" />
+              <img src={displayedCoverUrl} alt="" className="w-full max-w-[240px] h-28 object-cover rounded-none" />
               <button
                 type="button"
                 onClick={removeCoverImage}
@@ -311,7 +311,7 @@ export default function EventManager({ events: initialEvents }: { events: EventI
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {saving ? 'Saving…' : isEditing ? 'Save changes' : 'Add event'}
         </button>
@@ -322,11 +322,11 @@ export default function EventManager({ events: initialEvents }: { events: EventI
         <div className="space-y-3 max-h-[760px] overflow-y-auto pr-1">
           {events.length === 0 && <p className="font-body text-sm text-g600">No events added yet.</p>}
           {events.map((e) => (
-            <div key={e.id} className="bg-white border border-g100 rounded-xl p-4">
+            <div key={e.id} className="bg-white border border-g100 rounded-none p-4">
               <div className="flex items-center gap-2">
                 <div className="font-condensed font-semibold text-sm text-g800 truncate flex-1">{e.title}</div>
                 <span
-                  className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${
+                  className={`font-condensed font-bold text-[9.5px] uppercase tracking-wide px-2 py-0.5 rounded-none flex-shrink-0 ${
                     e.status === 'published' ? 'bg-green-50 text-green-700' : 'bg-g100 text-g600'
                   }`}
                 >
@@ -341,20 +341,20 @@ export default function EventManager({ events: initialEvents }: { events: EventI
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => startEdit(e)}
-                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-lg py-2 hover:border-gold transition-colors"
+                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-none py-2 hover:border-gold transition-colors"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => togglePublished(e)}
-                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-lg py-2 hover:border-gold transition-colors"
+                  className="flex-1 font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-off-white border border-g100 rounded-none py-2 hover:border-gold transition-colors"
                 >
                   {e.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
                 <button
                   onClick={() => deleteEvent(e.id)}
                   aria-label={`Delete ${e.title}`}
-                  className="w-9 flex-shrink-0 flex items-center justify-center rounded-lg text-g600 hover:text-red-500 hover:bg-red-50 transition-colors border border-g100"
+                  className="w-9 flex-shrink-0 flex items-center justify-center rounded-none text-g600 hover:text-red-500 hover:bg-red-50 transition-colors border border-g100"
                 >
                   ✕
                 </button>
@@ -385,4 +385,4 @@ function formatEventDate(iso: string) {
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
