@@ -43,7 +43,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
         <img src={post.cover_image_url} alt="" className="w-full h-56 object-cover rounded-none mb-6" />
       )}
       {post.category && (
-        <span className="inline-block font-condensed font-bold text-[10px] uppercase tracking-wide px-2 py-0.5 rounded bg-g100 text-navy mb-3">
+        <span className="inline-block font-condensed font-bold text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-none bg-g100 text-navy mb-3">
           {post.category}
         </span>
       )}
