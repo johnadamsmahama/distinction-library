@@ -93,7 +93,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
         placeholder="Search by student ID or name…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-4 py-3 mb-4 rounded-lg border border-g100 font-body text-sm outline-none focus:border-gold"
+        className="w-full px-4 py-3 mb-4 rounded-none border border-g100 font-body text-sm outline-none focus:border-gold"
       />
 
       <div className="flex flex-col gap-2.5">
@@ -102,10 +102,10 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
           return (
             <div
               key={u.id}
-              className="rounded p-3.5 flex gap-3 items-start border-l-[3px]"
+              className="rounded-none p-3.5 flex gap-3 items-start border-l-[3px]"
               style={{ background: tint.bg, borderColor: tint.border, borderLeftColor: '#C9A02C' }}
             >
-              <div className="w-10 h-10 rounded-md bg-navy flex items-center justify-center font-display text-sm text-off-white flex-shrink-0">
+              <div className="w-10 h-10 rounded-none bg-navy flex items-center justify-center font-display text-sm text-off-white flex-shrink-0">
                 {initials(u.full_name, u.student_id)}
               </div>
 
@@ -135,7 +135,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
                       {[0, 1, 2].map((n) => (
                         <span
                           key={n}
-                          className="w-4 h-1 rounded-sm"
+                          className="w-4 h-1 rounded-none"
                           style={{ background: n < u.strikes_count ? '#C0524A' : `${tint.text}33` }}
                         />
                       ))}
@@ -146,7 +146,7 @@ export default function UserManager({ users: initialUsers }: { users: UserRow[] 
                     value={u.role}
                     disabled={busyId === u.id}
                     onChange={(e) => changeRole(u.id, e.target.value)}
-                    className="font-condensed font-semibold text-[11px] px-2 py-1 rounded-md border border-navy/40 bg-white/70 outline-none focus:border-gold"
+                    className="font-condensed font-semibold text-[11px] px-2 py-1 rounded-none border border-navy/40 bg-white/70 outline-none focus:border-gold"
                   >
                     <option value="student">Student</option>
                     <option value="moderator">Moderator</option>
