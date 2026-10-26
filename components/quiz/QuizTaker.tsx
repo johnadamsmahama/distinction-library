@@ -13,7 +13,7 @@ type ReviewItem = {
   correct: boolean;
   explanation: string | null;
 };
-type Result = { score: number; total: number; review: ReviewItem[] };
+type Result = { score: number; total: number; review: ReviewItem[] | null; reason: string | null };
 
 const LETTERS = 'ABCDEFGH';
 
@@ -56,6 +56,8 @@ export default function QuizTaker({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const submittingRef = useRef(false);
+  const switchesRef = useRef(0); // times the student left the quiz
+  const [warning, setWarning] = useState(false);
   const autoTriedRef = useRef(false); // the timer tries to auto-submit once; after that the student taps Submit
 
   // Shuffle once per page load. The answers sent back use each option's ORIGINAL index (i),
@@ -75,6 +77,8 @@ export default function QuizTaker({
         setAttemptId(saved.attemptId);
         setAnswers(saved.answers || {});
         setDeadline(saved.deadline ?? null);
+        switchesRef.current = saved.switches || 0;
+        if (switchesRef.current === 1) setWarning(true);
         setPhase('taking');
       }
     } catch {
@@ -84,7 +88,7 @@ export default function QuizTaker({
 
   function persist(next: { attemptId: string; name: string; answers: Record<string, number>; deadline: number | null }) {
     try {
-      localStorage.setItem(storeKey, JSON.stringify(next));
+      localStorage.setItem(storeKey, JSON.stringify({ ...next, switches: switchesRef.current }));
     } catch {
       /* ignore */
     }
@@ -117,7 +121,7 @@ export default function QuizTaker({
     }
   }
 
-  async function submit(auto = false) {
+  async function submit(reason: 'time' | 'cheating' | null = null) {
     if (submittingRef.current || !attemptId) return;
     submittingRef.current = true;
     setBusy(true);
@@ -126,7 +130,8 @@ export default function QuizTaker({
       const res = await fetch(`/api/quiz/${slug}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attemptId, answers }),
+        keepalive: true,
+        body: JSON.stringify({ attemptId, answers, switches: switchesRef.current, reason }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not submit.');
@@ -138,9 +143,9 @@ export default function QuizTaker({
       setResult(data);
       setPhase('done');
     } catch (e: any) {
-      setError(auto ? `${e.message} Go to the last question and tap Submit to try again.` : e.message);
+      setError(reason === 'time' ? `${e.message} Go to the last question and tap Submit to try again.` : e.message);
       submittingRef.current = false;
-      if (auto) setIndex(ordered.length - 1);
+      if (reason === 'time') setIndex(ordered.length - 1);
     } finally {
       setBusy(false);
     }
@@ -154,7 +159,7 @@ export default function QuizTaker({
       setSecondsLeft(left);
       if (left === 0 && !autoTriedRef.current) {
         autoTriedRef.current = true;
-        submit(true);
+        submit('time');
       }
     };
     tick();
@@ -162,6 +167,25 @@ export default function QuizTaker({
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, deadline, attemptId, answers]);
+
+  // Leaving the quiz (switching app or tab): 1st time = warning when they return, 2nd time = auto-submit.
+  useEffect(() => {
+    if (phase !== 'taking' || !attemptId) return;
+    const onVisibility = () => {
+      if (document.hidden) {
+        switchesRef.current += 1;
+        persist({ attemptId, name, answers, deadline });
+        if (switchesRef.current >= 2) submit('cheating');
+      } else if (switchesRef.current === 1) {
+        setWarning(true);
+      } else if (switchesRef.current >= 2) {
+        submit('cheating'); // tries again if the first attempt failed while the page was in the background
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, attemptId, answers, deadline, name]);
 
   function choose(qid: string, optionIndex: number) {
     const next = { ...answers, [qid]: optionIndex };
@@ -224,7 +248,16 @@ export default function QuizTaker({
           </p>
           <p className="text-g600 mt-2">{pct}%. Your answers are saved, {name.split(' ')[0]}.</p>
         </div>
-        {result.review.map((r, n) => (
+        {result.reason === 'cheating' && (
+          <div className="bg-red-50 border-l-[3px] border-red-700 p-4 text-sm text-red-900">
+            <p className="font-bold mb-1">Submitted automatically: attempted cheating</p>
+            <p>You left the quiz twice, so it was submitted for you. Your lecturer can see this. The correct answers are not shown for this attempt.</p>
+          </div>
+        )}
+        {result.reason === 'time' && (
+          <div className="bg-[#FBF3E1] border-l-[3px] border-gold p-4 text-sm text-g800">Time ran out, so the quiz was submitted for you.</div>
+        )}
+        {(result.review ?? []).map((r, n) => (
           <div key={r.id} className="bg-white p-4 border-l-[3px]" style={{ borderLeftColor: r.correct ? '#4F8271' : '#B4402F' }}>
             <p className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] mb-1" style={{ color: r.correct ? '#4F8271' : '#B4402F' }}>
               Question {n + 1} · {r.chosen === null ? 'Not answered' : r.correct ? 'Correct' : 'Wrong'}
@@ -256,8 +289,30 @@ export default function QuizTaker({
 
   if (!q) return shell(<p>Loading...</p>);
 
+  const block = (e: React.SyntheticEvent) => e.preventDefault();
   return shell(
-    <div className="bg-white shadow-[0_2px_12px_rgba(13,43,94,0.08)]">
+    <div
+      className="bg-white shadow-[0_2px_12px_rgba(13,43,94,0.08)] select-none"
+      style={{ WebkitTouchCallout: 'none' } as React.CSSProperties}
+      onCopy={block}
+      onCut={block}
+      onContextMenu={block}
+      onDragStart={block}
+    >
+      {warning && (
+        <div role="alertdialog" aria-modal="true" aria-labelledby="warn-title" className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4">
+          <div className="bg-white max-w-[360px] w-full p-6 border-t-4 border-red-700">
+            <p id="warn-title" className="font-display font-bold text-[20px] text-navy mb-2">Warning: you left the quiz</p>
+            <p className="text-sm text-g800 mb-4">
+              Leaving the quiz is not allowed. If you leave it one more time, your quiz will be submitted automatically
+              and marked as attempted cheating.
+            </p>
+            <button onClick={() => setWarning(false)} className="w-full bg-navy text-[#F6F1E3] font-condensed font-bold uppercase tracking-[.1em] py-3">
+              I understand. Continue quiz
+            </button>
+          </div>
+        </div>
+      )}
       <div className="bg-navy text-[#F6F1E3] px-4 py-3">
         <div className="flex justify-between items-center font-condensed font-semibold text-[13px] uppercase tracking-[.12em] mb-2">
           <span>
@@ -303,7 +358,7 @@ export default function QuizTaker({
           </button>
           {last ? (
             <button
-              onClick={() => submit(false)}
+              onClick={() => submit(null)}
               disabled={busy}
               className="flex-1 bg-gold text-navy-deep font-condensed font-bold uppercase tracking-[.1em] py-3.5 disabled:opacity-60"
             >
