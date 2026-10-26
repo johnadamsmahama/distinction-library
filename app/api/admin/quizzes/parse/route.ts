@@ -62,6 +62,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const { questions, warnings } = parseQuestions(text);
-  return NextResponse.json({ questions, warnings, filename });
+  const { questions, theory, warnings } = parseQuestions(text);
+  return NextResponse.json({ questions, theory, warnings, filename });
 }
