@@ -63,6 +63,7 @@ export default function QuizTaker({
   timeLimitMinutes: number | null;
 }) {
   const storeKey = `dl-quiz-${slug}`;
+  const resultKey = `dl-quiz-result-${slug}`; // the finished result, so the student can open the link again and review it
   const [name, setName] = useState('');
   const [phase, setPhase] = useState<'intro' | 'taking' | 'done'>('intro');
   const [attemptId, setAttemptId] = useState<string | null>(null);
@@ -107,11 +108,54 @@ export default function QuizTaker({
         switchesRef.current = saved.switches || 0;
         if (switchesRef.current === 1) setWarning(true);
         setPhase('taking');
+      } else {
+        // No quiz in progress. Show the finished result from this device, if there is one.
+        const done = JSON.parse(localStorage.getItem(resultKey) || 'null');
+        if (done?.result) {
+          setName(done.name || '');
+          setAttemptId(done.attemptId || null);
+          setRatings(done.ratings || {});
+          setResult(done.result);
+          setPhase('done');
+        }
       }
     } catch {
       /* storage unavailable: start fresh */
     }
-  }, [storeKey]);
+  }, [storeKey, resultKey]);
+
+  function saveResult(data: Result, savedRatings: Record<string, string>) {
+    try {
+      localStorage.setItem(resultKey, JSON.stringify({ result: data, name, attemptId, ratings: savedRatings }));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // Clears everything so the student can start the quiz from the beginning.
+  function retake() {
+    try {
+      localStorage.removeItem(resultKey);
+      localStorage.removeItem(storeKey);
+    } catch {
+      /* ignore */
+    }
+    submittingRef.current = false;
+    autoTriedRef.current = false;
+    switchesRef.current = 0;
+    theoryRef.current = {};
+    setResult(null);
+    setAttemptId(null);
+    setDeadline(null);
+    setSecondsLeft(null);
+    setIndex(0);
+    setAnswers({});
+    setTheoryAnswers({});
+    setRatings({});
+    setWarning(false);
+    setError(null);
+    setPhase('intro');
+  }
 
   function persist(next: { attemptId: string; name: string; answers: Record<string, number>; deadline: number | null }) {
     try {
@@ -177,6 +221,7 @@ export default function QuizTaker({
         /* ignore */
       }
       setResult(data);
+      saveResult(data, {});
       setPhase('done');
     } catch (e: any) {
       setError(reason === 'time' ? `${e.message} Go to the last question and tap Submit to try again.` : e.message);
@@ -239,6 +284,7 @@ export default function QuizTaker({
   function rate(tid: string, value: string) {
     const next = { ...ratings, [tid]: value };
     setRatings(next);
+    if (result) saveResult(result, next);
     if (!attemptId) return;
     fetch(`/api/quiz/${slug}/rate`, {
       method: 'POST',
@@ -315,12 +361,12 @@ export default function QuizTaker({
               <p className="font-display font-bold text-[56px] leading-none text-navy">
                 {result.score} / {result.total}
               </p>
-              <p className="text-g600 mt-2">{pct}%. Your answers are saved, {first}.</p>
+              <p className="text-g600 mt-2">{pct}%. Well done for finishing, {first}.</p>
             </>
           ) : (
             <>
               <p className="font-display font-bold text-[26px] text-navy">Submitted, {first}</p>
-              <p className="text-g600 mt-2">Your theory answers are saved.</p>
+              <p className="text-g600 mt-2">Your theory answers have been sent.</p>
             </>
           )}
         </div>
@@ -396,6 +442,14 @@ export default function QuizTaker({
             ))}
           </>
         )}
+
+        <div className="bg-white p-4 text-sm text-g600 border-t border-g100">
+          <p className="mb-2">
+            Your result is kept on this phone. Open this same link again on this phone to review your score and answers.
+            If you clear your browser data, it will be gone, so take a screenshot of anything you want to keep.
+          </p>
+          <button onClick={retake} className="text-navy underline font-semibold">Start the quiz again</button>
+        </div>
       </div>
     );
   }
