@@ -143,11 +143,101 @@ export function parseQuestions(rawText: string): ParseResult {
   });
 
   if (questions.length === 0) {
+    // Word's automatic numbering is not real text, so the numbers (and letters) may be missing.
+    // Try to work out the questions from the layout instead.
+    const guessed = guessFromLayout(body, key);
+    if (guessed.length > 0) {
+      warnings.push(
+        'No question numbers were found (Word list numbering is not readable). The questions were worked out from the layout. Please check every question and answer carefully.'
+      );
+      return { questions: guessed, warnings };
+    }
     warnings.push(
       'No questions were found. Number each question (1. 2. 3.) and put options on their own lines starting A. B. C. D.'
     );
   }
   return { questions, warnings };
+}
+
+// Fallback for papers whose numbers/letters came from Word's list buttons.
+// Every paragraph is one line: a question followed by its options. We find the
+// repeating pattern: either each question ends at an "Answer:" line, or every
+// question has the same number of lines.
+function guessFromLayout(body: string[], key: Map<number, number>): ParsedQuestion[] {
+  type Block = { lines: string[]; answer: number | null; expl: string[] };
+  const stripOpt = (l: string) => clean(l.replace(OPTION_START, '$2'));
+  const blocks: Block[] = [];
+  const hasAnswerLines = body.some((l) => ANSWER_LINE.test(l));
+
+  if (hasAnswerLines) {
+    let cur: Block = { lines: [], answer: null, expl: [] };
+    let afterAnswer = false;
+    for (const line of body) {
+      const am = line.match(ANSWER_LINE);
+      const em = line.match(EXPLANATION_LINE);
+      if (am) {
+        cur.answer = LETTERS.indexOf(am[1].toUpperCase());
+        blocks.push(cur);
+        cur = { lines: [], answer: null, expl: [] };
+        afterAnswer = true;
+        continue;
+      }
+      if (em && blocks.length) {
+        blocks[blocks.length - 1].expl.push(em[1]);
+        continue;
+      }
+      afterAnswer = false;
+      cur.lines.push(line);
+    }
+    void afterAnswer;
+    if (cur.lines.length) blocks.push(cur); // trailing lines with no answer line
+  } else {
+    // No answer lines: look for a fixed block size (question + 3 to 5 options), allowing a title above.
+    const lines = body;
+    const sizes = [5, 4, 6, 3];
+    let found = false;
+    for (const n of sizes) {
+      for (let lead = 0; lead <= 2 && !found; lead++) {
+        const rest = lines.length - lead;
+        if (rest > 0 && rest % n === 0) {
+          for (let i = lead; i < lines.length; i += n) blocks.push({ lines: lines.slice(i, i + n), answer: null, expl: [] });
+          found = true;
+          break;
+        }
+      }
+    }
+  }
+  if (blocks.length === 0) return [];
+
+  // The usual block length (question + options) is the most common one.
+  const counts: Record<number, number> = {};
+  blocks.forEach((b) => {
+    counts[b.lines.length] = (counts[b.lines.length] || 0) + 1;
+  });
+  let size = 0;
+  Object.keys(counts).forEach((k) => {
+    const n = parseInt(k, 10);
+    if (n >= 3 && (size === 0 || counts[n] > counts[size])) size = n;
+  });
+  if (size === 0) return [];
+
+  const out: ParsedQuestion[] = [];
+  blocks.forEach((b) => {
+    if (b.lines.length < size) return;
+    const tail = b.lines.slice(b.lines.length - size); // drops a title or instructions above the first question
+    const options = tail.slice(1).map(stripOpt);
+    let answer = b.answer;
+    if (answer === null && key.has(out.length + 1)) answer = key.get(out.length + 1)!;
+    if (answer !== null && answer >= options.length) answer = null;
+    out.push({
+      id: `q${out.length + 1}`,
+      text: clean(tail[0]),
+      options,
+      answer,
+      explanation: clean(b.expl.join(' ')) || null,
+    });
+  });
+  return out;
 }
 
 // Marks a submission. answers: { [questionId]: chosenIndex }
