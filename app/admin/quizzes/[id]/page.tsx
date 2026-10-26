@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import QuizActions from '@/components/quiz/QuizActions';
-import type { StoredQuestion } from '@/lib/quiz/server';
+import type { StoredQuestion, StoredTheory } from '@/lib/quiz/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +18,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
 
   const { data: rows } = await supabase
     .from('quiz_attempts')
-    .select('id, participant_name, score, total, started_at, submitted_at, answers, tab_switches, submit_reason')
+    .select('id, participant_name, score, total, started_at, submitted_at, answers, tab_switches, submit_reason, theory_answers, theory_ratings')
     .eq('quiz_id', params.id)
     .not('submitted_at', 'is', null)
     .order('score', { ascending: false })
@@ -26,6 +26,8 @@ export default async function QuizResultsPage({ params }: { params: { id: string
 
   const attempts = rows ?? [];
   const questions = quiz.questions as StoredQuestion[];
+  const theoryQs = ((quiz.theory ?? []) as StoredTheory[]);
+  const ratingLabel: Record<string, string> = { got: 'Got it', partly: 'Partly', missed: 'Missed' };
   const n = attempts.length;
   const avgPct = n ? Math.round(attempts.reduce((s: number, a: any) => s + (a.total ? a.score / a.total : 0), 0) / n * 100) : 0;
   const top = n ? attempts[0] : null;
@@ -53,12 +55,13 @@ export default async function QuizResultsPage({ params }: { params: { id: string
         <QuizActions id={quiz.id} slug={quiz.slug} published={quiz.published} />
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { l: 'Submitted', v: String(n) },
           { l: 'Average', v: `${avgPct}%` },
           { l: 'Top score', v: top ? `${top.score} / ${top.total}` : '-' },
-          { l: 'Questions', v: String(questions.length) },
+          { l: 'Objectives', v: String(questions.length) },
+          { l: 'Theory', v: String(theoryQs.length) },
         ].map((s) => (
           <div key={s.l} className="bg-white p-3 border-l-[3px] border-gold">
             <div className="font-display font-bold text-2xl text-navy">{s.v}</div>
@@ -83,6 +86,41 @@ export default async function QuizResultsPage({ params }: { params: { id: string
             ))}
           </div>
           <p className="text-[12px] text-g600 mt-2">Percent of students who got the question wrong.</p>
+        </div>
+      )}
+
+      {theoryQs.length > 0 && n > 0 && (
+        <div className="bg-white p-4">
+          <h3 className="font-display font-bold text-lg text-navy mb-1">Theory answers</h3>
+          <p className="text-[13px] text-g600 mb-3">What each student typed, and how they rated themselves against your model answer. Open a student to read.</p>
+          <div className="flex flex-col gap-2">
+            {attempts.map((a: any) => (
+              <details key={a.id} className="border border-g100">
+                <summary className="cursor-pointer px-3 py-2 flex justify-between gap-2 text-[15px]">
+                  <span>{a.participant_name}</span>
+                  <span className="text-g600 text-[13px]">
+                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'got').length} got it ·{' '}
+                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'partly').length} partly ·{' '}
+                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'missed').length} missed
+                  </span>
+                </summary>
+                <div className="px-3 pb-3 flex flex-col gap-3">
+                  {theoryQs.map((t, ti) => (
+                    <div key={t.id}>
+                      <p className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] text-gold">
+                        Theory {ti + 1}
+                        {a.theory_ratings?.[t.id] ? ` · rated: ${ratingLabel[a.theory_ratings[t.id]] ?? ''}` : ' · not rated'}
+                      </p>
+                      <p className="text-[14px] font-medium mb-1">{t.text}</p>
+                      <p className="text-[14px] bg-g100 px-3 py-2 whitespace-pre-wrap break-words">
+                        {a.theory_answers?.[t.id] || <span className="text-g500">No answer typed.</span>}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
         </div>
       )}
 
