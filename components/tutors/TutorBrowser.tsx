@@ -161,7 +161,7 @@ export default function TutorBrowser({
                       {t.peer_tutor_courses.map((pc) => (
                         <span
                           key={pc.courses.id}
-                          className="font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-white border border-g100 rounded px-2 py-1"
+                          className="font-condensed font-bold text-[11px] uppercase tracking-wide text-navy bg-white border border-g100 rounded-none px-2 py-1"
                         >
                           {pc.courses.code}
                         </span>
