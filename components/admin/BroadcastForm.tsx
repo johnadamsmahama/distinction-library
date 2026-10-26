@@ -79,7 +79,7 @@ export default function BroadcastForm({
   };
 
   return (
-    <form onSubmit={send} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 max-w-lg">
+    <form onSubmit={send} className="bg-white border border-g100 rounded-none p-6 space-y-4 max-w-lg">
       <div>
         <label className={labelClass}>Audience</label>
         <div className="flex gap-2">
@@ -140,7 +140,7 @@ export default function BroadcastForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+        className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
       >
         {loading ? 'Sending…' : 'Send broadcast'}
       </button>
@@ -153,7 +153,7 @@ function AudienceBtn({ active, onClick, children }: { active: boolean; onClick: 
     <button
       type="button"
       onClick={onClick}
-      className={`font-condensed font-bold text-xs uppercase px-3 py-2 rounded-lg border transition-colors ${
+      className={`font-condensed font-bold text-xs uppercase px-3 py-2 rounded-none border transition-colors ${
         active ? 'border-gold bg-gold/10 text-navy' : 'border-g100 text-g600'
       }`}
     >
@@ -164,4 +164,4 @@ function AudienceBtn({ active, onClick, children }: { active: boolean; onClick: 
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5';
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
