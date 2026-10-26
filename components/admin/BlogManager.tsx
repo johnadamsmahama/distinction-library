@@ -438,14 +438,14 @@ export default function BlogManager({ posts: initialPosts, authorId }: { posts: 
                   <div className="font-condensed font-semibold text-sm text-g800 truncate">{p.title}</div>
                   <div className="flex items-center gap-2 mt-1">
                     <span
-                      className={`inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded ${
+                      className={`inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded-none ${
                         p.published ? 'bg-green-100 text-green-700' : 'bg-off-white text-g600'
                       }`}
                     >
                       {p.published ? 'Published' : 'Draft'}
                     </span>
                     {p.category && (
-                      <span className="inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-g100 text-navy">
+                      <span className="inline-block font-condensed font-bold text-[10px] uppercase px-2 py-0.5 rounded-none bg-g100 text-navy">
                         {p.category}
                       </span>
                     )}
