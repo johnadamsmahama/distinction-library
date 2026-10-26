@@ -190,7 +190,7 @@ export default function OpportunitiesManager({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <form onSubmit={createOpportunity} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
+      <form onSubmit={createOpportunity} className="bg-white border border-g100 rounded-none p-6 space-y-4 h-fit">
         <h2 className="font-display font-bold text-lg text-navy mb-1">Post a new opportunity</h2>
         <p className="font-body text-xs text-g600 -mt-2 mb-2">
           Publishes immediately, visible to all students right away.
@@ -229,12 +229,12 @@ export default function OpportunitiesManager({
             type="file"
             accept={IMAGE_ACCEPT}
             onChange={handleCoverChange}
-            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
+            className="w-full font-body text-sm text-g600 file:mr-3 file:px-3 file:py-2 file:rounded-none file:border file:border-g100 file:bg-off-white file:font-condensed file:font-bold file:text-xs file:uppercase file:cursor-pointer"
           />
           <p className="font-body text-xs text-g600 mt-1">JPEG, PNG, WebP, or GIF.</p>
           {coverPreviewUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverPreviewUrl} alt="" className="w-full max-w-[200px] h-28 object-cover rounded-lg mt-2" />
+            <img src={coverPreviewUrl} alt="" className="w-full max-w-[200px] h-28 object-cover rounded-none mt-2" />
           )}
         </div>
         <div>
@@ -296,7 +296,7 @@ export default function OpportunitiesManager({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Posting…' : 'Publish opportunity'}
         </button>
@@ -311,7 +311,7 @@ export default function OpportunitiesManager({
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-full border transition-colors ${
+              className={`font-condensed font-bold text-[10px] uppercase px-3 py-1.5 rounded-none border transition-colors ${
                 filter === f ? 'border-gold bg-gold/10 text-navy' : 'border-g100 text-g600'
               }`}
             >
@@ -323,7 +323,7 @@ export default function OpportunitiesManager({
 
         <div className="space-y-2">
           {visible.map((o) => (
-            <div key={o.id} className="bg-white border border-g100 rounded-lg px-4 py-3">
+            <div key={o.id} className="bg-white border border-g100 rounded-none px-4 py-3">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="flex items-start gap-3 min-w-0">
                   {o.cover_image_url && (
@@ -331,26 +331,26 @@ export default function OpportunitiesManager({
                     <img
                       src={o.cover_image_url}
                       alt=""
-                      className="w-11 h-11 rounded-lg object-cover flex-shrink-0"
+                      className="w-11 h-11 rounded-none object-cover flex-shrink-0"
                     />
                   )}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                      <span className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded ${STATUS_STYLES[o.status]}`}>
+                      <span className={`font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none ${STATUS_STYLES[o.status]}`}>
                         {o.status.replace('_', ' ')}
                       </span>
                       {o.source === 'student_submitted' && (
-                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-navy/10 text-navy">
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none bg-navy/10 text-navy">
                           Student submitted
                         </span>
                       )}
                       {o.featured && (
-                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-gold/15 text-[#7A5A0E]">
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none bg-gold/15 text-[#7A5A0E]">
                           Featured
                         </span>
                       )}
                       {o.verified && (
-                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                        <span className="font-condensed font-bold text-[10px] uppercase px-1.5 py-0.5 rounded-none bg-green-100 text-green-700">
                           Verified
                         </span>
                       )}
@@ -392,7 +392,7 @@ function ActionBtn({ onClick, children }: { onClick: () => void; children: React
   return (
     <button
       onClick={onClick}
-      className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg border border-g100 text-g600 hover:border-gold hover:text-navy transition-colors"
+      className="font-condensed font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-none border border-g100 text-g600 hover:border-gold hover:text-navy transition-colors"
     >
       {children}
     </button>
@@ -401,4 +401,4 @@ function ActionBtn({ onClick, children }: { onClick: () => void; children: React
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-1.5';
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-3.5 py-2.5 rounded-none border border-g100 font-body text-sm text-g800 outline-none focus:border-gold transition-colors';
