@@ -1,65 +1,67 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requireAdminId, makeSlug, validateQuestions } from '@/lib/quiz/server';
+import mammoth from 'mammoth';
+// @ts-ignore -- pdf-parse has no types for this subpath; same import as lib/trusted-upload/extract-pdf-metadata.ts
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { requireAdminId } from '@/lib/quiz/server';
+import { parseQuestions } from '@/lib/quiz/parser';
 
 export const runtime = 'nodejs';
 
-// POST /api/admin/quizzes  { title, questions, timeLimitMinutes?, closesAt?, shuffle }
+const MAX_BYTES = 4 * 1024 * 1024; // stays under the host's request size limit
+
+// POST /api/admin/quizzes/parse  (multipart: file) or JSON { text }
+// Reads a .docx / .pdf / pasted text and returns the questions it found.
+// Nothing is saved here — the admin reviews the result first.
 export async function POST(request: Request) {
-  const adminId = await requireAdminId();
-  if (!adminId) return NextResponse.json({ error: 'Admins only.' }, { status: 403 });
-
-  const body = (await request.json()) as {
-    title?: string;
-    questions?: unknown;
-    timeLimitMinutes?: number | null;
-    closesAt?: string | null;
-    shuffle?: boolean;
-  };
-
-  const title = body.title?.trim();
-  if (!title || title.length > 120) {
-    return NextResponse.json({ error: 'Give the quiz a title (up to 120 characters).' }, { status: 400 });
+  if (!(await requireAdminId())) {
+    return NextResponse.json({ error: 'Admins only.' }, { status: 403 });
   }
-  const checked = validateQuestions(body.questions);
-  if ('error' in checked) return NextResponse.json({ error: checked.error }, { status: 400 });
 
-  let timeLimit: number | null = null;
-  if (body.timeLimitMinutes != null) {
-    if (!Number.isInteger(body.timeLimitMinutes) || body.timeLimitMinutes < 1 || body.timeLimitMinutes > 300) {
-      return NextResponse.json({ error: 'Time limit must be 1 to 300 minutes.' }, { status: 400 });
+  let text = '';
+  let filename: string | null = null;
+
+  try {
+    const contentType = request.headers.get('content-type') ?? '';
+    if (contentType.includes('application/json')) {
+      const body = (await request.json()) as { text?: string };
+      text = body.text ?? '';
+    } else {
+      const form = await request.formData();
+      const file = form.get('file');
+      if (!(file instanceof File)) {
+        return NextResponse.json({ error: 'Choose a file first.' }, { status: 400 });
+      }
+      if (file.size > MAX_BYTES) {
+        return NextResponse.json({ error: 'That file is over 4 MB. Please use a smaller file.' }, { status: 400 });
+      }
+      filename = file.name;
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const lower = file.name.toLowerCase();
+      if (lower.endsWith('.docx')) {
+        text = (await mammoth.extractRawText({ buffer })).value;
+      } else if (lower.endsWith('.pdf') || file.type === 'application/pdf') {
+        text = (await pdfParse(buffer)).text;
+      } else if (lower.endsWith('.txt')) {
+        text = buffer.toString('utf8');
+      } else {
+        return NextResponse.json(
+          { error: 'Please upload a .docx (Word) or .pdf file. Older .doc files: open in Word and Save As .docx.' },
+          { status: 400 }
+        );
+      }
     }
-    timeLimit = body.timeLimitMinutes;
-  }
-  let closesAt: string | null = null;
-  if (body.closesAt) {
-    const d = new Date(body.closesAt);
-    if (isNaN(d.getTime())) return NextResponse.json({ error: 'Closing date is not valid.' }, { status: 400 });
-    closesAt = d.toISOString();
+  } catch (e) {
+    console.error('quiz parse failed', e);
+    return NextResponse.json({ error: 'Could not read that file. Try a different copy, or paste the text instead.' }, { status: 422 });
   }
 
-  const db = createAdminClient();
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const slug = makeSlug();
-    const { data, error } = await db
-      .from('quizzes')
-      .insert({
-        slug,
-        title,
-        questions: checked.questions,
-        time_limit_minutes: timeLimit,
-        closes_at: closesAt,
-        shuffle: body.shuffle !== false,
-        published: true,
-        created_by: adminId,
-      })
-      .select('id, slug')
-      .single();
-    if (!error && data) return NextResponse.json({ id: data.id, slug: data.slug });
-    if (error && error.code !== '23505') {
-      console.error('quiz insert failed', error);
-      return NextResponse.json({ error: 'Could not save the quiz. Has the stage13_quizzes.sql file been run?' }, { status: 500 });
-    }
+  if (!text.trim()) {
+    return NextResponse.json(
+      { error: 'No text found. If the PDF is a scan or photo, it cannot be read. Use a typed copy.' },
+      { status: 422 }
+    );
   }
-  return NextResponse.json({ error: 'Could not create a unique link. Try again.' }, { status: 500 });
+
+  const { questions, theory, warnings } = parseQuestions(text);
+  return NextResponse.json({ questions, theory, warnings, filename });
 }
