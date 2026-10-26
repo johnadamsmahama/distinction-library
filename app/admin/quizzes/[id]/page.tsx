@@ -18,7 +18,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
 
   const { data: rows } = await supabase
     .from('quiz_attempts')
-    .select('id, participant_name, score, total, started_at, submitted_at, answers')
+    .select('id, participant_name, score, total, started_at, submitted_at, answers, tab_switches, submit_reason')
     .eq('quiz_id', params.id)
     .not('submitted_at', 'is', null)
     .order('score', { ascending: false })
@@ -92,10 +92,10 @@ export default async function QuizResultsPage({ params }: { params: { id: string
           <p className="text-sm text-g600">No one has submitted yet. Share the link and scores will appear here.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-[15px] tabular-nums min-w-[420px]">
+            <table className="w-full text-[15px] tabular-nums min-w-[560px]">
               <thead>
                 <tr className="text-left font-condensed text-[12px] uppercase tracking-[.1em] text-g600 border-b-2 border-g100">
-                  <th className="py-2 pr-2">Student</th><th className="py-2 text-right">Score</th><th className="py-2 text-right">Time</th><th className="py-2 pl-3">Submitted</th>
+                  <th className="py-2 pr-2">Student</th><th className="py-2 text-right">Score</th><th className="py-2 text-right">Time</th><th className="py-2 pl-3">Submitted</th><th className="py-2 pl-3">Flags</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,6 +105,17 @@ export default async function QuizResultsPage({ params }: { params: { id: string
                     <td className="py-2 text-right">{a.score} / {a.total}</td>
                     <td className="py-2 text-right">{mins(a.started_at, a.submitted_at)}</td>
                     <td className="py-2 pl-3">{new Date(a.submitted_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td className="py-2 pl-3 whitespace-nowrap">
+                      {a.submit_reason === 'cheating' ? (
+                        <span className="font-condensed font-bold text-[11px] uppercase tracking-[.08em] px-2 py-1 bg-red-100 text-red-800">Attempted cheating</span>
+                      ) : a.tab_switches > 0 ? (
+                        <span className="font-condensed font-bold text-[11px] uppercase tracking-[.08em] px-2 py-1 bg-[#FBF3E1] text-g800">Left quiz {a.tab_switches}x</span>
+                      ) : a.submit_reason === 'time' ? (
+                        <span className="text-g600 text-[13px]">Time ran out</span>
+                      ) : (
+                        <span className="text-g500">-</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
