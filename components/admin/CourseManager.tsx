@@ -64,7 +64,7 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <form onSubmit={addCourse} className="bg-white border border-g100 rounded-2xl p-6 space-y-4 h-fit">
+      <form onSubmit={addCourse} className="bg-white border border-g100 rounded-none p-6 space-y-4 h-fit">
         <h2 className="font-display font-bold text-lg text-navy mb-1">Add a course</h2>
         <div>
           <label className={labelClass}>Course code</label>
@@ -90,7 +90,7 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-lg hover:bg-gold-light transition-colors disabled:opacity-60"
+          className="w-full bg-gold text-navy font-condensed font-bold text-sm py-3 rounded-none hover:bg-gold-light transition-colors disabled:opacity-60"
         >
           {loading ? 'Adding…' : 'Add course'}
         </button>
@@ -100,7 +100,7 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
         <h2 className="font-display font-bold text-lg text-navy mb-4">All courses ({courses.length})</h2>
         <div className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
           {courses.map((c) => (
-            <div key={c.id} className="flex items-center justify-between bg-white border border-g100 rounded-lg px-4 py-3">
+            <div key={c.id} className="flex items-center justify-between bg-white border border-g100 rounded-none px-4 py-3">
               <div className="min-w-0">
                 <div className="font-condensed font-semibold text-sm text-g800">{c.code} — {c.name}</div>
                 <div className="font-body text-xs text-g600">{c.department} · Level {c.level}</div>
@@ -122,4 +122,4 @@ export default function CourseManager({ courses: initialCourses }: { courses: Co
 
 const labelClass = 'block font-condensed font-semibold text-xs uppercase tracking-wide text-g800 mb-2';
 const inputClass =
-  'w-full px-4 py-3 rounded-lg border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
+  'w-full px-4 py-3 rounded-none border border-g100 font-body text-[15px] text-g800 outline-none focus:border-gold transition-colors';
