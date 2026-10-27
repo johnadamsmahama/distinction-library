@@ -32,10 +32,11 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0D2B5E',
-  // "only light" (not just "light") is what opts the page out of browsers'
-  // forced/auto dark mode, such as Samsung Internet's dark mode for
-  // websites. Plain "light" is only a preference and can still be overridden.
-  colorScheme: 'only light',
+  // "light dark" declares that the page supports dark mode. The site has no
+  // dark styles, so it keeps its white design everywhere. Browsers like
+  // Samsung Internet skip their auto-dark conversion for pages that declare
+  // dark support (the "only light" setting did not stop it).
+  colorScheme: 'light dark',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${courierPrime.variable} ${playfairDisplay.variable}`}
       // Same declaration at the CSS level, for browsers that read it from
       // the root element instead of the meta tag.
-      style={{ colorScheme: 'only light' }}
+      style={{ colorScheme: 'light dark' }}
     >
       <body>
         {children}
