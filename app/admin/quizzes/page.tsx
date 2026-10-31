@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import QuizBuilder from '@/components/quiz/QuizBuilder';
+import QuizListItem from '@/components/quiz/QuizListItem';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,17 +27,15 @@ export default async function AdminQuizzesPage() {
         {(quizzes ?? []).map((q: any) => {
           const closed = !q.published || (q.closes_at && new Date(q.closes_at).getTime() < Date.now());
           return (
-            <Link key={q.id} href={`/admin/quizzes/${q.id}`} className="bg-white p-3 border-l-[3px] border-gold flex justify-between gap-3 items-center hover:brightness-[0.97]">
-              <div className="min-w-0">
-                <p className="font-semibold text-navy truncate">{q.title}</p>
-                <p className="text-[12px] text-g600">
-                  {q.questions.length} questions · {counts.get(q.id) ?? 0} submitted · /quiz/{q.slug}
-                </p>
-              </div>
-              <span className={`font-condensed font-bold text-[11px] uppercase tracking-[.1em] px-2 py-1 flex-none ${closed ? 'bg-g100 text-g600' : 'bg-mint-light text-mint-deep'}`}>
-                {closed ? 'Closed' : 'Open'}
-              </span>
-            </Link>
+            <QuizListItem
+              key={q.id}
+              id={q.id}
+              slug={q.slug}
+              title={q.title}
+              questionCount={q.questions.length}
+              submitted={counts.get(q.id) ?? 0}
+              closed={!!closed}
+            />
           );
         })}
       </div>
