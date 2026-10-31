@@ -102,6 +102,23 @@ const PAPER_CSS = `
 .qp-model{color:var(--red);border-left:2px solid var(--red);padding-left:12px;white-space:pre-wrap;word-break:break-word;margin-bottom:28px}.qp-lbl.g{color:var(--red)}
 .qp-rate{display:flex;gap:8px;margin:10px 0}.qp-rate button{flex:1;height:36px;border:1px solid var(--red);background:var(--paper);color:var(--red);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.qp-rate button[aria-pressed=true]{background:var(--red);color:var(--paper)}
 .qp-foot{margin-top:28px}.qp-lnk{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;font-size:14px;color:var(--red)}
+/* Laptops and desktops: use the width of the screen. Phones keep the layout above. Line height stays 28px so text still sits on the ruled lines. */
+@media (min-width:820px){
+.qp{max-width:min(980px,92vw)}
+.qp::before{left:48px}.qp::after{right:48px}
+.qp-top{padding:0 84px}.qp-m{padding:0 84px}
+.qp-org{font-size:17px}.qp-title{font-size:26px}.qp-meta{font-size:15.5px}
+.qp-ins{font-size:14px}.qp-rules li{font-size:16.5px}.qp-input{font-size:21px}
+.qp-btn{font-size:14px;height:40px}.qp-nav{height:64px}.qp-nav .qp-btn{padding:0 28px}
+.qp-intro .qp-btn.qp-wide{width:100%}
+.qp-q{font-size:21px}.qb .qp-q{font-size:19px}
+.qp-opt{font-size:18px}.qp-ta{font-size:17px;height:280px}
+.qp-rv::before{left:-60px}
+.qp-rq{font-size:17px}.qp-rv li{font-size:16.5px}
+.qp-ex,.qp-lead,.qp-foot{font-size:15.5px}
+.qp-dlg{max-width:440px}
+}
+@media (min-width:1400px){.qp{max-width:min(1100px,80vw)}}
 `;
 
 export default function QuizTaker({
