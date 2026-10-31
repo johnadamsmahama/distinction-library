@@ -108,7 +108,7 @@ const PAPER_CSS = `
 .qp::before{left:30px}.qp::after{right:30px}
 .qp-top{padding:0 56px}.qp-m{padding:0 56px}
 .qp-org br{display:none}.qp-org .qp-x{position:static;transform:none;display:inline-block;padding:0 12px;font-size:inherit;line-height:inherit;background:none}
-.qp-org{font-size:17px}.qp-orgsm{font-size:13px;text-align:left}.qp-title{font-size:26px}.qp-meta{font-size:15.5px}
+.qp-org{font-size:22px}.qp-orgsm{font-size:19px;text-align:center;grid-column:2}.qp-top{display:grid;grid-template-columns:1fr auto 1fr}.qp-top .qp-timer{grid-column:3;justify-self:end;font-size:16px;line-height:28px;padding:0 12px}.qp-title{font-size:30px}.qp-meta{font-size:15.5px}
 .qp-ins{font-size:14px}.qp-rules li{font-size:16.5px}.qp-input{font-size:21px}
 .qp-btn{font-size:14px;height:40px}.qp-nav{height:64px}.qp-nav .qp-btn{padding:0 28px}
 .qp-intro .qp-btn.qp-wide{width:100%}
