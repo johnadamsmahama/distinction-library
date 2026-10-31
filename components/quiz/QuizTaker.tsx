@@ -104,21 +104,21 @@ const PAPER_CSS = `
 .qp-foot{margin-top:28px}.qp-lnk{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;font-size:14px;color:var(--red)}
 /* Laptops and desktops: use the width of the screen. Phones keep the layout above. Line height stays 28px so text still sits on the ruled lines. */
 @media (min-width:820px){
-.qp{max-width:min(980px,92vw)}
-.qp::before{left:48px}.qp::after{right:48px}
-.qp-top{padding:0 84px}.qp-m{padding:0 84px}
-.qp-org{font-size:17px}.qp-title{font-size:26px}.qp-meta{font-size:15.5px}
+.qp{max-width:min(1600px,98vw)}
+.qp::before{left:30px}.qp::after{right:30px}
+.qp-top{padding:0 56px}.qp-m{padding:0 56px}
+.qp-org br{display:none}.qp-org .qp-x{position:static;transform:none;display:inline-block;padding:0 12px;font-size:inherit;line-height:inherit;background:none}
+.qp-org{font-size:17px}.qp-orgsm{font-size:13px;text-align:left}.qp-title{font-size:26px}.qp-meta{font-size:15.5px}
 .qp-ins{font-size:14px}.qp-rules li{font-size:16.5px}.qp-input{font-size:21px}
 .qp-btn{font-size:14px;height:40px}.qp-nav{height:64px}.qp-nav .qp-btn{padding:0 28px}
 .qp-intro .qp-btn.qp-wide{width:100%}
 .qp-q{font-size:21px}.qb .qp-q{font-size:19px}
 .qp-opt{font-size:18px}.qp-ta{font-size:17px;height:280px}
-.qp-rv::before{left:-60px}
+.qp-rv::before{left:-44px}
 .qp-rq{font-size:17px}.qp-rv li{font-size:16.5px}
 .qp-ex,.qp-lead,.qp-foot{font-size:15.5px}
 .qp-dlg{max-width:440px}
 }
-@media (min-width:1400px){.qp{max-width:min(1100px,80vw)}}
 `;
 
 export default function QuizTaker({
