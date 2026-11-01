@@ -285,6 +285,13 @@ export default function QuizTaker({
         }),
       });
       const data = await res.json();
+      // The saved attempt no longer exists on the server (for example the scores were cleared).
+      // Retrying can never work, so clear the saved copy and let the student start again.
+      if (res.status === 404) {
+        retake();
+        setError('This attempt is no longer on the server, so it could not be submitted. Enter your name and start the quiz again.');
+        return;
+      }
       if (!res.ok) throw new Error(data.error || 'Could not submit.');
       try {
         localStorage.removeItem(storeKey);
