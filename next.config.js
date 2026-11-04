@@ -33,6 +33,21 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  // The programme's own address: opening distinctionprogramme.distinctionlibrary.com
+  // shows the /join page straight away (no "/join" in the link). Every other address
+  // on the site is untouched.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'distinctionprogramme.distinctionlibrary.com' }],
+          destination: '/join',
+        },
+      ],
+    };
+  },
 };
 
 module.exports = withPWA(nextConfig);
