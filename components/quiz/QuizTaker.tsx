@@ -56,7 +56,7 @@ const PAPER_CSS = `
 :where(.qp) button,:where(.qp) input,:where(.qp) textarea{font:inherit;color:inherit}.qp button{cursor:pointer}
 .qp-top{height:56px;padding:0 40px;display:flex;justify-content:space-between;align-items:center}
 .qp-orgsm{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--mut)}.qp-orgsm .qp-x{font-size:13px;line-height:12px;padding:0 4px}
-.qp-timer{font:700 14px/24px Georgia,serif;border:1px solid var(--red);color:var(--red);padding:0 8px;background:var(--paper);font-variant-numeric:tabular-nums}.qp-timer.low{background:var(--red);color:var(--paper)}
+.qp-timer{font:700 14px/24px Georgia,serif;border:1px solid var(--red);color:var(--red);padding:0 8px;background:var(--paper);font-variant-numeric:tabular-nums}.qp-timer.low{background:var(--red);color:var(--paper)}.qp-timer.warn{animation:qpPulse 1.4s ease-in-out infinite}.qp-timer.low{animation:qpPulse .7s ease-in-out infinite}@keyframes qpPulse{0%,100%{opacity:1}50%{opacity:.35}}@media (prefers-reduced-motion:reduce){.qp-timer.warn,.qp-timer.low{animation:none}}
 .qp-m{padding:0 40px}.qp-intro{padding-top:28px}
 .qp-cap,.qp-lbl{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 .qp-hd{position:relative;text-align:center}.qp-hd::after{content:'';position:absolute;left:0;right:0;top:100%;height:4px;border-top:3px double var(--red)}
@@ -560,7 +560,7 @@ export default function QuizTaker({
         Distinction Programme
       </p>
       {withTimer && secondsLeft !== null && (
-        <span className={`qp-timer${secondsLeft <= 60 ? ' low' : ''}`} aria-live="off">
+        <span className={`qp-timer${secondsLeft <= 60 ? ' low' : secondsLeft <= 300 ? ' warn' : ''}`} aria-live="off">
           {fmt(secondsLeft)}
         </span>
       )}
