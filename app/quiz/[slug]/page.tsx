@@ -12,12 +12,21 @@ function Notice({ title, text, invite = false }: { title: string; text: string; 
   return (
     <div className="min-h-screen bg-off-white font-body flex items-center justify-center px-4">
       <div className="max-w-[380px] w-full bg-white border-t-4 border-gold p-8 shadow-[0_2px_12px_rgba(13,43,94,0.08)]">
-        <p className="font-display font-bold text-[22px] text-navy mb-2">{title}</p>
-        <p className="text-sm text-g600">{text}</p>
+        <p className="font-display font-bold text-[22px] text-navy mb-2 text-center">{title}</p>
+        <p className="text-sm text-g600 text-center">{text}</p>
         {invite && (
-          <a href="/join" className="inline-block mt-4 bg-navy text-white font-condensed font-bold uppercase tracking-[.1em] text-[13px] px-4 py-2.5">
-            Join the Distinction Programme group
-          </a>
+          <div className="mt-5 p-4 text-center" style={{ background: '#E3F1E0', boxShadow: 'inset 0 0 0 1px #1F7A4D, 4px 4px 0 #9CCB9A' }}>
+            <p className="font-condensed font-bold uppercase tracking-[.14em] text-[12px] mb-3" style={{ color: '#14532F' }}>
+              Invite a friend
+            </p>
+            <a
+              href="/join"
+              className="block text-white font-condensed font-bold uppercase tracking-[.1em] text-[13px] px-4 py-3"
+              style={{ background: '#1F7A4D' }}
+            >
+              Join the Distinction Programme group
+            </a>
+          </div>
         )}
       </div>
     </div>
