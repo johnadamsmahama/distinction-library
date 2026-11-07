@@ -267,6 +267,7 @@ export default function QuizTaker({
   theory,
   shuffle,
   timeLimitMinutes,
+  preload,
 }: {
   slug: string;
   title: string;
@@ -274,6 +275,8 @@ export default function QuizTaker({
   theory: PublicTheory[];
   shuffle: boolean;
   timeLimitMinutes: number | null;
+  // Set by the shared result page: opens straight on a finished result, and keeps this device's own saved quiz untouched.
+  preload?: { name: string; attemptId: string; result: Result; ratings: Record<string, string> };
 }) {
   const storeKey = `dl-quiz-${slug}`;
   const resultKey = `dl-quiz-result-${slug}`; // the finished result, so the student can open the link again and review it
@@ -306,6 +309,14 @@ export default function QuizTaker({
 
   // Pick up an attempt in progress after a refresh.
   useEffect(() => {
+    if (preload) {
+      setName(preload.name);
+      setAttemptId(preload.attemptId);
+      setRatings(preload.ratings);
+      setResult(preload.result);
+      setPhase('done');
+      return;
+    }
     try {
       const saved = JSON.parse(localStorage.getItem(storeKey) || 'null');
       if (saved?.attemptId) {
@@ -332,9 +343,10 @@ export default function QuizTaker({
     } catch {
       /* storage unavailable: start fresh */
     }
-  }, [storeKey, resultKey]);
+  }, [storeKey, resultKey, preload]);
 
   function saveResult(data: Result, savedRatings: Record<string, string>) {
+    if (preload) return;
     try {
       localStorage.setItem(resultKey, JSON.stringify({ result: data, name, attemptId, ratings: savedRatings }));
     } catch {
