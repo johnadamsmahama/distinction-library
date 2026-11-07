@@ -2,7 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import QuizActions from '@/components/quiz/QuizActions';
+import QuizResultsList, { type ResultRow } from '@/components/quiz/QuizResultsList';
 import type { StoredQuestion, StoredTheory } from '@/lib/quiz/server';
+
+const LETTERS = 'ABCDEFGH';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,10 +30,42 @@ export default async function QuizResultsPage({ params }: { params: { id: string
   const attempts = rows ?? [];
   const questions = quiz.questions as StoredQuestion[];
   const theoryQs = ((quiz.theory ?? []) as StoredTheory[]);
-  const ratingLabel: Record<string, string> = { got: 'Got it', partly: 'Partly', missed: 'Missed' };
   const n = attempts.length;
   const avgPct = n ? Math.round(attempts.reduce((s: number, a: any) => s + (a.total ? a.score / a.total : 0), 0) / n * 100) : 0;
   const top = n ? attempts[0] : null;
+
+  // One plain object per student for the results list: objectives missed and theory answers together.
+  const rows: ResultRow[] = attempts.map((a: any, i: number) => {
+    const ans = (a.answers ?? {}) as Record<string, unknown>;
+    return {
+      id: a.id,
+      rank: i + 1,
+      name: a.participant_name,
+      score: a.score,
+      total: a.total,
+      pct: a.total ? Math.round((a.score / a.total) * 100) : 0,
+      mins: mins(a.started_at, a.submitted_at),
+      submitted: new Date(a.submitted_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }),
+      reason: a.submit_reason === 'cheating' ? 'cheating' : a.submit_reason === 'time' ? 'time' : null,
+      switches: a.tab_switches ?? 0,
+      cells: questions.map((q) => ans[q.id] === q.answer),
+      miss: questions
+        .map((q, qi) => ({ q, qi }))
+        .filter(({ q }) => ans[q.id] !== q.answer)
+        .map(({ q, qi }) => ({
+          n: qi + 1,
+          text: q.text,
+          chose: typeof ans[q.id] === 'number' ? LETTERS[ans[q.id] as number] ?? null : null,
+          correct: LETTERS[q.answer],
+        })),
+      theory: theoryQs.map((t, ti) => ({
+        n: ti + 1,
+        text: t.text,
+        answer: a.theory_answers?.[t.id] ?? '',
+        rating: a.theory_ratings?.[t.id] ?? null,
+      })),
+    };
+  });
 
   // Share of students who got each question wrong (blank counts as wrong).
   const wrong = questions
@@ -63,7 +98,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
           { l: 'Objectives', v: String(questions.length) },
           { l: 'Theory', v: String(theoryQs.length) },
         ].map((s) => (
-          <div key={s.l} className="bg-white p-3 border-l-[3px] border-gold">
+          <div key={s.l} className="bg-white p-3 border-l-[3px] border-navy">
             <div className="font-display font-bold text-2xl text-navy">{s.v}</div>
             <div className="font-condensed text-[10px] uppercase tracking-wide text-g600">{s.l}</div>
           </div>
@@ -76,10 +111,10 @@ export default async function QuizResultsPage({ params }: { params: { id: string
           <div className="flex flex-col gap-3">
             {wrong.map((w) => (
               <div key={w.n} className="grid grid-cols-[40px_minmax(0,1fr)_44px] gap-2 items-center text-sm">
-                <span className="font-condensed font-bold text-gold">Q{w.n}</span>
+                <span className="font-condensed font-bold text-g600">Q{w.n}</span>
                 <div className="min-w-0">
                   <p className="text-g600 text-[13px] truncate mb-1">{w.text}</p>
-                  <div className="h-2.5 bg-g100"><div className="h-full bg-[#B4402F]" style={{ width: `${w.pct}%` }} /></div>
+                  <div className="h-2.5 bg-g100"><div className="h-full bg-navy" style={{ width: `${w.pct}%` }} /></div>
                 </div>
                 <b className="text-right tabular-nums">{w.pct}%</b>
               </div>
@@ -89,78 +124,14 @@ export default async function QuizResultsPage({ params }: { params: { id: string
         </div>
       )}
 
-      {theoryQs.length > 0 && n > 0 && (
+      {n === 0 ? (
         <div className="bg-white p-4">
-          <h3 className="font-display font-bold text-lg text-navy mb-1">Theory answers</h3>
-          <p className="text-[13px] text-g600 mb-3">What each student typed, and how they rated themselves against your model answer. Open a student to read.</p>
-          <div className="flex flex-col gap-2">
-            {attempts.map((a: any) => (
-              <details key={a.id} className="border border-g100">
-                <summary className="cursor-pointer px-3 py-2 flex justify-between gap-2 text-[15px]">
-                  <span>{a.participant_name}</span>
-                  <span className="text-g600 text-[13px]">
-                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'got').length} got it ·{' '}
-                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'partly').length} partly ·{' '}
-                    {Object.values(a.theory_ratings ?? {}).filter((v) => v === 'missed').length} missed
-                  </span>
-                </summary>
-                <div className="px-3 pb-3 flex flex-col gap-3">
-                  {theoryQs.map((t, ti) => (
-                    <div key={t.id}>
-                      <p className="font-condensed font-bold text-[12px] uppercase tracking-[.1em] text-gold">
-                        Theory {ti + 1}
-                        {a.theory_ratings?.[t.id] ? ` · rated: ${ratingLabel[a.theory_ratings[t.id]] ?? ''}` : ' · not rated'}
-                      </p>
-                      <p className="text-[14px] font-medium mb-1">{t.text}</p>
-                      <p className="text-[14px] bg-g100 px-3 py-2 whitespace-pre-wrap break-words">
-                        {a.theory_answers?.[t.id] || <span className="text-g500">No answer typed.</span>}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </details>
-            ))}
-          </div>
+          <h3 className="font-display font-bold text-lg text-navy mb-3">Results</h3>
+          <p className="text-sm text-g600">No one has submitted yet. Share the link and results will appear here.</p>
         </div>
+      ) : (
+        <QuizResultsList rows={rows} slug={quiz.slug} title={quiz.title} hasObjectives={questions.length > 0} hasTheory={theoryQs.length > 0} />
       )}
-
-      <div className="bg-white p-4">
-        <h3 className="font-display font-bold text-lg text-navy mb-3">Scores</h3>
-        {n === 0 ? (
-          <p className="text-sm text-g600">No one has submitted yet. Share the link and scores will appear here.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[15px] tabular-nums min-w-[560px]">
-              <thead>
-                <tr className="text-left font-condensed text-[12px] uppercase tracking-[.1em] text-g600 border-b-2 border-g100">
-                  <th className="py-2 pr-2">Student</th><th className="py-2 text-right">Score</th><th className="py-2 text-right">Time</th><th className="py-2 pl-3">Submitted</th><th className="py-2 pl-3">Flags</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attempts.map((a: any) => (
-                  <tr key={a.id} className="border-b border-g100">
-                    <td className="py-2 pr-2">{a.participant_name}</td>
-                    <td className="py-2 text-right">{a.score} / {a.total}</td>
-                    <td className="py-2 text-right">{mins(a.started_at, a.submitted_at)}</td>
-                    <td className="py-2 pl-3">{new Date(a.submitted_at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
-                    <td className="py-2 pl-3 whitespace-nowrap">
-                      {a.submit_reason === 'cheating' ? (
-                        <span className="font-condensed font-bold text-[11px] uppercase tracking-[.08em] px-2 py-1 bg-red-100 text-red-800">Attempted cheating</span>
-                      ) : a.tab_switches > 0 ? (
-                        <span className="font-condensed font-bold text-[11px] uppercase tracking-[.08em] px-2 py-1 bg-[#FBF3E1] text-g800">Left quiz {a.tab_switches}x</span>
-                      ) : a.submit_reason === 'time' ? (
-                        <span className="text-g600 text-[13px]">Time ran out</span>
-                      ) : (
-                        <span className="text-g500">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
