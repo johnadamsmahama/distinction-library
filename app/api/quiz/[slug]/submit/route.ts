@@ -32,12 +32,30 @@ export async function POST(request: Request, { params }: { params: { slug: strin
 
   const { data: attempt } = await db
     .from('quiz_attempts')
-    .select('id, started_at, submitted_at')
+    .select('id, started_at, submitted_at, answers, theory_answers, submit_reason')
     .eq('id', attemptId)
     .eq('quiz_id', quiz.id)
     .single();
   if (!attempt) return NextResponse.json({ error: 'Attempt not found.' }, { status: 404 });
-  if (attempt.submitted_at) return NextResponse.json({ error: 'This attempt was already submitted.' }, { status: 409 });
+  if (attempt.submitted_at) {
+    // Already saved (a double tap, or the first reply was lost on a weak network).
+    // Send the saved result back so the student sees it instead of an error.
+    const savedAnswers = (attempt.answers ?? {}) as Record<string, unknown>;
+    const savedTyped = (attempt.theory_answers ?? {}) as Record<string, string>;
+    const savedReason = attempt.submit_reason === 'cheating' || attempt.submit_reason === 'time' ? attempt.submit_reason : null;
+    const marked = markAttempt(quiz.questions as StoredQuestion[], savedAnswers);
+    const defs = (quiz.theory ?? []) as StoredTheory[];
+    return NextResponse.json({
+      score: marked.score,
+      total: marked.total,
+      reason: savedReason,
+      review: savedReason === 'cheating' ? null : marked.review,
+      theory:
+        savedReason === 'cheating'
+          ? null
+          : defs.map((t) => ({ id: t.id, text: t.text, yourAnswer: savedTyped[t.id] ?? '', modelAnswer: t.modelAnswer })),
+    });
+  }
 
   if (quiz.time_limit_minutes) {
     const elapsed = (Date.now() - new Date(attempt.started_at).getTime()) / 1000;
