@@ -35,7 +35,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
   const top = n ? attempts[0] : null;
 
   // One plain object per student for the results list: objectives missed and theory answers together.
-  const rows: ResultRow[] = attempts.map((a: any, i: number) => {
+  const resultRows: ResultRow[] = attempts.map((a: any, i: number) => {
     const ans = (a.answers ?? {}) as Record<string, unknown>;
     return {
       id: a.id,
@@ -130,7 +130,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
           <p className="text-sm text-g600">No one has submitted yet. Share the link and results will appear here.</p>
         </div>
       ) : (
-        <QuizResultsList rows={rows} slug={quiz.slug} title={quiz.title} hasObjectives={questions.length > 0} hasTheory={theoryQs.length > 0} />
+        <QuizResultsList rows={resultRows} slug={quiz.slug} title={quiz.title} hasObjectives={questions.length > 0} hasTheory={theoryQs.length > 0} />
       )}
     </div>
   );
