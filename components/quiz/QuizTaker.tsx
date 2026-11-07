@@ -47,7 +47,7 @@ function fmt(s: number) {
 }
 
 const PAPER_CSS = `
-.qp-bg{--paper:#FBF6E8;--rule:#D9CDA8;--red:#8A2E2E;--ink:#2A2418;--pen:#24477A;--mut:#8A7A5C;--green:#2E6B4A;min-height:100vh;background:var(--paper) linear-gradient(transparent 27px,var(--rule) 27px) 0 3px/100% 28px;color:var(--ink);font:15px/28px Georgia,'Times New Roman',serif}
+.qp-bg{--paper:#FBF6E8;--rule:#D9CDA8;--red:#8A2E2E;--ink:#2A2418;--pen:#24477A;--mut:#8A7A5C;--green:#2E6B4A;min-height:100vh;background:var(--paper) linear-gradient(transparent 27px,var(--rule) 27px) 0 -3px/100% 28px;color:var(--ink);font:15px/28px Georgia,'Times New Roman',serif}
 .qp{position:relative;max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:28px}
 .qp::before,.qp::after{content:'';position:absolute;top:0;bottom:0;width:2px;background:#C0504D;opacity:.8;pointer-events:none}
 .qp::before{left:28px}.qp::after{right:28px}
@@ -67,7 +67,7 @@ const PAPER_CSS = `
 .qp-ins{margin-top:28px;font-size:13px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--red);text-align:center}
 .qp-rules{margin-bottom:28px;counter-reset:r;list-style:none;padding:0}.qp-rules li{counter-increment:r;display:flex;gap:4px;line-height:28px;color:var(--red);font-weight:600}.qp-rules li::before{content:counter(r) '.';flex:none;width:22px;font-weight:800}
 .qp-label{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
-.qp-input{display:block;width:100%;height:31px;margin-bottom:-3px;padding:0;border:0;border-bottom:2px solid var(--pen);background:transparent;font-size:19px;color:var(--pen);outline:0}.qp-input::placeholder{color:var(--mut);font-style:italic}
+.qp-input{display:block;width:100%;height:27px;margin-bottom:1px;padding:0;border:0;border-bottom:2px solid var(--pen);background:transparent;font-size:19px;color:var(--pen);outline:0}.qp-input::placeholder{color:var(--mut);font-style:italic}
 .qp-err{color:var(--red);font-style:italic;line-height:28px}
 .qp-btn{height:36px;margin:10px 0;padding:0 18px;border:0;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.qp-btn:disabled{opacity:.4;cursor:default}
 .qp-red{background:var(--red);color:#F6EFDC}.qp-out{background:var(--paper);color:var(--red);border:1px solid var(--red)}.qp-wide{width:100%}
@@ -95,39 +95,49 @@ const PAPER_CSS = `
 .qp-rl{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 .qp-rq{font-size:15.5px;font-weight:600}
 .qp-rv li{font-size:15px}.qp-rv li b{font-weight:400;margin-right:6px}.qp-rv li em{font-style:normal;white-space:nowrap}
-.qp-rv li.ans{color:var(--green);font-weight:700}.qp-rv li.ans em{font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-left:4px}
+.qp-rv li.ans{color:var(--green);font-weight:700}.qp-rv li em{line-height:1}
+.qp-rv li.ans em{font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-left:4px}
 .qp-rv li.wr em{color:var(--red);font-weight:700;font-size:13px;margin-left:4px}
 .qp-ex,.qp-lead,.qp-foot{font-style:italic;font-size:14px;color:#6B5D3F}.qp-lead{margin-bottom:28px}
 .qp-yours{color:var(--pen);white-space:pre-wrap;word-break:break-word;margin-bottom:28px}
 .qp-model{color:var(--red);border-left:2px solid var(--red);padding-left:12px;white-space:pre-wrap;word-break:break-word;margin-bottom:28px}.qp-lbl.g{color:var(--red)}
-.qp-rate{display:flex;gap:8px;margin:10px 0}.qp-rate button{flex:1;height:36px;border:1px solid var(--red);background:var(--paper);color:var(--red);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.qp-rate button[aria-pressed=true]{background:var(--red);color:var(--paper)}
+.qp-rate{display:flex;gap:8px;margin:10px 0 0;padding-bottom:10px}.qp-rate button{flex:1;height:36px;border:1px solid var(--red);background:var(--paper);color:var(--red);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.qp-rate button[aria-pressed=true]{background:var(--red);color:var(--paper)}
 .qp-foot{margin-top:28px}.qp-lnk{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;font-size:14px;color:var(--red)}
-.qp-invl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:28px;padding-top:10px}
-.qp-invl span{flex:1 1 180px;font-size:14px;line-height:22px;font-style:italic;color:#6B5D3F}.qp-invl .qp-btn{margin:0;height:44px}
-.qp-ch{margin:28px 0;border:1px solid var(--red);padding:14px;background:var(--paper)}
-.qp-ch h4,.qp-sheet h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);line-height:20px}
-.qp-ch p{margin:4px 0 10px;font-size:14px;line-height:20px;font-style:italic;color:#6B5D3F}
-.qp-ch p.qp-bub,.qp-sheet p.qp-bub{margin:0 0 10px;padding:10px 12px;background:#D9FDD3;border-radius:12px 0 12px 12px;font:normal 14.5px/20px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#111B21}
-.qp-chk{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;line-height:20px;cursor:pointer}.qp-chk input{width:22px;height:22px;margin:0;accent-color:var(--red)}
-.qp-sheet{align-items:flex-end;justify-content:center;padding:0}
-.qp-sheet .qp-dlg{max-width:none;width:100%;padding:20px 24px 24px;line-height:20px}.qp-sheet .qp-dlg p.qp-sub{margin:4px 0 12px;font-size:14px;font-style:italic;color:#6B5D3F}
-.qp-sheet .qp-btn{margin:0}.qp-sheet .qp-inv-btns{margin:0}
-.qp-inv-btns{display:flex;flex-direction:column;gap:8px;margin:6px 0 0}
-.qp-inv-btns .qp-btn{margin:0;height:38px;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none}
+.qp-card{display:flow-root;margin:28px 0;padding:0 14px;background:#E3F1E0;box-shadow:inset 0 0 0 1px #1F7A4D,4px 4px 0 #9CCB9A}
+.qp-card h4{margin:0;position:relative;top:3px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#14532F;line-height:28px}
+.qp-card p{margin:0;position:relative;top:2px;font-size:14px;line-height:28px;font-style:italic;color:#3F5F44}
+.qp-card p.qp-bub{top:0;margin:0;padding:0 12px;background:#D9FDD3;box-shadow:inset 0 0 0 1px #A9DFA2;font:normal 14.5px/28px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#111B21;word-break:break-word}
+.qp-card .qp-out{color:#14532F;border:1px solid #1F7A4D;background:transparent}
+.qp-chk{display:flex;align-items:flex-start;gap:10px;height:56px;font-size:14px;line-height:28px;cursor:pointer}.qp-chk input{flex:none;width:22px;height:22px;margin:3px 0 0;accent-color:#1F7A4D}
+.qp-inv-btns{display:flex;flex-direction:column}
+.qp-inv-btns .qp-btn{margin:10px 0;width:100%;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none}
 .qp-wa{background:#1F7A4D;color:#fff}
+.qp-card .qp-btn.qp-wa{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.qp-sheet{align-items:flex-end;justify-content:center;padding:0}
+.qp-sheet .qp-dlg{max-width:none;width:100%;padding:20px 24px 24px;line-height:20px}
+.qp-sheet h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);line-height:20px}
+.qp-sheet .qp-dlg p.qp-sub{margin:4px 0 12px;font-size:14px;font-style:italic;color:#6B5D3F}
+.qp-sheet p.qp-bub{margin:0 0 10px;padding:10px 12px;background:#D9FDD3;box-shadow:inset 0 0 0 1px #A9DFA2;font:normal 14.5px/20px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#111B21}
+.qp-sheet .qp-inv-btns .qp-btn{margin:0 0 8px}
+/* Small capital labels and small italic notes hang a little lower so they rest on their line like the body text */
+.qp-cap,.qp-lbl,.qp-label,.qp-ins,.qp-sec,.qp-rl{position:relative;top:3px}
+.qp-meta,.qp-fine,.qp-ex,.qp-lead,.qp-foot{position:relative;top:2px}
+/* Headings are centred on every quiz page */
+.qp-sec,.qp-score,.qp-card h4,.qp-sheet h3{text-align:center}
+.qp-head{flex-direction:column;align-items:center;text-align:center}
 /* Laptops and desktops: use the width of the screen. Phones keep the layout above. Line height stays 28px so text still sits on the ruled lines. */
 @media (min-width:820px){
-.qp-inv-btns{flex-direction:row;max-width:520px}.qp-inv-btns .qp-btn{flex:1}
-.qp-sheet .qp-dlg{max-width:560px}.qp-sheet .qp-inv-btns{max-width:none}
+.qp-inv-btns{flex-direction:row;gap:12px}.qp-inv-btns .qp-btn{flex:1}
+.qp-sheet .qp-dlg{max-width:560px}.qp-sheet .qp-inv-btns{gap:12px}.qp-sheet .qp-inv-btns .qp-btn{margin:0}
 .qp{max-width:min(1600px,98vw)}
 .qp::before{left:30px}.qp::after{right:30px}
 .qp-top{padding:0 56px}.qp-m{padding:0 56px}
 .qp-org br{display:none}.qp-org .qp-x{position:static;transform:none;display:inline-block;padding:0 12px;font-size:inherit;line-height:inherit;background:none}
-.qp-org{font-size:22px}.qp-orgsm{font-size:19px;text-align:center;grid-column:2}.qp-top{display:grid;grid-template-columns:1fr auto 1fr}.qp-top .qp-timer{grid-column:3;justify-self:end;font-size:16px;line-height:28px;padding:0 12px}.qp-title{font-size:30px}.qp-meta{font-size:15.5px}
+.qp-org{font-size:20px}.qp-orgsm{font-size:19px;text-align:center;grid-column:2}.qp-top{display:grid;grid-template-columns:1fr auto 1fr}.qp-top .qp-timer{grid-column:3;justify-self:end;font-size:16px;line-height:28px;padding:0 12px}.qp-title{font-size:28px}.qp-meta{font-size:15.5px}
 .qp-ins{font-size:14px}.qp-rules li{font-size:16.5px}.qp-input{font-size:21px}
-.qp-btn{font-size:14px;height:40px}.qp-nav{height:64px}.qp-nav .qp-btn{padding:0 28px}
+.qp-btn{font-size:14px}.qp-nav .qp-btn{padding:0 28px}
 .qp-intro .qp-btn.qp-wide{width:100%}
-.qp-q{font-size:21px}.qb .qp-q{font-size:19px}
+.qb .qp-q{font-size:19px}
 .qp-opt{font-size:18px}.qp-ta{font-size:17px;height:280px}
 .qp-rv::before{left:-44px}
 .qp-rq{font-size:17px}.qp-rv li{font-size:16.5px}
@@ -204,12 +214,13 @@ function InviteLine() {
   }, [open]);
   return (
     <>
-      <div className="qp-invl">
-        <span>Know someone who should be in the group?</span>
-        <button type="button" onClick={() => setOpen(true)} className="qp-btn qp-out">
-          Invite
+      <section className="qp-card" aria-label="Invite a friend">
+        <h4>Invite a friend</h4>
+        <p>Know someone who should be in the group?</p>
+        <button type="button" onClick={() => setOpen(true)} className="qp-btn qp-wa qp-wide">
+          Invite on WhatsApp
         </button>
-      </div>
+      </section>
       {open && (
         <div className="qp-ov qp-sheet" onClick={() => setOpen(false)}>
           <div role="dialog" aria-modal="true" aria-labelledby="inv-title" className="qp-dlg" onClick={(e) => e.stopPropagation()}>
@@ -234,7 +245,7 @@ function ChallengeCard({ score, total, quizTitle }: { score: number; total: numb
   const base = `${INVITE_TEXT} ${link}`;
   const message = withScore && total > 0 ? `I scored ${score}/${total} on ${quizTitle}. Beat me! ${base}` : base;
   return (
-    <section className="qp-ch" aria-label="Challenge a friend">
+    <section className="qp-card" aria-label="Challenge a friend">
       <h4>Challenge a friend</h4>
       <p>Send them the group link. They can join and take the next quiz.</p>
       <p className="qp-bub">{message}</p>
