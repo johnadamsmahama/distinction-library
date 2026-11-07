@@ -102,8 +102,23 @@ const PAPER_CSS = `
 .qp-model{color:var(--red);border-left:2px solid var(--red);padding-left:12px;white-space:pre-wrap;word-break:break-word;margin-bottom:28px}.qp-lbl.g{color:var(--red)}
 .qp-rate{display:flex;gap:8px;margin:10px 0}.qp-rate button{flex:1;height:36px;border:1px solid var(--red);background:var(--paper);color:var(--red);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.qp-rate button[aria-pressed=true]{background:var(--red);color:var(--paper)}
 .qp-foot{margin-top:28px}.qp-lnk{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;font-size:14px;color:var(--red)}
+.qp-invl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:28px;padding-top:10px}
+.qp-invl span{flex:1 1 180px;font-size:14px;line-height:22px;font-style:italic;color:#6B5D3F}.qp-invl .qp-btn{margin:0;height:44px}
+.qp-ch{margin:28px 0;border:1px solid var(--red);padding:14px;background:var(--paper)}
+.qp-ch h4,.qp-sheet h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red);line-height:20px}
+.qp-ch p{margin:4px 0 10px;font-size:14px;line-height:20px;font-style:italic;color:#6B5D3F}
+.qp-ch p.qp-bub,.qp-sheet p.qp-bub{margin:0 0 10px;padding:10px 12px;background:#D9FDD3;border-radius:12px 0 12px 12px;font:normal 14.5px/20px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#111B21}
+.qp-chk{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;line-height:20px;cursor:pointer}.qp-chk input{width:22px;height:22px;margin:0;accent-color:var(--red)}
+.qp-sheet{align-items:flex-end;justify-content:center;padding:0}
+.qp-sheet .qp-dlg{max-width:none;width:100%;padding:20px 24px 24px;line-height:20px}.qp-sheet .qp-dlg p.qp-sub{margin:4px 0 12px;font-size:14px;font-style:italic;color:#6B5D3F}
+.qp-sheet .qp-btn{margin:0}.qp-sheet .qp-inv-btns{margin:0}
+.qp-inv-btns{display:flex;flex-direction:column;gap:8px;margin:6px 0 0}
+.qp-inv-btns .qp-btn{margin:0;height:38px;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none}
+.qp-wa{background:#1F7A4D;color:#fff}
 /* Laptops and desktops: use the width of the screen. Phones keep the layout above. Line height stays 28px so text still sits on the ruled lines. */
 @media (min-width:820px){
+.qp-inv-btns{flex-direction:row;max-width:520px}.qp-inv-btns .qp-btn{flex:1}
+.qp-sheet .qp-dlg{max-width:560px}.qp-sheet .qp-inv-btns{max-width:none}
 .qp{max-width:min(1600px,98vw)}
 .qp::before{left:30px}.qp::after{right:30px}
 .qp-top{padding:0 56px}.qp-m{padding:0 56px}
@@ -120,6 +135,119 @@ const PAPER_CSS = `
 .qp-dlg{max-width:440px}
 }
 `;
+
+// Invite pieces. They appear only on the start and result screens, never while the quiz is running:
+// opening WhatsApp mid-quiz would count as leaving the page.
+const INVITE_TEXT = 'Join the Distinction Programme on WhatsApp: peer-led extra classes and quizzes for UPSA students. Pick your level here:';
+
+function useJoinLink() {
+  const [link, setLink] = useState('/join');
+  useEffect(() => {
+    setLink(`${window.location.origin}/join`);
+  }, []);
+  return link;
+}
+
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      // Older browsers: fall back to a temporary text box.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
+// Share on WhatsApp + Copy, for a ready-made message.
+function InviteButtons({ message }: { message: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    if (await copyText(message)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+  return (
+    <div className="qp-inv-btns">
+      <a className="qp-btn qp-wa" href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer">
+        Share on WhatsApp
+      </a>
+      <button type="button" onClick={copy} className="qp-btn qp-out">
+        {copied ? 'Copied' : 'Copy message'}
+      </button>
+    </div>
+  );
+}
+
+// Start screen: one quiet line. Tapping Invite opens a sheet showing the exact message.
+function InviteLine() {
+  const link = useJoinLink();
+  const [open, setOpen] = useState(false);
+  const message = `${INVITE_TEXT} ${link}`;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+  return (
+    <>
+      <div className="qp-invl">
+        <span>Know someone who should be in the group?</span>
+        <button type="button" onClick={() => setOpen(true)} className="qp-btn qp-out">
+          Invite
+        </button>
+      </div>
+      {open && (
+        <div className="qp-ov qp-sheet" onClick={() => setOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="inv-title" className="qp-dlg" onClick={(e) => e.stopPropagation()}>
+            <h3 id="inv-title">Invite a friend</h3>
+            <p className="qp-sub">This is the message they will receive.</p>
+            <p className="qp-bub">{message}</p>
+            <InviteButtons message={message} />
+            <button type="button" onClick={() => setOpen(false)} className="qp-lnk" style={{ display: 'block', margin: '14px auto 0' }}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Result screen, right under the score. The score is only added if the student ticks the box.
+function ChallengeCard({ score, total, quizTitle }: { score: number; total: number; quizTitle: string }) {
+  const link = useJoinLink();
+  const [withScore, setWithScore] = useState(false);
+  const base = `${INVITE_TEXT} ${link}`;
+  const message = withScore && total > 0 ? `I scored ${score}/${total} on ${quizTitle}. Beat me! ${base}` : base;
+  return (
+    <section className="qp-ch" aria-label="Challenge a friend">
+      <h4>Challenge a friend</h4>
+      <p>Send them the group link. They can join and take the next quiz.</p>
+      <p className="qp-bub">{message}</p>
+      {total > 0 && (
+        <label className="qp-chk">
+          <input type="checkbox" checked={withScore} onChange={(e) => setWithScore(e.target.checked)} />
+          Include my score
+        </label>
+      )}
+      <InviteButtons message={message} />
+    </section>
+  );
+}
 
 export default function QuizTaker({
   slug,
@@ -474,6 +602,7 @@ export default function QuizTaker({
           {busy ? 'Starting...' : 'Start quiz'}
         </button>
         {timeLimitMinutes ? <p className="qp-fine">The timer begins as soon as you tap Start.</p> : null}
+        <InviteLine />
       </main>
     );
   }
@@ -505,6 +634,8 @@ export default function QuizTaker({
             )}
             <span className="qp-stamp">Submitted</span>
           </section>
+
+          <ChallengeCard score={result.score} total={result.reason === 'cheating' ? 0 : result.total} quizTitle={title} />
 
           {result.reason === 'cheating' && (
             <div className="qp-note">
