@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { normalizeName } from '@/lib/quiz/names';
 
 export const runtime = 'nodejs';
 
@@ -7,7 +8,8 @@ export const runtime = 'nodejs';
 // Public. Records who started and when, so the time limit is enforced by the server clock.
 export async function POST(request: Request, { params }: { params: { slug: string } }) {
   const { name } = (await request.json()) as { name?: string };
-  const participant = name?.trim().replace(/\s+/g, ' ');
+  // Names are always saved in capital letters.
+  const participant = name ? normalizeName(name) : '';
   if (!participant || participant.length < 2 || participant.length > 60) {
     return NextResponse.json({ error: 'Enter your name (2 to 60 characters).' }, { status: 400 });
   }
