@@ -92,6 +92,10 @@ export default function HomeButtonGate() {
   const isAiTool = topSegment === 'ai-tools' && segments.length === 2;
   const aiToolLabel = isAiTool ? AI_TOOLS[segments[1]] : undefined;
 
+  // /admin/quizzes/[id] (a quiz's results) shows Home / Admin / Quizzes, so the
+  // results page links straight back to the quiz list.
+  const isAdminQuizDetail = topSegment === 'admin' && segments[1] === 'quizzes' && segments.length === 3;
+
   return (
     <div className="relative mb-4 -mx-4 sm:mx-0 px-4 sm:px-0">
       <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap font-[family-name:var(--font-courier-prime)] font-bold text-[13px] uppercase tracking-wide text-navy [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -134,6 +138,15 @@ export default function HomeButtonGate() {
           <>
             <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
             <span className="flex-shrink-0">{aiToolLabel}</span>
+          </>
+        )}
+
+        {isAdminQuizDetail && (
+          <>
+            <span className="text-[#B0A57E] normal-case font-normal flex-shrink-0">/</span>
+            <Link href="/admin/quizzes" className="hover:opacity-70 transition-opacity flex-shrink-0">
+              Quizzes
+            </Link>
           </>
         )}
       </div>
