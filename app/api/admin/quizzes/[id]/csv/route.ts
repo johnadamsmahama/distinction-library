@@ -1,49 +1,85 @@
-import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requireAdminId } from '@/lib/quiz/server';
+'use client';
 
-export const runtime = 'nodejs';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-function cell(v: string | number | null) {
-  let s = v === null ? '' : String(v);
-  // Stops spreadsheet apps from running a name like "=SUM(...)" as a formula.
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-  return `"${s.replace(/"/g, '""')}"`;
-}
+const OPTIONS: { label: string; note: string; hours: number | null }[] = [
+  { label: '1 hour', note: 'Quick re-sit', hours: 1 },
+  { label: '24 hours', note: 'One day', hours: 24 },
+  { label: '3 days', note: 'Through the week', hours: 72 },
+  { label: '7 days', note: 'A full week', hours: 168 },
+  { label: 'No deadline', note: 'Stays open until you close it', hours: null },
+];
 
-// GET — scores for one quiz as a CSV file.
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  if (!(await requireAdminId())) return NextResponse.json({ error: 'Admins only.' }, { status: 403 });
-  const db = createAdminClient();
-  const { data: quiz } = await db.from('quizzes').select('title').eq('id', params.id).single();
-  if (!quiz) return NextResponse.json({ error: 'Quiz not found.' }, { status: 404 });
-  const { data: attempts } = await db
-    .from('quiz_attempts')
-    .select('participant_name, score, total, started_at, submitted_at, tab_switches, submit_reason')
-    .eq('quiz_id', params.id)
-    .not('submitted_at', 'is', null)
-    .order('score', { ascending: false });
+// Bottom sheet that reopens a closed or expired quiz with a fresh deadline.
+export default function ReactivateSheet({ id, open, onClose }: { id: string; open: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const [pick, setPick] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const rows = [['Name', 'Score', 'Out of', 'Percent', 'Minutes taken', 'Submitted at', 'Times left quiz', 'Submission note']];
-  for (const a of attempts ?? []) {
-    const mins = Math.round(((new Date(a.submitted_at).getTime() - new Date(a.started_at).getTime()) / 60000) * 10) / 10;
-    rows.push([
-      a.participant_name,
-      a.score,
-      a.total,
-      a.total ? Math.round((a.score / a.total) * 100) : 0,
-      mins,
-      a.submitted_at,
-      a.tab_switches ?? 0,
-      a.submit_reason === 'cheating' ? 'Attempted cheating' : a.submit_reason === 'time' ? 'Time ran out' : '',
-    ] as unknown as string[]);
+  useEffect(() => {
+    if (!open) return;
+    setPick(1);
+    setError(null);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  async function confirm() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/quizzes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: true, hours: OPTIONS[pick].hours }),
+      });
+      if (!res.ok) throw new Error();
+      onClose();
+      router.refresh();
+    } catch {
+      setError('Could not reactivate the quiz. Try again.');
+    } finally {
+      setBusy(false);
+    }
   }
-  const csv = rows.map((r) => r.map((c) => cell(c as string)).join(',')).join('\r\n');
-  const safeName = quiz.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'quiz';
-  return new NextResponse('﻿' + csv, {
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${safeName}-scores.csv"`,
-    },
-  });
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Reactivate quiz">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-navy-deep/60" />
+      <div className="relative w-full max-w-[620px] bg-white rounded-t-[22px] px-5 pt-6 pb-[calc(24px+env(safe-area-inset-bottom,0px))] shadow-2xl">
+        <h2 className="font-display font-bold text-2xl text-navy">Reactivate this quiz</h2>
+        <p className="text-[13px] text-g600 mt-1 mb-4">
+          Choose how long it stays open. The same link works again and every saved score is kept.
+        </p>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {OPTIONS.map((o, i) => (
+            <button
+              key={o.label}
+              type="button"
+              onClick={() => setPick(i)}
+              aria-pressed={pick === i}
+              className={`text-left p-3 border-[1.5px] ${pick === i ? 'border-gold bg-[#FFF7DC]' : 'border-[#DDE2EE] bg-[#F6F8FC]'}`}
+            >
+              <span className="block font-bold text-[14px] text-navy">{o.label}</span>
+              <span className="block text-[11.5px] text-g600 mt-0.5">{o.note}</span>
+            </button>
+          ))}
+        </div>
+        {error && <p className="text-sm text-red-700 mb-2">{error}</p>}
+        <button
+          type="button"
+          onClick={confirm}
+          disabled={busy}
+          className="w-full min-h-[48px] bg-gradient-to-br from-gold-light to-gold text-[#2A1F00] font-condensed font-bold uppercase tracking-[.14em] text-[13px] disabled:opacity-50"
+        >
+          {busy ? 'Reactivating...' : 'Reactivate quiz'}
+        </button>
+      </div>
+    </div>
+  );
 }
