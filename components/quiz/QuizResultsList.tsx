@@ -102,7 +102,7 @@ function ShareBar({ r, slug, title }: { r: ResultRow; slug: string; title: strin
       window.prompt('Copy this message', message());
     }
   }
-  const btn = 'font-condensed font-bold uppercase tracking-[.1em] text-[12px] px-3 min-h-[44px] border border-navy flex items-center justify-center';
+  const btn = 'font-condensed font-bold uppercase tracking-[.1em] text-[11px] px-3 min-h-[34px] border border-navy flex items-center justify-center';
   return (
     <div className="bg-[#F7F1E1] p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
       <p className="text-[14px] text-g800 md:flex-1">Send {first} their result link, in case they could not see it.</p>
@@ -149,12 +149,12 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
   }, [searched, filter, sort]);
 
   const chip = (on: boolean) =>
-    `h-11 px-4 border-[1.5px] font-condensed font-bold uppercase tracking-[.12em] text-[12px] ${on ? 'bg-navy text-white border-navy' : 'bg-transparent text-g800 border-[#DACFAE]'}`;
+    `h-8 px-3 border-[1.5px] font-condensed font-bold uppercase tracking-[.1em] text-[11px] ${on ? 'bg-navy text-white border-navy' : 'bg-transparent text-g800 border-[#DACFAE]'}`;
 
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-2">
-        <label className="flex-[1_1_100%] flex items-center gap-2 h-12 border-[1.5px] border-[#DACFAE] bg-[#FFFCF4] px-3 focus-within:border-navy focus-within:ring-2 focus-within:ring-navy/30">
+        <label className="flex-[1_1_100%] flex items-center gap-2 h-10 border-[1.5px] border-[#DACFAE] bg-[#FFFCF4] px-3 focus-within:border-navy focus-within:ring-2 focus-within:ring-navy/30">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="text-g600 shrink-0">
             <circle cx="11" cy="11" r="7" />
             <path d="M20 20l-4-4" />
@@ -178,7 +178,7 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
           aria-label="Sort"
           value={sort}
           onChange={(e) => setSort(e.target.value as typeof sort)}
-          className="h-11 border-[1.5px] border-[#DACFAE] bg-[#FFFCF4] px-2 text-[14px] font-medium"
+          className="h-8 border-[1.5px] border-[#DACFAE] bg-[#FFFCF4] px-2 text-[12.5px] font-medium"
         >
           <option value="score">Highest score</option>
           <option value="low">Lowest score</option>
@@ -206,10 +206,10 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
                 type="button"
                 onClick={() => setOpen(isOpen ? null : r.id)}
                 aria-expanded={isOpen}
-                className="w-full text-left grid grid-cols-[48px_minmax(0,1fr)_auto] gap-x-3.5 items-center px-3.5 py-3.5"
+                className="w-full text-left grid grid-cols-[44px_minmax(0,1fr)_auto] gap-x-3.5 items-center px-3.5 py-3.5"
               >
                 <span
-                  className={`w-12 h-12 rounded-full grid place-items-center font-display font-bold text-[16px] text-navy ${
+                  className={`w-11 h-11 rounded-[3px] grid place-items-center font-display font-bold text-[15px] text-navy ${
                     top ? 'bg-gradient-to-br from-gold-light to-gold ring-[1px] ring-gold ring-offset-[3px] ring-offset-[#FFFCF4]' : 'bg-[#F7F1E1] ring-1 ring-inset ring-[#DACFAE]'
                   }`}
                   aria-hidden="true"
@@ -224,7 +224,7 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
                   {flags.length > 0 && (
                     <span className="flex flex-wrap gap-1.5 mt-2">
                       {flags.map((f) => (
-                        <span key={f.text} className={`font-condensed font-bold text-[10.5px] uppercase tracking-[.1em] px-2 py-[3px] border ${CHIP[f.tone]}`}>
+                        <span key={f.text} className={`font-condensed font-bold text-[9.5px] uppercase tracking-[.08em] px-1.5 py-[1px] border ${CHIP[f.tone]}`}>
                           {f.text}
                         </span>
                       ))}
@@ -273,7 +273,7 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
                         </h4>
                         <div className="grid grid-cols-10 gap-[3px]">
                           {r.cells.map((ok, i) => (
-                            <span key={i} className={`h-[30px] flex items-center justify-center text-[12px] font-bold ${ok ? 'bg-g100 text-navy' : 'bg-navy text-white'}`}>{i + 1}</span>
+                            <span key={i} className={`h-[26px] flex items-center justify-center text-[11.5px] font-bold ${ok ? 'bg-g100 text-navy' : 'bg-navy text-white'}`}>{i + 1}</span>
                           ))}
                         </div>
                         {r.miss.length > 0 && (
@@ -302,7 +302,7 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
                               <div key={t.n}>
                                 <div className="flex items-center justify-between gap-2 mb-1">
                                   <span className="font-condensed font-bold text-[12px] uppercase tracking-[.12em] text-[#7A6F52]">Theory {t.n}</span>
-                                  <span className={`font-condensed font-bold text-[11px] uppercase tracking-[.08em] px-2 py-[2px] ${RATE_BADGE[k]}`}>
+                                  <span className={`font-condensed font-bold text-[10px] uppercase tracking-[.08em] px-1.5 py-[1px] ${RATE_BADGE[k]}`}>
                                     {t.rating ? RATE_LABEL[t.rating] : 'Not rated'}
                                   </span>
                                 </div>
