@@ -40,7 +40,7 @@ export default function QuizListItem({ id, slug, title, questionCount, submitted
 
   if (gone) return null;
 
-  const btn = 'font-condensed font-bold uppercase tracking-[.1em] text-[12px] px-3 min-h-[40px] border flex items-center';
+  const btn = 'font-condensed font-bold uppercase tracking-[.1em] text-[11px] px-2.5 min-h-[30px] border flex items-center';
 
   return (
     <div className="bg-white border-l-[3px] border-gold">
@@ -54,7 +54,7 @@ export default function QuizListItem({ id, slug, title, questionCount, submitted
       </div>
       <div className="px-3 pb-3 flex flex-wrap items-center gap-2">
         <span
-          className={`font-condensed font-bold text-[11px] uppercase tracking-[.1em] px-2.5 py-1 ${closed ? 'bg-g100 text-g600' : 'bg-mint-light text-mint-deep'}`}
+          className={`font-condensed font-bold text-[10px] uppercase tracking-[.1em] px-2 py-[3px] ${closed ? 'bg-g100 text-g600' : 'bg-mint-light text-mint-deep'}`}
         >
           {closed ? 'Closed' : 'Open'}
         </span>
