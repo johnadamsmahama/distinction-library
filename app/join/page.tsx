@@ -2,20 +2,24 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Join the Distinction Programme',
-  description: 'Peer-led, assessment-driven extra classes for UPSA students. Pick your level and join your WhatsApp group.',
+  description: 'Peer-led, assessment-driven extra classes for UPSA students. Pick your group and join on WhatsApp.',
   openGraph: {
     title: 'Join the Distinction Programme',
-    description: 'Peer-led, assessment-driven extra classes for UPSA students. Pick your level and join your WhatsApp group.',
+    description: 'Peer-led, assessment-driven extra classes for UPSA students. Pick your group and join on WhatsApp.',
   },
 };
 
 // ---------------------------------------------------------------------------
-// THE TWO WHATSAPP INVITE LINKS. To change a link later, replace it here (it must start with
-// https://chat.whatsapp.com/). If a link is ever removed, that level's button shows "Link coming soon".
+// WHATSAPP INVITE LINKS. Groups show in this order, so keep the one with space first.
+// When a group fills up, move it to the bottom or delete its line.
+// To change a link later, replace it here (it must start with https://chat.whatsapp.com/).
+// If a link is ever removed, that button shows "Link coming soon".
 // ---------------------------------------------------------------------------
 const GROUPS = [
-  { level: 'Level 100', name: 'MahamaCares', href: 'https://chat.whatsapp.com/IMXPTiNqWR496u1bOm0Eoz?s=cl&p=a&mlu=4&ilr=4&iam=2' },
-  { level: 'Level 200', name: 'Distinction Programme', href: 'https://chat.whatsapp.com/IbMtGP4aNvY6QGPDUQQDvV?s=cl&p=a&mlu=4&ilr=4&iam=2' },
+  { level: 'Level 100', name: 'MahamaCares II', href: 'https://chat.whatsapp.com/IMXPTiNqWR496u1bOm0Eoz?s=cl&p=a&iam=2' },
+  { level: 'Level 100', name: 'MahamaCares III', href: 'https://chat.whatsapp.com/CCS4cMiLjS4G7S5xuhjTdA?s=cl&p=a&iam=2' },
+  { level: 'Level 100', name: 'MahamaCares IV', href: 'https://chat.whatsapp.com/JVh7vsfEBjFJQBZcQTCSEF?s=cl&p=a&iam=2' },
+  { level: 'Level 100', name: 'MahamaCares V', href: 'https://chat.whatsapp.com/FpN5UcaQi9EErhczcijT7J?s=cl&p=a&iam=2' },
 ];
 
 const isReal = (href: string) => href.startsWith('https://chat.whatsapp.com/');
@@ -50,10 +54,8 @@ const JOIN_CSS = `
 .jn-typing u:nth-child(2){animation-delay:.15s}
 .jn-typing u:nth-child(3){animation-delay:.3s}
 
-.jn-reply{display:block;max-width:88%;margin:12px 0 12px auto;padding:12px 14px 9px;border-radius:14px 0 14px 14px;background:#D9FDD3;box-shadow:0 1px 1px rgba(0,0,0,.15),0 0 0 2px #25D366;transform-origin:100% 0;transition:transform .15s}
+.jn-reply{display:block;max-width:88%;margin:12px 0 12px auto;padding:12px 14px 9px;border-radius:14px 0 14px 14px;background:#D9FDD3;box-shadow:0 1px 1px rgba(0,0,0,.15),0 0 0 2px #25D366;transform-origin:100% 0;transition:transform .15s;animation:jn-pop .5s both}
 a.jn-reply:active{transform:scale(.97)}
-.jn-r0{animation:jn-pop .5s 2.6s both}
-.jn-r1{animation:jn-pop .5s 3.1s both}
 .jn-reply b{display:block;font-size:17px}
 .jn-reply span{display:block;font-size:15px;font-style:italic;color:#3B5F3A}
 .jn-reply small{display:flex;justify-content:space-between;margin-top:6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#128C7E}
@@ -63,10 +65,13 @@ a.jn-reply:active{transform:scale(.97)}
 .jn-reply.off b,.jn-reply.off span,.jn-reply.off small{color:#8A8A8A}
 .jn-reply.off small::after{content:''}
 
-.jn-fine{margin-top:20px;animation:jn-pop .5s 3.6s both}
+.jn-fine{margin-top:20px}
 `;
 
 export default function JoinPage() {
+  // Each group pops in half a second after the one before it.
+  const delay = (i: number) => `${(2.6 + i * 0.5).toFixed(1)}s`;
+
   return (
     <div className="jn-bg">
       <style>{JOIN_CSS}</style>
@@ -98,25 +103,31 @@ export default function JoinPage() {
 
           <div className="jn-bub jn-b2">
             <h2 style={{ margin: 0 }}>
-              <strong>Which level are you in?</strong>
+              <strong>Level 100? Pick a group to join.</strong>
             </h2>
           </div>
 
           {GROUPS.map((g, i) =>
             isReal(g.href) ? (
               <a
-                key={g.level}
+                key={g.name}
                 href={g.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`jn-reply jn-r${i % 2}`}
+                className="jn-reply"
+                style={{ animationDelay: delay(i) }}
               >
                 <b>{g.level}</b>
                 <span>{g.name}</span>
                 <small>Tap to join on WhatsApp</small>
               </a>
             ) : (
-              <div key={g.level} className={`jn-reply off jn-r${i % 2}`} aria-disabled="true">
+              <div
+                key={g.name}
+                className="jn-reply off"
+                style={{ animationDelay: delay(i) }}
+                aria-disabled="true"
+              >
                 <b>{g.level}</b>
                 <span>{g.name}</span>
                 <small>Link coming soon</small>
@@ -124,7 +135,12 @@ export default function JoinPage() {
             )
           )}
 
-          <p className="jn-chip jn-fine">Tap your level and WhatsApp opens the group for you.</p>
+          <p
+            className="jn-chip jn-fine"
+            style={{ animation: 'jn-pop .5s both', animationDelay: delay(GROUPS.length) }}
+          >
+            Tap a group and WhatsApp opens it for you. If a group is full, try the next one.
+          </p>
         </div>
       </main>
     </div>
