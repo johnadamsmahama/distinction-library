@@ -26,7 +26,7 @@ export default function QuizActions({ id, slug, closed }: Props) {
     return () => document.removeEventListener('mousedown', away);
   }, [menu]);
 
-  const btn = 'font-condensed font-bold uppercase tracking-[.14em] text-[12.5px] px-4 min-h-[44px] border-[1.5px] flex items-center justify-center';
+  const btn = 'font-condensed font-bold uppercase tracking-[.12em] text-[11.5px] px-3.5 min-h-[34px] border-[1.5px] flex items-center justify-center';
 
   async function copy() {
     try {
@@ -86,7 +86,7 @@ export default function QuizActions({ id, slug, closed }: Props) {
             onClick={() => setMenu((m) => !m)}
             aria-label="More actions"
             aria-expanded={menu}
-            className={`${btn} border-navy text-navy !px-3.5 text-[18px] leading-none`}
+            className={`${btn} border-navy text-navy !px-3 text-[16px] leading-none`}
           >
             ⋯
           </button>
