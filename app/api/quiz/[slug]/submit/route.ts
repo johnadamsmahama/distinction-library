@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { markAttempt } from '@/lib/quiz/parser';
 import type { StoredQuestion, StoredTheory } from '@/lib/quiz/server';
+import { applyFirstTrialSlip, isFirstTrial, slipEnabled } from '@/lib/quiz/firstTrial';
 
 export const runtime = 'nodejs';
 
@@ -32,7 +33,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
 
   const { data: attempt } = await db
     .from('quiz_attempts')
-    .select('id, started_at, submitted_at, answers, theory_answers, submit_reason')
+    .select('id, participant_name, started_at, submitted_at, answers, theory_answers, submit_reason')
     .eq('id', attemptId)
     .eq('quiz_id', quiz.id)
     .single();
@@ -43,7 +44,11 @@ export async function POST(request: Request, { params }: { params: { slug: strin
     const savedAnswers = (attempt.answers ?? {}) as Record<string, unknown>;
     const savedTyped = (attempt.theory_answers ?? {}) as Record<string, string>;
     const savedReason = attempt.submit_reason === 'cheating' || attempt.submit_reason === 'time' ? attempt.submit_reason : null;
-    const marked = markAttempt(quiz.questions as StoredQuestion[], savedAnswers);
+    let marked: { score: number; total: number; review: ReturnType<typeof markAttempt>['review'] } = markAttempt(quiz.questions as StoredQuestion[], savedAnswers);
+    if (slipEnabled(params.slug) && (await isFirstTrial(db, quiz.id, attempt.participant_name, attempt.id, attempt.submitted_at))) {
+      const s = applyFirstTrialSlip(marked.review, attempt.id);
+      marked = { score: s.score, total: marked.total, review: s.review };
+    }
     const defs = (quiz.theory ?? []) as StoredTheory[];
     return NextResponse.json({
       score: marked.score,
@@ -64,7 +69,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
     }
   }
 
-  const { score, total, review } = markAttempt(quiz.questions as StoredQuestion[], answers);
+  const { score, total, review: realReview } = markAttempt(quiz.questions as StoredQuestion[], answers);
   const submitReason = reason === 'cheating' || reason === 'time' ? reason : null;
   const theoryDefs = (quiz.theory ?? []) as StoredTheory[];
   const typed: Record<string, string> = {};
@@ -84,13 +89,19 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   if (error || !saved?.length) {
     return NextResponse.json({ error: 'Could not save your result. Try again.' }, { status: 500 });
   }
+  // First-trial slips change only what the student sees. The saved score above stays the real one.
+  let shown = { score, review: realReview, slipped: false };
+  if (slipEnabled(params.slug) && (await isFirstTrial(db, quiz.id, attempt.participant_name, attempt.id))) {
+    shown = applyFirstTrialSlip(realReview, attempt.id);
+  }
+  const review = shown.review;
   // Someone caught cheating still sees their score but not the correct answers.
   const theoryReview =
     submitReason === 'cheating'
       ? null
       : theoryDefs.map((t) => ({ id: t.id, text: t.text, yourAnswer: typed[t.id], modelAnswer: t.modelAnswer }));
   return NextResponse.json({
-    score,
+    score: shown.score,
     total,
     reason: submitReason,
     review: submitReason === 'cheating' ? null : review,
