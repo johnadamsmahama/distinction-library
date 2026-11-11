@@ -10,10 +10,20 @@ export default async function AdminQuizzesPage() {
     .from('quizzes')
     .select('id, slug, title, published, closes_at, created_at, questions')
     .order('created_at', { ascending: false });
-  const { data: attempts } = await supabase.from('quiz_attempts').select('quiz_id').not('submitted_at', 'is', null);
 
+  // Count submitted attempts per quiz with an exact count query. Do not load every attempt row here:
+  // the database returns at most 1,000 rows per request, which made quiz counts come out too low.
   const counts = new Map<string, number>();
-  (attempts ?? []).forEach((a: { quiz_id: string }) => counts.set(a.quiz_id, (counts.get(a.quiz_id) ?? 0) + 1));
+  await Promise.all(
+    (quizzes ?? []).map(async (q: { id: string }) => {
+      const { count } = await supabase
+        .from('quiz_attempts')
+        .select('id', { count: 'exact', head: true })
+        .eq('quiz_id', q.id)
+        .not('submitted_at', 'is', null);
+      counts.set(q.id, count ?? 0);
+    }),
+  );
 
   return (
     <div>
