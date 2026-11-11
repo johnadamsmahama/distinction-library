@@ -1,131 +1,85 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ReactivateSheet from '@/components/quiz/ReactivateSheet';
 
-type Props = { id: string; slug: string; published: boolean; closed: boolean };
+const OPTIONS: { label: string; note: string; hours: number | null }[] = [
+  { label: '1 hour', note: 'Quick re-sit', hours: 1 },
+  { label: '24 hours', note: 'One day', hours: 24 },
+  { label: '3 days', note: 'Through the week', hours: 72 },
+  { label: '7 days', note: 'A full week', hours: 168 },
+  { label: 'No deadline', note: 'Stays open until you close it', hours: null },
+];
 
-// Action row for one quiz: copy link, close or reactivate, and a "more" menu (CSV export, delete).
-export default function QuizActions({ id, slug, closed }: Props) {
+// Bottom sheet that reopens a closed or expired quiz with a fresh deadline.
+export default function ReactivateSheet({ id, open, onClose }: { id: string; open: boolean; onClose: () => void }) {
   const router = useRouter();
+  const [pick, setPick] = useState(1);
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [sheet, setSheet] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menu) return;
-    const away = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenu(false);
-    };
-    document.addEventListener('mousedown', away);
-    return () => document.removeEventListener('mousedown', away);
-  }, [menu]);
+    if (!open) return;
+    setPick(1);
+    setError(null);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
-  const btn = 'font-condensed font-bold uppercase tracking-[.14em] text-[12.5px] px-4 min-h-[44px] border-[1.5px] flex items-center justify-center';
-
-  async function copy() {
+  async function confirm() {
+    setBusy(true);
+    setError(null);
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/quiz/${slug}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const res = await fetch(`/api/admin/quizzes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: true, hours: OPTIONS[pick].hours }),
+      });
+      if (!res.ok) throw new Error();
+      onClose();
+      router.refresh();
     } catch {
-      setError('Could not copy the link.');
+      setError('Could not reactivate the quiz. Try again.');
+    } finally {
+      setBusy(false);
     }
   }
 
-  async function closeQuiz() {
-    setBusy(true);
-    setError(null);
-    const res = await fetch(`/api/admin/quizzes/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ published: false }),
-    });
-    setBusy(false);
-    if (!res.ok) return setError('Could not close the quiz.');
-    router.refresh();
-  }
-
-  async function remove() {
-    setBusy(true);
-    setError(null);
-    const res = await fetch(`/api/admin/quizzes/${id}`, { method: 'DELETE' });
-    setBusy(false);
-    if (!res.ok) return setError('Could not delete the quiz.');
-    router.push('/admin/quizzes');
-    router.refresh();
-  }
+  if (!open) return null;
 
   return (
-    <div>
-      <div className="flex gap-2 flex-wrap items-center justify-center">
-        <button type="button" onClick={copy} className={`${btn} bg-navy text-white border-navy`}>
-          {copied ? 'Copied' : 'Copy link'}
+    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Reactivate quiz">
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-navy-deep/60" />
+      <div className="relative w-full max-w-[620px] bg-white rounded-t-[22px] px-5 pt-6 pb-[calc(24px+env(safe-area-inset-bottom,0px))] shadow-2xl">
+        <h2 className="font-display font-bold text-2xl text-navy">Reactivate this quiz</h2>
+        <p className="text-[13px] text-g600 mt-1 mb-4">
+          Choose how long it stays open. The same link works again and every saved score is kept.
+        </p>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {OPTIONS.map((o, i) => (
+            <button
+              key={o.label}
+              type="button"
+              onClick={() => setPick(i)}
+              aria-pressed={pick === i}
+              className={`text-left p-3 border-[1.5px] ${pick === i ? 'border-gold bg-[#FFF7DC]' : 'border-[#DDE2EE] bg-[#F6F8FC]'}`}
+            >
+              <span className="block font-bold text-[14px] text-navy">{o.label}</span>
+              <span className="block text-[11.5px] text-g600 mt-0.5">{o.note}</span>
+            </button>
+          ))}
+        </div>
+        {error && <p className="text-sm text-red-700 mb-2">{error}</p>}
+        <button
+          type="button"
+          onClick={confirm}
+          disabled={busy}
+          className="w-full min-h-[48px] bg-gradient-to-br from-gold-light to-gold text-[#2A1F00] font-condensed font-bold uppercase tracking-[.14em] text-[13px] disabled:opacity-50"
+        >
+          {busy ? 'Reactivating...' : 'Reactivate quiz'}
         </button>
-        {closed ? (
-          <button
-            type="button"
-            onClick={() => setSheet(true)}
-            className={`${btn} bg-gradient-to-br from-gold-light to-gold text-[#2A1F00] border-transparent`}
-          >
-            ⟲ Reactivate
-          </button>
-        ) : (
-          <button type="button" onClick={closeQuiz} disabled={busy} className={`${btn} border-navy text-navy disabled:opacity-50`}>
-            {busy ? 'Closing...' : 'Close quiz'}
-          </button>
-        )}
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            onClick={() => setMenu((m) => !m)}
-            aria-label="More actions"
-            aria-expanded={menu}
-            className={`${btn} border-navy text-navy !px-3.5 text-[18px] leading-none`}
-          >
-            ⋯
-          </button>
-          {menu && (
-            <div className="absolute right-0 top-[calc(100%+4px)] z-20 min-w-[170px] bg-white text-left shadow-[0_12px_30px_rgba(0,0,0,.25)]">
-              <a href={`/api/admin/quizzes/${id}/csv`} className="block px-4 py-3 text-[13px] font-semibold text-g800 hover:bg-g100">
-                Export CSV
-              </a>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenu(false);
-                  setConfirmDelete(true);
-                }}
-                className="block w-full text-left px-4 py-3 text-[13px] font-semibold text-red-700 border-t border-g100 hover:bg-g100"
-              >
-                Delete quiz
-              </button>
-            </div>
-          )}
-        </div>
       </div>
-
-      {confirmDelete && (
-        <div className="mt-3 border border-red-700/40 bg-red-700/5 p-3 text-left">
-          <p className="text-sm text-g800 mb-2">Delete this quiz and every saved score? This cannot be undone.</p>
-          <div className="flex gap-2">
-            <button type="button" onClick={remove} disabled={busy} className={`${btn} bg-red-700 text-white border-red-700 disabled:opacity-50`}>
-              {busy ? 'Deleting...' : 'Yes, delete'}
-            </button>
-            <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy} className={`${btn} border-g500 text-g600`}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-      {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
-
-      <ReactivateSheet id={id} open={sheet} onClose={() => setSheet(false)} />
     </div>
   );
 }
