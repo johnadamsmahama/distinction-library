@@ -120,7 +120,7 @@ export default async function QuizResultsPage({ params }: { params: { id: string
         ? `closes ${fmtLong(quiz.closes_at)}`
         : 'no deadline';
 
-  const navBtn = 'font-condensed font-bold uppercase tracking-[.14em] text-[12.5px] px-4 min-h-[44px] border-[1.5px] flex items-center justify-center';
+  const navBtn = 'font-condensed font-bold uppercase tracking-[.12em] text-[11.5px] px-3.5 min-h-[34px] border-[1.5px] flex items-center justify-center';
 
   return (
     <div className="max-w-[760px] mx-auto bg-[#EFE8D6] p-3 sm:p-6">
