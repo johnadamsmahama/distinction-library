@@ -209,7 +209,7 @@ export default function QuizResultsList({ rows, slug, title, hasObjectives, hasT
                 className="w-full text-left grid grid-cols-[44px_minmax(0,1fr)_auto] gap-x-3.5 items-center px-3.5 py-3.5"
               >
                 <span
-                  className={`w-11 h-11 rounded-[3px] grid place-items-center font-display font-bold text-[15px] text-navy ${
+                  className={`w-11 h-11 rounded-none grid place-items-center font-display font-bold text-[15px] text-navy ${
                     top ? 'bg-gradient-to-br from-gold-light to-gold ring-[1px] ring-gold ring-offset-[3px] ring-offset-[#FFFCF4]' : 'bg-[#F7F1E1] ring-1 ring-inset ring-[#DACFAE]'
                   }`}
                   aria-hidden="true"
