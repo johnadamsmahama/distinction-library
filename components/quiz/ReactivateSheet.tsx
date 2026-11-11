@@ -63,7 +63,7 @@ export default function ReactivateSheet({ id, open, onClose }: { id: string; ope
               type="button"
               onClick={() => setPick(i)}
               aria-pressed={pick === i}
-              className={`text-left p-3 border-[1.5px] ${pick === i ? 'border-gold bg-[#FFF7DC]' : 'border-[#DDE2EE] bg-[#F6F8FC]'}`}
+              className={`text-left px-3 py-2 border-[1.5px] ${pick === i ? 'border-gold bg-[#FFF7DC]' : 'border-[#DDE2EE] bg-[#F6F8FC]'}`}
             >
               <span className="block font-bold text-[14px] text-navy">{o.label}</span>
               <span className="block text-[11.5px] text-g600 mt-0.5">{o.note}</span>
@@ -75,7 +75,7 @@ export default function ReactivateSheet({ id, open, onClose }: { id: string; ope
           type="button"
           onClick={confirm}
           disabled={busy}
-          className="w-full min-h-[48px] bg-gradient-to-br from-gold-light to-gold text-[#2A1F00] font-condensed font-bold uppercase tracking-[.14em] text-[13px] disabled:opacity-50"
+          className="w-full min-h-[40px] bg-gradient-to-br from-gold-light to-gold text-[#2A1F00] font-condensed font-bold uppercase tracking-[.12em] text-[12px] disabled:opacity-50"
         >
           {busy ? 'Reactivating...' : 'Reactivate quiz'}
         </button>
