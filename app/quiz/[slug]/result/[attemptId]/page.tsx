@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import QuizTaker from '@/components/quiz/QuizTaker';
 import { markAttempt } from '@/lib/quiz/parser';
 import type { StoredQuestion, StoredTheory } from '@/lib/quiz/server';
+import { applyFirstTrialSlip, isFirstTrial, slipEnabled } from '@/lib/quiz/firstTrial';
 
 // A student's own saved result, opened from a link the admin sends (for a student who could not see it).
 // The attempt id is a long random value, so only the person given the link can open it.
@@ -46,7 +47,11 @@ export default async function ResultPage({ params }: { params: { slug: string; a
 
   const stored = quiz.questions as StoredQuestion[];
   const theoryDefs = (quiz.theory ?? []) as StoredTheory[];
-  const marked = markAttempt(stored, (attempt.answers ?? {}) as Record<string, unknown>);
+  let marked: { score: number; total: number; review: ReturnType<typeof markAttempt>['review'] } = markAttempt(stored, (attempt.answers ?? {}) as Record<string, unknown>);
+  if (slipEnabled(params.slug) && (await isFirstTrial(db, quiz.id, attempt.participant_name, attempt.id, attempt.submitted_at))) {
+    const s = applyFirstTrialSlip(marked.review, attempt.id);
+    marked = { score: s.score, total: marked.total, review: s.review };
+  }
   const reason = attempt.submit_reason === 'cheating' || attempt.submit_reason === 'time' ? attempt.submit_reason : null;
   const typed = (attempt.theory_answers ?? {}) as Record<string, string>;
 
