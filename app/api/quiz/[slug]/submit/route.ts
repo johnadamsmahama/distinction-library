@@ -7,6 +7,9 @@ import { applyFirstTrialSlip, isFirstTrial, slipEnabled } from '@/lib/quiz/first
 export const runtime = 'nodejs';
 
 const GRACE_SECONDS = 90; // covers slow networks when the timer auto-submits
+// A phone can pause the page or lose signal exactly when the timer ends, so the auto-submit never arrives.
+// Answers up to this many minutes late are still saved, and marked as a timed-out submission.
+const LATE_ACCEPT_MINUTES = 120;
 
 // POST /api/quiz/[slug]/submit  { attemptId, answers: { [questionId]: optionIndex } }
 // Public. Marks on the server, saves the result, and returns the score with the
@@ -62,15 +65,17 @@ export async function POST(request: Request, { params }: { params: { slug: strin
     });
   }
 
+  let late = false;
   if (quiz.time_limit_minutes) {
     const elapsed = (Date.now() - new Date(attempt.started_at).getTime()) / 1000;
-    if (elapsed > quiz.time_limit_minutes * 60 + GRACE_SECONDS) {
+    if (elapsed > (quiz.time_limit_minutes + LATE_ACCEPT_MINUTES) * 60) {
       return NextResponse.json({ error: 'Time is up. This attempt can no longer be submitted.' }, { status: 403 });
     }
+    late = elapsed > quiz.time_limit_minutes * 60 + GRACE_SECONDS;
   }
 
   const { score, total, review: realReview } = markAttempt(quiz.questions as StoredQuestion[], answers);
-  const submitReason = reason === 'cheating' || reason === 'time' ? reason : null;
+  const submitReason = reason === 'cheating' ? 'cheating' : late || reason === 'time' ? 'time' : null;
   const theoryDefs = (quiz.theory ?? []) as StoredTheory[];
   const typed: Record<string, string> = {};
   theoryDefs.forEach((t) => {
