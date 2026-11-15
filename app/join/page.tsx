@@ -10,12 +10,18 @@ export const metadata: Metadata = {
 };
 
 // ---------------------------------------------------------------------------
-// WHATSAPP INVITE LINKS. Groups show in this order, so keep the one with space first.
-// When a group fills up, move it to the bottom or delete its line.
+// WHATSAPP INVITE LINKS. Groups always show in this order (I to V).
+// HOW TO MOVE ON WHEN A GROUP FILLS UP: change OPEN_NOW below to the next number.
+//   0 = first group, 1 = second group, 2 = third group, and so on.
+// Groups before OPEN_NOW show as "Full". The group at OPEN_NOW glows and can be tapped.
+// Groups after it wait and show "Opens when ... is full".
 // To change a link later, replace it here (it must start with https://chat.whatsapp.com/).
-// If a link is ever removed, that button shows "Link coming soon".
+// If the open group has no link, its button shows "Link coming soon".
 // ---------------------------------------------------------------------------
+const OPEN_NOW = 1;
+
 const GROUPS = [
+  { level: 'Level 100', name: 'MahamaCares I', href: '' }, // full, no link needed
   { level: 'Level 100', name: 'MahamaCares II', href: 'https://chat.whatsapp.com/IMXPTiNqWR496u1bOm0Eoz?s=cl&p=a&iam=2' },
   { level: 'Level 100', name: 'MahamaCares III', href: 'https://chat.whatsapp.com/CCS4cMiLjS4G7S5xuhjTdA?s=cl&p=a&iam=2' },
   { level: 'Level 100', name: 'MahamaCares IV', href: 'https://chat.whatsapp.com/JVh7vsfEBjFJQBZcQTCSEF?s=cl&p=a&iam=2' },
@@ -24,10 +30,14 @@ const GROUPS = [
 
 const isReal = (href: string) => href.startsWith('https://chat.whatsapp.com/');
 
+// "MahamaCares II" -> "II"
+const shortName = (name: string) => name.replace('MahamaCares ', '');
+
 const JOIN_CSS = `
 @keyframes jn-pop{from{opacity:0;transform:scale(.6) translateY(8px)}}
 @keyframes jn-dot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
 @keyframes jn-fade{to{opacity:0;height:0;margin:0;padding:0}}
+@keyframes jn-ring{0%{box-shadow:0 1px 1px rgba(0,0,0,.15),0 0 0 2px #25D366,0 0 0 2px rgba(37,211,102,.55)}100%{box-shadow:0 1px 1px rgba(0,0,0,.15),0 0 0 2px #25D366,0 0 0 12px rgba(37,211,102,0)}}
 @media (prefers-reduced-motion:reduce){.jn-bg *{animation:none!important}}
 
 .jn-bg{min-height:100vh;background-color:#EAE0D2;background-image:radial-gradient(rgba(0,0,0,.06) 1.5px,transparent 1.5px);background-size:22px 22px;color:#111B21;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.4}
@@ -56,14 +66,24 @@ const JOIN_CSS = `
 
 .jn-reply{display:block;max-width:88%;margin:12px 0 12px auto;padding:12px 14px 9px;border-radius:14px 0 14px 14px;background:#D9FDD3;box-shadow:0 1px 1px rgba(0,0,0,.15),0 0 0 2px #25D366;transform-origin:100% 0;transition:transform .15s;animation:jn-pop .5s both}
 a.jn-reply:active{transform:scale(.97)}
+.jn-reply .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .jn-reply b{display:block;font-size:17px}
 .jn-reply span{display:block;font-size:15px;font-style:italic;color:#3B5F3A}
 .jn-reply small{display:flex;justify-content:space-between;margin-top:6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#128C7E}
 .jn-reply small::after{content:'\\2713\\2713';letter-spacing:0;color:#34B7F1}
+.jn-tag{flex:none;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:999px}
+
+.jn-reply.live .jn-tag{background:#25D366;color:#06361F}
+
+.jn-reply.soon{background:#F4EFE7;box-shadow:0 0 0 2px #C9BFAF inset;pointer-events:none}
+.jn-reply.soon b,.jn-reply.soon span,.jn-reply.soon small{color:#6F6657}
+.jn-reply.soon .jn-tag{background:#E3DACB;color:#5E5546}
 
 .jn-reply.off{background:#EDEDED;box-shadow:0 0 0 2px #B8B8B8;pointer-events:none}
-.jn-reply.off b,.jn-reply.off span,.jn-reply.off small{color:#8A8A8A}
-.jn-reply.off small::after{content:''}
+.jn-reply.off b,.jn-reply.off span,.jn-reply.off small{color:#6E6E6E}
+.jn-reply.off .jn-tag{background:#D5D5D5;color:#4A4A4A}
+
+.jn-reply.soon small::after,.jn-reply.off small::after{content:''}
 
 .jn-fine{margin-top:20px}
 `;
@@ -71,6 +91,7 @@ a.jn-reply:active{transform:scale(.97)}
 export default function JoinPage() {
   // Each group pops in half a second after the one before it.
   const delay = (i: number) => `${(2.6 + i * 0.5).toFixed(1)}s`;
+  const openName = GROUPS[OPEN_NOW] ? shortName(GROUPS[OPEN_NOW].name) : '';
 
   return (
     <div className="jn-bg">
@@ -103,43 +124,84 @@ export default function JoinPage() {
 
           <div className="jn-bub jn-b2">
             <h2 style={{ margin: 0 }}>
-              <strong>Level 100? Pick a group to join.</strong>
+              <strong>Level 100? Pick the group that is open.</strong>
             </h2>
           </div>
 
-          {GROUPS.map((g, i) =>
-            isReal(g.href) ? (
-              <a
-                key={g.name}
-                href={g.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="jn-reply"
-                style={{ animationDelay: delay(i) }}
-              >
-                <b>{g.level}</b>
-                <span>{g.name}</span>
-                <small>Tap to join on WhatsApp</small>
-              </a>
-            ) : (
-              <div
-                key={g.name}
-                className="jn-reply off"
-                style={{ animationDelay: delay(i) }}
-                aria-disabled="true"
-              >
-                <b>{g.level}</b>
+          {GROUPS.map((g, i) => {
+            const d = delay(i);
+
+            // Groups before OPEN_NOW are full.
+            if (i < OPEN_NOW) {
+              return (
+                <div key={g.name} className="jn-reply off" style={{ animationDelay: d }} aria-disabled="true">
+                  <div className="top">
+                    <b>{g.level}</b>
+                    <i className="jn-tag">Full</i>
+                  </div>
+                  <span>{g.name}</span>
+                  <small>This group is full</small>
+                </div>
+              );
+            }
+
+            // Groups after OPEN_NOW wait their turn.
+            if (i > OPEN_NOW) {
+              return (
+                <div key={g.name} className="jn-reply soon" style={{ animationDelay: d }} aria-disabled="true">
+                  <div className="top">
+                    <b>{g.level}</b>
+                    <i className="jn-tag">Next</i>
+                  </div>
+                  <span>{g.name}</span>
+                  <small>Opens when {openName} is full</small>
+                </div>
+              );
+            }
+
+            // The open group. Glows and can be tapped.
+            if (isReal(g.href)) {
+              // The glow starts a little after the group pops in.
+              const ringDelay = `${(parseFloat(d) + 0.6).toFixed(1)}s`;
+              return (
+                <a
+                  key={g.name}
+                  href={g.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="jn-reply live"
+                  style={{
+                    animation: 'jn-pop .5s both, jn-ring 1.8s infinite',
+                    animationDelay: `${d}, ${ringDelay}`,
+                  }}
+                >
+                  <div className="top">
+                    <b>{g.level}</b>
+                    <i className="jn-tag">Open now</i>
+                  </div>
+                  <span>{g.name}</span>
+                  <small>Tap to join on WhatsApp</small>
+                </a>
+              );
+            }
+
+            return (
+              <div key={g.name} className="jn-reply off" style={{ animationDelay: d }} aria-disabled="true">
+                <div className="top">
+                  <b>{g.level}</b>
+                  <i className="jn-tag">Soon</i>
+                </div>
                 <span>{g.name}</span>
                 <small>Link coming soon</small>
               </div>
-            )
-          )}
+            );
+          })}
 
           <p
             className="jn-chip jn-fine"
             style={{ animation: 'jn-pop .5s both', animationDelay: delay(GROUPS.length) }}
           >
-            Tap a group and WhatsApp opens it for you. If a group is full, try the next one.
+            Tap the open group and WhatsApp opens it for you. When it fills up, the next one opens here.
           </p>
         </div>
       </main>
