@@ -1,8 +1,17 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import {
+  firstAnswerLetter,
+  parseAnswers,
+  parseMcqBlob,
+  parseSingleMcq,
+  type McqItem,
+  type McqOption,
+  type ParsedAnswer,
+} from '@/lib/solved-format';
 
 type SolvedQuestion = {
   id: string;
@@ -111,6 +120,22 @@ const BOOKLET_CSS = `
 }
 .sb-ans { margin: 0; font-size: 15px; line-height: var(--sb-row); color: var(--sb-pen); white-space: pre-wrap; overflow-wrap: anywhere; }
 .sb-gap { height: var(--sb-row); }
+
+/* Multiple-choice questions: number, question, options on their own lines, answer under them. */
+.sb-item { display: flex; gap: 6px; }
+.sb-no { flex: none; width: 30px; font-weight: 700; font-size: 15.5px; line-height: var(--sb-row); }
+.sb-body { flex: 1; min-width: 0; }
+.sb-stem { margin: 0; font-weight: 600; font-size: 15.5px; line-height: var(--sb-row); overflow-wrap: anywhere; }
+.sb-opt { display: flex; gap: 8px; font-size: 15px; line-height: var(--sb-row); }
+.sb-let { flex: none; width: 24px; font-weight: 700; color: var(--sb-muted); }
+.sb-opt-text { min-width: 0; overflow-wrap: anywhere; }
+.sb-opt.sb-right { color: var(--sb-pen); font-weight: 700; }
+.sb-opt.sb-right .sb-let { color: var(--sb-pen); }
+.sb-ansline { margin: 0; font-size: 15px; line-height: var(--sb-row); color: var(--sb-pen); overflow-wrap: anywhere; }
+.sb-tag {
+  font-weight: 700; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--sb-red); margin-right: 8px;
+}
 
 .sb-reviewed { font-style: italic; font-size: 12.5px; color: var(--sb-muted); height: var(--sb-row); line-height: var(--sb-row); }
 .sb-nav { display: flex; align-items: center; justify-content: space-between; height: calc(var(--sb-row) * 2); }
@@ -387,6 +412,72 @@ function NotReadyState({
   );
 }
 
+type Block =
+  | { kind: 'whole'; key: string; q: SolvedQuestion }
+  | {
+      kind: 'item';
+      key: string;
+      q: SolvedQuestion;
+      // Shown above the first item of a section (or above a single question).
+      head: { label: string; intro: string | null; showMeta: boolean } | null;
+      no: number | null;
+      stem: string;
+      options: McqOption[];
+      answer: ParsedAnswer | null;
+    };
+
+// Splits each stored question into display blocks. A section stored as one long
+// line of numbered multiple-choice questions becomes one block per question, so
+// each question sits with its options and its own answer and pages break between them.
+function buildBlocks(questions: SolvedQuestion[]): Block[] {
+  const blocks: Block[] = [];
+  questions.forEach((q) => {
+    const blob = parseMcqBlob(q.question_text);
+    const answers = blob ? parseAnswers(q.answer_text) : {};
+    const hasLetterAnswers = Object.keys(answers).some((k) => answers[Number(k)].letter !== null);
+
+    if (blob && hasLetterAnswers) {
+      const first = blob.items[0].no;
+      const last = blob.items[blob.items.length - 1].no;
+      blob.items.forEach((it: McqItem, i: number) => {
+        blocks.push({
+          kind: 'item',
+          key: `${q.id}-${it.no}`,
+          q,
+          head:
+            i === 0
+              ? { label: first === last ? `Question ${first}.` : `Questions ${first}\u2013${last}.`, intro: blob.intro || null, showMeta: true }
+              : null,
+          no: it.no,
+          stem: it.stem,
+          options: it.options,
+          answer: answers[it.no] ?? null,
+        });
+      });
+      return;
+    }
+
+    const single = parseSingleMcq(q.question_text);
+    const letter = single ? firstAnswerLetter(q.answer_text) : null;
+    if (single && letter) {
+      blocks.push({
+        kind: 'item',
+        key: q.id,
+        q,
+        head: { label: `Question ${q.order_index}.`, intro: null, showMeta: true },
+        no: null,
+        stem: single.stem,
+        options: single.options,
+        answer: { letter, text: q.answer_text.replace(/^\s*\d{1,3}\s*[.)]\s*/, '').trim() },
+      });
+      return;
+    }
+
+    blocks.push({ kind: 'whole', key: q.id, q });
+  });
+  return blocks;
+}
+
 /**
  * Paginates solved questions into "pages" of an answer script — never a
  * question+answer pair split across two pages.
@@ -402,11 +493,12 @@ function NotReadyState({
  * scrollable height — that was what created the blank scroll space.
  */
 function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; heading: Heading }) {
+  const blocks = useMemo(() => buildBlocks(questions), [questions]);
   const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
   const titleMeasureRef = useRef<HTMLDivElement | null>(null);
   const measureLayerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [pages, setPages] = useState<SolvedQuestion[][] | null>(null);
+  const [pages, setPages] = useState<Block[][] | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
 
   useLayoutEffect(() => {
@@ -434,12 +526,12 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
       const titleH = snap(titleMeasureRef.current?.offsetHeight ?? ROW * 5);
       const heights = measureRefs.current.map((el) => snap(el ? el.offsetHeight : ROW * 4));
 
-      const built: SolvedQuestion[][] = [];
-      let current: SolvedQuestion[] = [];
+      const built: Block[][] = [];
+      let current: Block[] = [];
       let used = 0;
       let budget = Math.max(roomForPage - titleH, ROW * 4); // first page carries the title block
 
-      questions.forEach((q, i) => {
+      blocks.forEach((q, i) => {
         const h = heights[i];
         if (current.length > 0 && used + h > budget) {
           built.push(current);
@@ -452,7 +544,7 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
       });
       if (current.length > 0) built.push(current);
 
-      setPages(built.length > 0 ? built : [questions]);
+      setPages(built.length > 0 ? built : [blocks]);
       setPageIndex((prev) => Math.min(prev, Math.max(built.length - 1, 0)));
     }
 
@@ -472,7 +564,7 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
       window.removeEventListener('resize', measureAndPaginate);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions]);
+  }, [blocks]);
 
   const currentPage = pages?.[pageIndex] ?? [];
   const totalPages = pages?.length ?? 1;
@@ -497,14 +589,14 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
         <div ref={titleMeasureRef}>
           <TitleBlock {...heading} solved />
         </div>
-        {questions.map((q, i) => (
+        {blocks.map((q, i) => (
           <div
-            key={q.id}
+            key={q.key}
             ref={(el) => {
               measureRefs.current[i] = el;
             }}
           >
-            <ScriptBlock question={q} />
+            <BlockView block={q} />
           </div>
         ))}
       </div>
@@ -521,8 +613,8 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
             </div>
           )}
 
-          {currentPage.map((q) => (
-            <ScriptBlock key={q.id} question={q} />
+          {currentPage.map((b) => (
+            <BlockView key={b.key} block={b} />
           ))}
 
           <div className="sb-reviewed">Solved — reviewed by the Distinction Tutoring Team</div>
@@ -543,6 +635,54 @@ function PaginatedScript({ questions, heading }: { questions: SolvedQuestion[]; 
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function BlockView({ block }: { block: Block }) {
+  if (block.kind === 'whole') return <ScriptBlock question={block.q} />;
+  const q = block.q;
+  return (
+    <div>
+      {block.head && (
+        <>
+          <div className="sb-qhead">
+            <b>{block.head.label}</b>
+            <span className="sb-meta">
+              {q.is_predicted && <span className="sb-badge font-condensed">Predicted</span>}
+              {q.marks != null && <span>[{q.marks} marks]</span>}
+            </span>
+          </div>
+          {block.head.intro && (
+            <>
+              <p className="sb-qtext">{block.head.intro}</p>
+              <div className="sb-gap" />
+            </>
+          )}
+        </>
+      )}
+      <div className="sb-item">
+        {block.no !== null && <span className="sb-no">{block.no}.</span>}
+        <div className="sb-body">
+          <p className="sb-stem">{block.stem}</p>
+          {block.options.map((o) => (
+            <div key={o.letter} className={`sb-opt${block.answer?.letter === o.letter ? ' sb-right' : ''}`}>
+              <span className="sb-let font-condensed">{o.letter}.</span>
+              <span className="sb-opt-text">
+                {o.text}
+                {block.answer?.letter === o.letter && <span aria-label="correct answer">{'\u00a0\u2713'}</span>}
+              </span>
+            </div>
+          ))}
+          {block.answer && (
+            <p className="sb-ansline">
+              <span className="sb-tag font-condensed">Answer</span>
+              {block.answer.text}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="sb-gap" />
     </div>
   );
 }
