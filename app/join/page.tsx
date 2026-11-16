@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 // To change a link later, replace it here (it must start with https://chat.whatsapp.com/).
 // If the open group has no link, its button shows "Link coming soon".
 // ---------------------------------------------------------------------------
-const OPEN_NOW = 1;
+const OPEN_NOW = 2;
 
 const GROUPS = [
   { level: 'Level 100', name: 'MahamaCares I', href: '' }, // full, no link needed
