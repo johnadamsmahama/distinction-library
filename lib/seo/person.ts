@@ -2,7 +2,7 @@
 // Used by /about (founder section) and /about/j-a-mahama (the full biography)
 // so both pages describe the same entity with the same @id.
 
-export const SITE_URL = 'https://distinctionlibrary.com';
+export const SITE_URL = 'https://www.distinctionlibrary.com';
 export const BIO_PATH = '/about/j-a-mahama';
 export const BIO_URL = `${SITE_URL}${BIO_PATH}`;
 export const PERSON_ID = `${BIO_URL}#person`;
