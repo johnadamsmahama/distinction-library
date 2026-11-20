@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
+import { BIO_LAST_UPDATED } from '@/lib/seo/person';
 
 // Only pages reachable without a UPSA login belong here — everything behind
 // auth (dashboard, ai-tools, papers, tutors, vault, etc.) is invisible to
@@ -20,6 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about/j-a-mahama`,
+      lastModified: new Date(BIO_LAST_UPDATED),
+      changeFrequency: 'monthly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/login`,
