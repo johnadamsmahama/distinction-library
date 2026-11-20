@@ -7,7 +7,7 @@ import { BIO_LAST_UPDATED } from '@/lib/seo/person';
 // Google anyway since a crawler can't log in, so listing those would just
 // be noise Search Console flags as "blocked by login."
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://distinctionlibrary.com';
+  const baseUrl = 'https://www.distinctionlibrary.com';
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
