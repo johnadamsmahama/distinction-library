@@ -1,35 +1,16 @@
 import Link from 'next/link';
 
-const founderJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'J.A. Mahama',
-  alternateName: 'John Adams Mahama',
-  jobTitle: 'Founder, Distinction Library',
-  description:
-    'UPSA Communication Studies student and founder of Distinction Library and other student-led initiatives under the J.A. Mahama Leadership Compendium.',
-  affiliation: {
-    '@type': 'CollegeOrUniversity',
-    name: 'University of Professional Studies, Accra',
-  },
-  worksFor: {
-    '@type': 'Organization',
-    name: 'Distinction Library',
-    url: 'https://www.distinctionlibrary.com',
-  },
-  sameAs: [
-    'https://www.facebook.com/johnadamsmahamah',
-    'https://www.instagram.com/johnadamsmahama',
-    'https://www.linkedin.com/in/john-adams-mahama-32bb4b3b1',
-  ],
-};
+import { personJsonLd, toJsonLdString } from '@/lib/seo/person';
+
+// Same person entity (same @id) as the full biography page.
+const founderJsonLd = personJsonLd();
 
 export default function AboutPage() {
   return (
     <div className="bg-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(founderJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLdString(founderJsonLd) }}
       />
 
       <section className="bg-navy-deep px-7 py-20 text-center">
@@ -81,6 +62,14 @@ export default function AboutPage() {
                 Leadership Compendium — spanning student welfare, entrepreneurship, campus culture,
                 and academic support — built with the same navy-and-gold identity and the same
                 underlying belief: distinction shouldn't require luck.
+              </p>
+              <p className="font-body text-sm leading-relaxed text-white/60 mb-4">
+                <Link
+                  href="/about/j-a-mahama"
+                  className="text-gold-light font-semibold underline underline-offset-2"
+                >
+                  Read the full biography of J.A Mahama →
+                </Link>
               </p>
               <p className="font-body text-sm leading-relaxed text-white/60">
                 There is no verifiable connection between J.A. Mahama and President John Dramani
