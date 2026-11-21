@@ -32,12 +32,6 @@ export default function Footer() {
               style={{ fontFamily: 'var(--font-courier-prime), monospace' }}
             >
               <div className="flex items-baseline gap-1.5 py-[5.5px]">
-                <Link href="/about/j-a-mahama" className="hover:text-white transition-colors">
-                  About J.A Mahama
-                </Link>
-                <span className="flex-1 border-b border-dotted border-white/25 -translate-y-[3px]" />
-              </div>
-              <div className="flex items-baseline gap-1.5 py-[5.5px]">
                 <Link href="/legal/privacy" className="hover:text-white transition-colors">
                   Privacy policy
                 </Link>
