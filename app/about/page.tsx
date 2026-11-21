@@ -63,14 +63,6 @@ export default function AboutPage() {
                 and academic support — built with the same navy-and-gold identity and the same
                 underlying belief: distinction shouldn't require luck.
               </p>
-              <p className="font-body text-sm leading-relaxed text-white/60 mb-4">
-                <Link
-                  href="/about/j-a-mahama"
-                  className="text-gold-light font-semibold underline underline-offset-2"
-                >
-                  Read the full biography of J.A Mahama →
-                </Link>
-              </p>
               <p className="font-body text-sm leading-relaxed text-white/60">
                 There is no verifiable connection between J.A. Mahama and President John Dramani
                 Mahama. The two share a surname and Gonja heritage rooted in the Savannah Region,
